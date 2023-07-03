@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>linux主机监控 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="cpu负载平均负载12Load average，系统的平均活跃进程数。它反应了系统的整体负载情况。 uptime显示三个数值，分别指过去 1 分钟、过去 5 分钟和过去 15 分钟的平均负载；理想情况下，平均负载等于逻辑 CPU 个数  uptime或top查看 CPU负载情况， （watch -d uptime  -d 参数表示高亮显示变化的区域） 定义：平均负载，表示的是活跃进程数， 单位时间">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux主机监控">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="cpu负载平均负载12Load average，系统的平均活跃进程数。它反应了系统的整体负载情况。 uptime显示三个数值，分别指过去 1 分钟、过去 5 分钟和过去 15 分钟的平均负载；理想情况下，平均负载等于逻辑 CPU 个数  uptime或top查看 CPU负载情况， （watch -d uptime  -d 参数表示高亮显示变化的区域） 定义：平均负载，表示的是活跃进程数， 单位时间">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-07-03T02:36:39.000Z">
+<meta property="article:modified_time" content="2023-07-03T02:56:34.111Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-system/linux/host/monitor/linux主机监控" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T02:36:39.000Z" itemprop="datePublished">2023-07-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      linux主机监控
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="cpu负载"><a href="#cpu负载" class="headerlink" title="cpu负载"></a>cpu负载</h2><h3 id="平均负载"><a href="#平均负载" class="headerlink" title="平均负载"></a>平均负载</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Load average，系统的平均活跃进程数。它反应了系统的整体负载情况。 uptime显示三个数值，分别指过去 1 分钟、过去 5 分钟和过去 15 分钟的平均负载；理想情况下，平均负载等于逻辑 CPU 个数</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>uptime或top查看 CPU负载情况， （watch -d uptime  -d 参数表示高亮显示变化的区域）</p>
+<p>定义：平均负载，表示的是活跃进程数，</p>
+<p>单位时间内，系统中处于可运行状态和不可中断状态的平均进程数</p>
+<p>可运行状态的进程：正在使用cpu或者正在等待cpu的进程，即ps aux命令下STAT处于R状态的进程 </p>
+<p>不可中断状态的进程：处于内核态关键流程中的进程，且不可被打断，如等待硬件设备IO响应，ps命令D状态的进程</p>
+<p>1、CPU密集型</p>
+<p>2、IO 密集型</p>
+<p>3、大量进程</p>
+<h3 id="cpu使用分析"><a href="#cpu使用分析" class="headerlink" title="cpu使用分析"></a>cpu使用分析</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">含义：cpu非空闲时间占总 CPU 时间的百分比。cpu状态(us、ni、sys、id、wa、hi、si、st、guest)</span><br><span class="line">工具：top  vmstat  mpstat  sar  /proc/stat</span><br><span class="line">说明：/proc/stat是其他性能工具的数据来源</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>分析工具：安装stress(压测)  sysstat（分析）</p>
+<p>stress   -c 1</p>
+<p>stress   -c 8        spawn N workers spinning on sqrt()  模拟8个进程，同时在执行任务sqrt</p>
+<p>stress   -d 2        spawn N workers spinning on write()&#x2F;unlink() 模拟2个进程，同时在执行磁盘写操作</p>
+<h4 id="进程cpu使用统计"><a href="#进程cpu使用统计" class="headerlink" title="进程cpu使用统计"></a>进程cpu使用统计</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">工具：top pidstat  ps</span><br><span class="line">说明：top和ps按cpu使用率对进程排序，pidstat只显示实际用了cpu的进程</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>cpu监控：mpstat   -P ALL 5  2      打印2次，每5s间隔打印一次，监控所有cpu,</p>
+<p>进程级别监控：</p>
+<p>​     pidstat  -u 5  2    进程cpu使用统计，打印2次，每5s间隔打印一次</p>
+<p>​     pidstat -d 5 2    进程IO统计(磁盘读写速率)，打印2次，每5s间隔打印一次</p>
+<p>​     pidstat  -r  5  2    进程内存使用统计，打印2次，每5s间隔打印一次</p>
+<h3 id="进程上下文切换"><a href="#进程上下文切换" class="headerlink" title="进程上下文切换"></a>进程上下文切换</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vmstat 3      整个系统上下文切换次数 整体情况</span><br><span class="line">pidstat -wt   5   上下文切换次数  进程级别 + 线程       -w 进程切换  -t具体到线程统计</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>进程的切换只能发生在内核态。所以，</p>
+<p>进程的上下文不仅包括了虚拟内存、栈、全局变量等用户空间的资源，</p>
+<p>还包括了内核堆栈、寄存器等内核空间的状态</p>
+<p>所谓自愿上下文切换，是指进程无法获取所需资源，导致的上下文切换。比如说， I&#x2F;O、内存等系统资源不足时，就会发生自愿上下文切换。</p>
+<p>而非自愿上下文切换，则是指进程由于时间片已到等原因，被系统强制调度，进而发生的上下文切换。比如说，大量进程都在争抢 CPU 时，就容易发生非自愿上下文切换</p>
+<p>压测工具 sysbench：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 以10个线程运行5分钟的基准测试，模拟多线程切换的问题</span><br><span class="line">sysbench --threads=10 --max-time=300 threads run</span><br></pre></td></tr></table></figure>
+
+
+
+<p>vmstat 3      整个系统上下文切换次数 整体情况</p>
+<p>pidstat -wt   5   上下文切换次数  进程级别 + 线程       -w 进程切换  -t具体到线程统计</p>
+<p>cpu中断情况查看：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-d 参数表示高亮显示变化的区域</span><br><span class="line">watch -d cat /proc/interrupts</span><br><span class="line">           CPU0       CPU1</span><br><span class="line">RES:    2450431    5279697   Rescheduling interrupts</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+
+<p>cpu上下文切换排查思路：</p>
+<p>首先通过uptime查看系统负载，然后使用mpstat结合pidstat来初步判断到底是cpu计算量大还是进程争抢过大或者是io过多，接着使用vmstat分析切换次数，以及切换类型，来进一步判断到底是io过多导致问题还是进程争抢激烈导致问题。</p>
+<h3 id="CPU使用率"><a href="#CPU使用率" class="headerlink" title="CPU使用率"></a>CPU使用率</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">user（通常缩写为 us），代表用户态 CPU 时间。注意，它不包括下面的 nice 时间，但包括了 guest 时间。</span><br><span class="line">nice（通常缩写为 ni），代表低优先级用户态 CPU 时间，也就是进程的 nice 值被调整为 1-19 之间时的    CPU 时间。这里注意，nice 可取值范围是 -20 到 19，数值越大，优先级反而越低。</span><br><span class="line"></span><br><span class="line">system（通常缩写为 sys），代表内核态 CPU 时间。</span><br><span class="line">idle（通常缩写为 id），代表空闲时间。注意，它不包括等待 I/O 的时间（iowait）。</span><br><span class="line">iowait（通常缩写为 wa），代表等待 I/O 的 CPU 时间。</span><br><span class="line">irq（通常缩写为 hi），代表处理硬中断的 CPU 时间。</span><br><span class="line">softirq（通常缩写为 si），代表处理软中断的 CPU 时间。</span><br><span class="line">steal（通常缩写为 st），代表当系统运行在虚拟机中的时候，被其他虚拟机占用的 CPU 时间。</span><br><span class="line">guest（通常缩写为 guest），代表通过虚拟化运行其他操作系统的时间，也就是运行虚拟机的 CPU 时间。guest_nice（通常缩写为 gnice），代表以低优先级运行虚拟机的时间。</span><br></pre></td></tr></table></figure>
+
+<h4 id="查找热点函数"><a href="#查找热点函数" class="headerlink" title="查找热点函数"></a>查找热点函数</h4><p>perf top -g  -p pid    查找热点函数，定位引起cpu使用率高的具体函数</p>
+<p>perf record -g  -p pid </p>
+<p>perf report </p>
+<p>centos install apache benchmark:</p>
+<p>yum install -y  httpd-tools</p>
+<p> ab -c 10 -n 100 <a target="_blank" rel="noopener" href="http://192.168.56.101:10000/">http://192.168.56.101:10000/</a>    并发10个请求测试Nginx性能，总共测试100个请求</p>
+<p>perf  top -g -p 3927   正常查看调用链</p>
+<p>perf record -g  -p 3927  导出到文件</p>
+<p>perf  report     &#x2F;&#x2F;查看， 如果进程是在容器中，可以如下先挂载文件，再查看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#进程在容器中的情况下，可以把容器目录挂载到宿主机</span><br><span class="line">mkdir /tmp/foo</span><br><span class="line">PID=$(docker inspect --format &#123;&#123;.State.Pid&#125;&#125; &lt;container-name&gt;)</span><br><span class="line">PID=$(docker inspect --format &#123;&#123;.State.Pid&#125;&#125; app)</span><br><span class="line">bindfs /proc/$PID/root /tmp/foo  ( yum -y install bindfs)</span><br><span class="line">perf report --symfs /tmp/foo</span><br><span class="line"></span><br><span class="line"># 使用完成后不要忘记解除绑定</span><br><span class="line">umount /tmp/foo/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="短时进程监控"><a href="#短时进程监控" class="headerlink" title="短时进程监控"></a>短时进程监控</h3><p>通过pstree 查看父子进程关系</p>
+<p>perf record -g </p>
+<p>perf  report     &#x2F;&#x2F;查看， 如果进程是在容器中，可以如上先挂载文件，再查看（如上）</p>
+<h4 id="execsnoop"><a href="#execsnoop" class="headerlink" title="execsnoop"></a>execsnoop</h4><h3 id="不可中断进程和僵尸进程"><a href="#不可中断进程和僵尸进程" class="headerlink" title="不可中断进程和僵尸进程"></a>不可中断进程和僵尸进程</h3><p>僵尸进程,  查看调用链 pstree  -aps  pid</p>
+<h3 id="软中断"><a href="#软中断" class="headerlink" title="软中断"></a>软中断</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">工具：top mpstat   /proc/softirqs </span><br><span class="line">说明：top使用率，其他提供各种软中断在每个cpu运行的累积次数</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>ps aux | grep softirq</p>
+<p>cat &#x2F;proc&#x2F;softirqs </p>
+<p>Linux 中的中断处理程序分为上半部和下半部：</p>
+<p>上半部对应硬件中断，用来快速处理中断。</p>
+<p>下半部对应软中断，用来异步处理上半部未完成的工作。</p>
+<h3 id="硬中断"><a href="#硬中断" class="headerlink" title="硬中断"></a>硬中断</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">工具： vmstat    /proc/interrupts</span><br><span class="line">说明：vmstat总的中断次数，/proc/interrupts提供各种中断在每个cpu运行的累积次数</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">系统已用、可用、剩余内存</span><br><span class="line">free -h | vmstat | sar –r | cat /proc/meminfo</span><br><span class="line"></span><br><span class="line">进程虚拟内存、常驻内存、共享</span><br><span class="line">top  | ps aux | </span><br><span class="line">pidstat  -r  5  2  (进程内存使用统计，打印2次，每5s间隔打印一次)</span><br><span class="line"></span><br><span class="line">进程内存分布</span><br><span class="line">pmap</span><br><span class="line"></span><br><span class="line">缓存/缓冲区用量</span><br><span class="line">Free | vmstat | sar | cachestat</span><br><span class="line"></span><br><span class="line">Swap可用空间和剩余空间</span><br><span class="line">Free | sar</span><br><span class="line"></span><br><span class="line">Swap换入和换出</span><br><span class="line">vmstat</span><br><span class="line"></span><br><span class="line">内存泄漏检测</span><br><span class="line">memleak</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>Buffer </p>
+<p>Cache </p>
+<p>Buffer 是对磁盘数据的缓存，而 Cache 是文件数据的缓存，它们既会用在读请求中，也会用在写请求中</p>
+<p>cachestat 提供了整个操作系统缓存的读写命中情况</p>
+<p>cachetop 提供了每个进程的缓存命中情况</p>
+<p>pmap pid  进程的内存分布</p>
+<p>available &#x3D; free_pages - total_reserved + pagecache + SReclaimable</p>
+<p>(空闲内存减去所有zones的lowmem reserve和high watermark，再加上page cache和slab中可以回收的部分)</p>
+<p>Cache &#x3D; page cache + SReclaimable</p>
+<pre><code>total  Total installed memory (MemTotal and SwapTotal in /proc/meminfo)
+
+used   Used memory (calculated as total - free - buffers - cache)
+
+free   Unused memory (MemFree and SwapFree in /proc/meminfo)
+</code></pre>
+<p>​    </p>
+<pre><code>buffers
+   Memory used by kernel buffers (Buffers in /proc/meminfo)
+cache  
+   Memory used by the page cache and slabs (Cached and SReclaimable in /proc/meminfo)
+</code></pre>
+<p>参考：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/93841288">知乎</a>  <a target="_blank" rel="noopener" href="https://lotabout.me/2021/Linux-Available-Memory/">内存去哪里</a></p>
+<h3 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">应用程序可以访问的用户内存空间，由只读段、数据段、堆、栈以及文件映射段等组成。</span><br><span class="line">其中，堆内存和文件映射段，需要应用程序来动态管理内存段，所以我们必须小心处理。不仅要会用标准库函数 malloc() 来动态分配内存，还要记得在用完内存后，调用库函数 free() 来释放它们。</span><br></pre></td></tr></table></figure>
+
+
+
+<p>pmap pid  进程的内存分布</p>
+<p>&#x2F;usr&#x2F;share&#x2F;bcc&#x2F;tools&#x2F;memleak -a -p  pid</p>
+<p>memleak 可以跟踪系统或指定进程的内存分配、释放请求，然后定期输出一个未释放内存和相应调用栈的汇总情况（默认 5 秒）</p>
+<h3 id="Swap-交换"><a href="#Swap-交换" class="headerlink" title="Swap 交换"></a>Swap 交换</h3><p>Swap 把这些不常访问的内存先写到磁盘中，然后释放这些内存，给其他更需要的进程使用。再次访问这些内存时，重新从磁盘读入内存就可以了。</p>
+<p>Swap 说白了就是把一块磁盘空间或者一个本地文件</p>
+<p>所谓换出，就是把进程暂时不用的内存数据存储到磁盘中，并释放这些数据占用的内存。</p>
+<p>而换入，则是在进程再次访问这些内存的时候，把它们从磁盘读到内存中来。</p>
+<p>在内存资源紧张时，Linux 通过直接内存回收和定期扫描的方式，来释放文件页和匿名页，以便把内存分配给更需要的进程使用。</p>
+<p>文件页的回收比较容易理解，直接清空缓存，或者把脏数据写回磁盘后，再释放缓存就可以了。</p>
+<p>而对不常访问的匿名页，则需要通过 Swap 换出到磁盘中，这样在下次访问的时候，再次从磁盘换入到内存中就可以了。</p>
+<h2 id="IO"><a href="#IO" class="headerlink" title="IO"></a>IO</h2><h3 id="性能指标"><a href="#性能指标" class="headerlink" title="性能指标"></a>性能指标</h3><p>五个常见指标: 使用率、饱和度、IOPS、吞吐量以及响应时间。这五个指标，是衡量磁盘性能的基本指标。<br>• 使用率，是指磁盘处理 I&#x2F;O 的时间百分比。过高的使用率（比如超过 80%），通常意味着磁盘 I&#x2F;O 存在性能瓶颈。<br>• 饱和度，是指磁盘处理 I&#x2F;O 的繁忙程度。过高的饱和度，意味着磁盘存在严重的性能瓶颈。当饱和度为 100% 时，磁盘无法接受新的 I&#x2F;O 请求。<br>• IOPS（Input&#x2F;Output Per Second），是指每秒的 I&#x2F;O 请求数。<br>• 吞吐量，是指每秒的 I&#x2F;O 请求大小。<br>• 响应时间，是指 I&#x2F;O 请求从发出到收到响应的间隔时间。</p>
+<p>磁盘IO性能</p>
+<p>iostat -d -x 1</p>
+<p>iotop</p>
+<p>pidstat -d 1</p>
+<p>sar -d</p>
+<p>dstat</p>
+<p>其他：</p>
+<p>文件系统空间用量  df -h</p>
+<p>索引节点使用 df -ih</p>
+<p>磁盘大小 lsblk</p>
+<h2 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h2><table>
+<thead>
+<tr>
+<th align="left"><strong>指标</strong></th>
+<th><strong>工具</strong></th>
+<th align="right"><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">吞吐量</td>
+<td>sar -n  DEV | nethogs</td>
+<td align="right">网络接口、进程的网络吞吐量</td>
+</tr>
+<tr>
+<td align="left">PPS</td>
+<td>sar | proc&#x2F;net&#x2F;dev</td>
+<td align="right">网络接口PPS</td>
+</tr>
+<tr>
+<td align="left">连接数</td>
+<td>netstat -ltunp | ss</td>
+<td align="right">查看端口、网络连接数</td>
+</tr>
+<tr>
+<td align="left">端口占用</td>
+<td>lsof -i:22 | netstat -ltunp</td>
+<td align="right">查看端口占用</td>
+</tr>
+<tr>
+<td align="left">端口连通性</td>
+<td>telnet 192.68.56.1 22</td>
+<td align="right">查看远程服务端口是否是通的</td>
+</tr>
+<tr>
+<td align="left">延迟</td>
+<td>ping</td>
+<td align="right">测试网络延迟</td>
+</tr>
+<tr>
+<td align="left">路由</td>
+<td>route | traceroute</td>
+<td align="right">查看路由并测试链路信息</td>
+</tr>
+<tr>
+<td align="left">DNS</td>
+<td>dig | nslookup</td>
+<td align="right">排查DNS解析问题</td>
+</tr>
+<tr>
+<td align="left">防火墙</td>
+<td>iptables</td>
+<td align="right">配置和管理防火墙</td>
+</tr>
+<tr>
+<td align="left">ip地址</td>
+<td>ifconfig</td>
+<td align="right"></td>
+</tr>
+<tr>
+<td align="left">网络抓包</td>
+<td>tcpdump | wireshark</td>
+<td align="right">抓包分析网络流量</td>
+</tr>
+</tbody></table>
+<p>sar -n DEV 1</p>
+<p>nethogs  -d 2   按进程实时统计网络带宽利用率（yum install -y nethogs）</p>
+<p>dstat  性能查询工具，包括网络收发情况</p>
+<h3 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h3><p>tcp&#x2F;udp  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># -s表示启动服务端，-i表示汇报间隔，-p表示监听端口</span><br><span class="line">$ iperf3 -s -i 1 -p 10000</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># -c表示启动客户端，192.168.56.100为目标服务器的IP</span><br><span class="line"># -b表示目标带宽(单位是bits/s)</span><br><span class="line"># -t表示测试时间</span><br><span class="line"># -P表示并发数，-p表示目标服务器监听端口</span><br><span class="line">$ iperf3 -c 192.168.56.101 -b 1G -t 15 -P 2 -p 10000</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>http性能：</p>
+<p>ab -c 1000 -n 10000 <a target="_blank" rel="noopener" href="http://192.168.0.30/">http://192.168.0.30/</a></p>
+<p>应用负载性能：</p>
+<p>wrk\Jmeter\LoadRunner</p>
+<h3 id="DNS"><a href="#DNS" class="headerlink" title="DNS"></a>DNS</h3><p>cat &#x2F;etc&#x2F;resolv.conf   dns 服务器配置</p>
+<p>ping  163.com</p>
+<p>nslookup  163.com   域名解析</p>
+<p>time nslookup  163.com   域名解析消耗时间</p>
+<p>yum -y install dnsmasq; systemctl start  dnsmasq     dnsmasq 增加DNS缓存</p>
+<p>nslookup -type&#x3D;PTR 35.190.27.188 8.8.8.8  根据ip解析域名(反解析)</p>
+<h3 id="流量分析"><a href="#流量分析" class="headerlink" title="流量分析"></a>流量分析</h3><p>tcpdump &#x2F; Wireshark</p>
+<p>tcpdump使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-nn ，表示不解析抓包中的域名（即不反向解析）、协议以及端口号。</span><br><span class="line">udp port 53 ，表示只显示 UDP 协议的端口号（包括源端口和目的端口）为 53 的包。</span><br><span class="line">host 35.190.27.188 ，表示只显示 IP 地址（包括源地址和目的地址）为 35.190.27.188 的包。</span><br><span class="line">结果保存到ping.pcap文件</span><br><span class="line"></span><br><span class="line">tcpdump -nn udp port 53 or host 35.190.27.188 -w ping.pcap</span><br><span class="line"></span><br><span class="line">--tcpdump 的输出格式</span><br><span class="line">时间戳 协议 源地址.源端口 &gt; 目的地址.目的端口 网络包详细信息</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Wireshark</p>
+<p>wireshark的使用推荐阅读林沛满的《Wireshark网络分析就这么简单》和《Wireshark网络分析的艺术》</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tcpdump -nn host example.com -w web.pcap</span><br><span class="line">curl http://example.com</span><br><span class="line"></span><br><span class="line">使用 Wireshark 打开 web.pcap</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="NAT"><a href="#NAT" class="headerlink" title="NAT"></a>NAT</h3><p>Network Address Translation</p>
+<p>NAT 技术可以重写 IP 数据包的源 IP 或者目的 IP，被普遍地用来解决公网 IP 地址短缺的问题。它的主要原理就是，网络中的多台主机，通过共享同一个公网 IP 地址，来访问外网资源。</p>
+<p>NAT 的主要目的，是实现地址转换。根据实现方式的不同，</p>
+<p>NAT 可以分为三类：</p>
+<p>静态 NAT，即内网 IP 与公网 IP 是一对一的永久映射关系；</p>
+<p>动态 NAT，即内网 IP 从公网 IP 池中，动态选择一个进行映射；</p>
+<p>网络地址端口转换 NAPT（Network Address and Port Translation），即把内网 IP 映射到公网 IP 的不同端口上，让多个内网 IP 可以共享同一个公网 IP 地址。</p>
+<p>网络性能</p>
+<p>sar -n DEV</p>
+<h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><h3 id="系统"><a href="#系统" class="headerlink" title="系统"></a>系统</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">版本：cat /etc/redhat-release</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="CPU"><a href="#CPU" class="headerlink" title="CPU"></a>CPU</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">架构：arch | uname -a</span><br><span class="line">cpu核数和型号： lscpu</span><br></pre></td></tr></table></figure>
+
+<p>64位和32位处理器：64表示cpu可以处理的最大位数</p>
+<p>cpu架构：x86（pc、服务器）  arm(移动端，如高通骁龙)  </p>
+<p>cpu核数： 一个CPU可以包含若干个物理核，通过超线程HT（Hyper-Threading）技术可以将一个物理核变成两个逻辑处理核。vCPU（virtual CPU）是ECS实例的虚拟处理核</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 查看物理CPU个数</span><br><span class="line">cat /proc/cpuinfo| grep &quot;physical id&quot;| sort| uniq| wc -l</span><br><span class="line"></span><br><span class="line"># 查看每个物理CPU中core的个数(即核数)</span><br><span class="line">cat /proc/cpuinfo| grep &quot;cpu cores&quot;| uniq</span><br><span class="line"></span><br><span class="line"># 查看逻辑CPU的个数</span><br><span class="line">cat /proc/cpuinfo| grep &quot;processor&quot;| wc -l</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><p>磁盘大小:  lsblk</p>
+<p>磁盘使用情况：df -h</p>
+<h4 id="磁盘raid"><a href="#磁盘raid" class="headerlink" title="磁盘raid"></a>磁盘raid</h4><p>在Linux系统中，常见的RAID（冗余磁盘阵列）级别有以下几种类型：</p>
+<ol>
+<li><p>RAID 0（条带化）：<br>RAID 0将多个物理磁盘组合成一个逻辑卷，实现数据的条带化分布。它提供了较高的读写性能，但没有冗余功能，即一个磁盘损坏将导致数据完全丢失。</p>
+</li>
+<li><p>RAID 1（镜像）：<br>RAID 1通过将数据同时写入两个或多个磁盘来实现数据的镜像备份。即使一个磁盘故障，数据仍然可以从其他镜像磁盘恢复。RAID 1提供了很好的数据冗余和容错性能，但对存储空间有一定的浪费。</p>
+</li>
+<li><p>RAID 5：<br>RAID 5通过将数据和奇偶校验分布在多个磁盘上来提供冗余和容错性能。数据条带化并使用奇偶校验进行分布，允许从单个磁盘故障中恢复数据。RAID 5需要至少3个磁盘，并且具有相对较高的读取性能和适度的写入性能。</p>
+</li>
+<li><p>RAID 6：<br>RAID 6类似于RAID 5，但它使用两个奇偶校验进行冗余，提供更高的容错能力。RAID 6需要至少4个磁盘，并且可以从两个磁盘故障中恢复数据。它比RAID 5更安全，但对写入性能有一定的影响。</p>
+</li>
+<li><p>RAID 10（1+0）：<br>RAID 10是将RAID 1和RAID 0组合在一起的级别。它通过将数据镜像和条带化结合，提供了较高的读写性能和冗余能力。RAID 10需要至少4个磁盘，但对存储空间有一定的浪费。</p>
+</li>
+<li><p>RAID 50：<br>RAID 50是将RAID 5和RAID 0结合在一起的级别。它通过条带化和奇偶校验的组合提供了较高的性能和容错性能。RAID 50需要至少6个磁盘。</p>
+</li>
+</ol>
+<p>这些是常见的Linux RAID级别，每个级别都有自己的特点、优势和限制。选择适当的RAID级别取决于数据安全性、性能需求和可用的硬件资源。注意，某些高级RAID级别可能需要专用的RAID控制器支持。</p>
+<h3 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h3><p>OCI（Open Container Initiative）即开放的容器运行时<code>规范</code>，目的在于定义一个容器运行时及镜像的相关标准和规范，其中包括</p>
+<ul>
+<li>runtime-spec：容器的生命周期管理</li>
+<li>image-spec：镜像的生命周期管理</li>
+</ul>
+<p>runc(run container)&#96;是一个基于OCI标准实现的一个轻量级容器运行工具，用来创建和运行容器。而Containerd是用来维持通过runc创建的容器的运行状态。即runc用来创建和运行容器，containerd作为常驻进程用来管理容器。</p>
+<p><code>containerd（container daemon）</code>是一个daemon进程用来管理和运行容器，可以用来拉取&#x2F;推送镜像和管理容器的存储和网络。其中可以调用runc来创建和运行容器。</p>
+<p>docker 和runc、containerd的关系：</p>
+<p>![截屏2023-06-13 16.58.26](&#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;mydirect&#x2F;github&#x2F;OS&#x2F;截屏2023-06-13 16.58.26.png)</p>
+<h4 id="References"><a href="#References" class="headerlink" title="References:"></a>References:</h4><p><a target="_blank" rel="noopener" href="https://www.huweihuang.com/kubernetes-notes/runtime/runtime.html">分析OCI，CRI，runc，containerd，cri-containerd，dockershim等组件说明及调用关系</a></p>
+<p><a target="_blank" rel="noopener" href="https://chinalhr.github.io/post/docker-runc/">Docker容器运行时引擎-runC分析</a></p>
+<h2 id="资料"><a href="#资料" class="headerlink" title="资料"></a>资料</h2><p>极客时间：<a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/100020901?tab=catalog">Linux性能优化实战</a>，多操作，多实践，反复阅读并实践</p>
+<p>网络分析：Wireshark网络分析就这么简单 (林沛满）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/" data-id="cljm9suky00002a9a4i41bbbm" data-title="linux主机监控" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/07/02/bigdata/spark/spark_file_read_partition_num/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">spark_file_read_partition_num</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github/">tools/github</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/">linux主机监控</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/02/bigdata/spark/spark_file_read_partition_num/">spark_file_read_partition_num</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/02/bigdata/spark/spark_file_combine/">spark_file_combine</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/02/bigdata/spark/spark_minio/">spark_minio</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/02/bigdata/spark/spark_connect/">spark_connect</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
