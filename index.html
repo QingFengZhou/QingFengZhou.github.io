@@ -73,6 +73,56 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-system/linux/prometheus/prometheus使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T17:43:13.000Z" itemprop="datePublished">2023-07-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/">prometheus使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Grafana:  </p>
+<p>bin&#x2F;grafana-server</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:3000/">http://localhost:3000/</a></p>
+<p>Node_exporter:</p>
+<p>curl  <a target="_blank" rel="noopener" href="http://localhost:9100/metrics">http://localhost:9100/metrics</a></p>
+<p>prometheus:</p>
+<p>.&#x2F;prometheus –config.file&#x3D;prometheus.yml</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:9090/">http://localhost:9090</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/" data-id="cljn5iqgg00007j9a6mcm3wwz" data-title="prometheus使用" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-system/linux/ansible/ansible使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/" class="article-date">
@@ -1316,63 +1366,6 @@ cache
 
 
   
-    <article id="post-bigdata/spark/spark_connect" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/02/bigdata/spark/spark_connect/" class="article-date">
-  <time class="dt-published" datetime="2023-07-02T15:28:37.000Z" itemprop="datePublished">2023-07-02</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/bigdata-spark/">bigdata/spark</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/02/bigdata/spark/spark_connect/">spark_connect</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="Spark-Connect"><a href="#Spark-Connect" class="headerlink" title="Spark Connect"></a>Spark Connect</h2><p>Env: spark3.4.1 hadoop2.7.7</p>
-<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>Server: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./sbin/start-connect-server.sh --packages org.apache.spark:spark-connect_2.12:3.4.1 --master yarn  --conf spark.sql.catalogImplementation=hive</span><br><span class="line"></span><br><span class="line">./sbin/stop-connect-server.sh </span><br></pre></td></tr></table></figure>
-
-<p>Client：</p>
-<p>1、Pyspark:</p>
-<p>python最低版本3.9, 需要安装多个依赖包</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/pyspark --remote <span class="string">&quot;sc://localhost&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>2、maven Scala： 注：目前scala client不太稳定，还没正式对外release，使用方式来自stackoverflow</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- https://mvnrepository.com/artifact/org.apache.spark/spark-connect-client-jvm --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-connect-client-jvm_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-catalyst_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-core_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-
-<p>Test code:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">object SparkConnectTest &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line">    val ip = &quot;192.168.43.65&quot;</span><br><span class="line">    val spark = SparkSession.builder().remote(s&quot;sc://$ip&quot;).build()</span><br><span class="line">//    spark.sql(&quot;show databases&quot;).show()</span><br><span class="line">//    spark.sql(&quot;use test_zhou&quot;)</span><br><span class="line">//    spark.sql(&quot;select addr, count(1) cnt from users group by addr&quot;).show()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    val ds1 = spark.read.text(&quot;/tmp/output.txt&quot;)</span><br><span class="line">    val cnt = ds1.count()</span><br><span class="line"></span><br><span class="line">    println(cnt)</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id=""><a href="#" class="headerlink" title=""></a></h2>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/02/bigdata/spark/spark_connect/" data-id="cljllibbx0000029aavti3wcr" data-title="spark_connect" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1388,7 +1381,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -1416,6 +1409,10 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/">prometheus使用</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/">ansible使用</a>
           </li>
         
@@ -1429,10 +1426,6 @@ cache
         
           <li>
             <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/">linux主机监控</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/03/tools/github/hexo/simple_usage/">simple_usage</a>
           </li>
         
       </ul>
