@@ -423,7 +423,14 @@ cache
 <p>runc(run container)&#96;是一个基于OCI标准实现的一个轻量级容器运行工具，用来创建和运行容器。而Containerd是用来维持通过runc创建的容器的运行状态。即runc用来创建和运行容器，containerd作为常驻进程用来管理容器。</p>
 <p><code>containerd（container daemon）</code>是一个daemon进程用来管理和运行容器，可以用来拉取&#x2F;推送镜像和管理容器的存储和网络。其中可以调用runc来创建和运行容器。</p>
 <p>docker 和runc、containerd的关系：</p>
-<p>![docker](截屏2023-06-13 16.58.26.png)</p>
+<img src="/Users/zhouqingfeng/Desktop/mydirect/gitblog/cont/source/_posts/system/linux/host/monitor/1.png">
+
+
+
+
+
+
+
 <h4><span id="references">References:</span></h4><p><a target="_blank" rel="noopener" href="https://www.huweihuang.com/kubernetes-notes/runtime/runtime.html">分析OCI，CRI，runc，containerd，cri-containerd，dockershim等组件说明及调用关系</a></p>
 <p><a target="_blank" rel="noopener" href="https://chinalhr.github.io/post/docker-runc/">Docker容器运行时引擎-runC分析</a></p>
 <h2><span id="资料">资料</span></h2><p>极客时间：<a target="_blank" rel="noopener" href="https://time.geekbang.org/column/intro/100020901?tab=catalog">Linux性能优化实战</a>，多操作，多实践，反复阅读并实践</p>
