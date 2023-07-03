@@ -13,12 +13,12 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="cpu负载 平均负载 cpu使用分析 进程cpu使用统计   进程上下文切换 CPU使用率 查找热点函数   短时进程监控 execsnoop   不可中断进程和僵尸进程 软中断 硬中断   内存 定义 内存泄漏 Swap 交换   IO 性能指标   网络 性能测试 DNS 流量分析 NAT   基础 系统 CPU 磁盘 磁盘raid   容器 References:     资料">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://qingfengzhou.github.io/Users/zhouqingfeng/Desktop/mydirect/gitblog/cont/source/_posts/system/linux/host/monitor/1.png">
-<meta property="article:published_time" content="2023-07-03T02:36:39.000Z">
-<meta property="article:modified_time" content="2023-07-03T07:37:35.114Z">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/1.png">
+<meta property="article:published_time" content="2023-07-03T10:01:05.000Z">
+<meta property="article:modified_time" content="2023-07-03T10:04:53.162Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://qingfengzhou.github.io/Users/zhouqingfeng/Desktop/mydirect/gitblog/cont/source/_posts/system/linux/host/monitor/1.png">
+<meta name="twitter:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/1.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -80,7 +80,7 @@
         <section id="main"><article id="post-system/linux/host/monitor/linux主机监控" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/" class="article-date">
-  <time class="dt-published" datetime="2023-07-03T02:36:39.000Z" itemprop="datePublished">2023-07-03</time>
+  <time class="dt-published" datetime="2023-07-03T10:01:05.000Z" itemprop="datePublished">2023-07-03</time>
 </a>
     
   <div class="article-category">
@@ -172,7 +172,7 @@
 <p>1、CPU密集型</p>
 <p>2、IO 密集型</p>
 <p>3、大量进程</p>
-<h3><span id="cpu使用分析">cpu使用分析</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">含义：cpu非空闲时间占总 CPU 时间的百分比。cpu状态(us、ni、sys、id、wa、hi、si、st、guest)</span><br><span class="line">工具：top  vmstat  mpstat  sar  /proc/stat</span><br><span class="line">说明：/proc/stat是其他性能工具的数据来源</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3><span id="cpu使用分析">cpu使用分析</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">含义：cpu非空闲时间占总 CPU 时间的百分比。cpu状态(us、ni、sys、id、wa、hi、si、st、guest)</span><br><span class="line">工具：top  vmstat  mpstat  sar  /proc/stat</span><br><span class="line">说明：/proc/stat是其他性能工具的数据来源</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>分析工具：安装stress(压测)  sysstat（分析）</p>
 <p>stress   -c 1</p>
@@ -427,7 +427,7 @@ cache
 <p>runc(run container)&#96;是一个基于OCI标准实现的一个轻量级容器运行工具，用来创建和运行容器。而Containerd是用来维持通过runc创建的容器的运行状态。即runc用来创建和运行容器，containerd作为常驻进程用来管理容器。</p>
 <p><code>containerd（container daemon）</code>是一个daemon进程用来管理和运行容器，可以用来拉取&#x2F;推送镜像和管理容器的存储和网络。其中可以调用runc来创建和运行 容器。</p>
 <p>docker 和runc、containerd的 关系：</p>
-<img src="/Users/zhouqingfeng/Desktop/mydirect/gitblog/cont/source/_posts/system/linux/host/monitor/1.png">
+<img src="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/1.png">
 
 
 
@@ -453,19 +453,10 @@ cache
     
 <nav id="article-nav">
   
-    <a href="/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          HBase概览
-        
-      </div>
-    </a>
   
-  
-    <a href="/2023/07/02/bigdata/spark/spark_file_read_partition_num/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2023/07/03/tools/github/hexo/simple_usage/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">spark_file_read_partition_num</div>
+      <div class="article-nav-title">simple_usage</div>
     </a>
   
 </nav>
@@ -510,15 +501,15 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/">linux主机监控</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/03/tools/github/hexo/simple_usage/">simple_usage</a>
           </li>
         
           <li>
             <a href="/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/">HBase概览</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/">linux主机监控</a>
           </li>
         
           <li>
