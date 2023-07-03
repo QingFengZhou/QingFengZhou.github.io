@@ -73,6 +73,66 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tools/java/maven/maven远程仓库配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T14:01:21.000Z" itemprop="datePublished">2023-07-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools-java-maven/">tools/java/maven</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+
+
+<!-- tocstop -->
+
+<p>修改 MAVEN_HOME&#x2F;conf&#x2F;settings.xml文件，</p>
+<p>1、本地仓库位置 修改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;localRepository&gt;$&#123;user.home&#125;/.m2/repository&lt;/localRepository&gt;</span><br><span class="line">默认位置 ~/.m2/repository </span><br></pre></td></tr></table></figure>
+
+
+
+<p>2、远程仓库地址 配置</p>
+<p>当本地仓库找不到对应依赖包时，从配置的远程仓库中拉取依赖包、下载到本地。</p>
+<p>如下示例在profiles  配置了两个远程仓库，id分别为repo、alimaven，id必须是唯一的，不能重复。</p>
+<p>activeProfiles 指明两个仓库都是激活状态，都可用于项目构建</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">&lt;profiles&gt;</span><br><span class="line">    &lt;!--</span><br><span class="line">     | Specifies a set of introductions to the build process, to be activated using one or more of the</span><br><span class="line">     | mechanisms described above. For inheritance purposes, and to activate profiles via &lt;activatedProfiles/&gt;</span><br><span class="line">     | or the command line, profiles have to have an ID that is unique.</span><br><span class="line">     |</span><br><span class="line">     | An encouraged best practice for profile identification is to use a consistent naming convention</span><br><span class="line">     | for profiles, such as &#x27;env-dev&#x27;, &#x27;env-test&#x27;, &#x27;env-production&#x27;, &#x27;user-jdcasey&#x27;, &#x27;user-brett&#x27;, etc.</span><br><span class="line">     | This will make it more intuitive to understand what the set of introduced profiles is attempting</span><br><span class="line">     | to accomplish, particularly when you only have a list of profile id&#x27;s for debug.</span><br><span class="line">   --&gt;</span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">              &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">              &lt;name&gt;Central Repository&lt;/name&gt;</span><br><span class="line">              &lt;url&gt;https://repo.maven.apache.org/maven2&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">           &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">           &lt;name&gt;alimaven&lt;/name&gt;</span><br><span class="line">           &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">&lt;/profiles&gt;</span><br><span class="line"></span><br><span class="line">  &lt;!-- activeProfiles</span><br><span class="line">   | List of profiles that are active for all builds.</span><br><span class="line">  &lt;/activeProfiles&gt;</span><br><span class="line">  --&gt;</span><br><span class="line"></span><br><span class="line">&lt;activeProfiles&gt;</span><br><span class="line">    &lt;activeProfile&gt;repo&lt;/activeProfile&gt;</span><br><span class="line">    &lt;activeProfile&gt;alimaven&lt;/activeProfile&gt;</span><br><span class="line">&lt;/activeProfiles&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" data-id="cljmy0mmf0000v29a26p20mk6" data-title="maven远程仓库配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-system/linux/command/linux常用命令" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="article-date">
@@ -1134,53 +1194,12 @@ cache
 
 
   
-    <article id="post-life/daily/20230630" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/06/30/life/daily/20230630/" class="article-date">
-  <time class="dt-published" datetime="2023-06-30T09:39:44.000Z" itemprop="datePublished">2023-06-30</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/life-daily/">life/daily</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/06/30/life/daily/20230630/">20230630</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="Morning"><a href="#Morning" class="headerlink" title="Morning"></a>Morning</h2><p>8:10 - 8:35</p>
-<p>8:40 - 11:30</p>
-<h2 id="loon"><a href="#loon" class="headerlink" title="loon"></a>loon</h2><p>11:30 - 13:30</p>
-<h2 id="Afternoon"><a href="#Afternoon" class="headerlink" title="Afternoon"></a>Afternoon</h2><p>13:30 - 18:00<br>18:00 - 18:40</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/06/30/life/daily/20230630/" data-id="cljieq5zk0001bt9a4yle9w6t" data-title="20230630" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -1190,7 +1209,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -1218,6 +1237,10 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">linux常用命令</a>
           </li>
         
@@ -1231,10 +1254,6 @@ cache
         
           <li>
             <a href="/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/">HBase概览</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/02/bigdata/spark/spark_file_read_partition_num/">spark_file_read_partition_num</a>
           </li>
         
       </ul>
