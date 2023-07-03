@@ -484,6 +484,7 @@ cache
 <li><a href="#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98">其他问题</a><ul>
 <li><a href="#%E7%9B%AE%E5%BD%95%E4%B8%8D%E6%98%BE%E7%A4%BA">目录不显示</a></li>
 <li><a href="#%E5%9B%BE%E7%89%87%E4%B8%8D%E6%98%BE%E7%A4%BA">图片不显示</a></li>
+<li><a href="#github%E8%AE%BF%E9%97%AE%E6%85%A2%E9%97%AE%E9%A2%98">Github访问慢问题</a></li>
 <li><a href="#github-token-%E8%AE%BE%E7%BD%AE">Github token 设置</a></li>
 <li><a href="#think">Think</a></li>
 </ul>
@@ -544,6 +545,19 @@ cache
 <p>参考资料:  </p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/542101567">hexo图片不显示</a></p>
 <p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7006594302604214280">解决hexo引用本地图片无法显示的问题</a></p>
+<h3><span id="github访问慢问题">Github访问慢问题</span></h3><p>1、手动设置 hosts</p>
+<p>从网站查询github.com对应ip，更新&#x2F;etc&#x2F;hosts文件，示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.30.255.113  github.com</span><br></pre></td></tr></table></figure>
+
+<p>2、编码定时 自动拉取，并更新hosts文件</p>
+<p>从github下载<a target="_blank" rel="noopener" href="https://github.com/oldj/SwitchHosts/releases/tag/v4.1.2">SwitchHosts</a>，install，add one rule.</p>
+<img src="/2023/07/03/tools/github/hexo/simple_usage/截屏2023-07-03 18.15.54.png">
+
+
+
+<p>参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7019683061977579557">https://juejin.cn/post/7019683061977579557</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/isevenluo/github-hosts">https://github.com/isevenluo/github-hosts</a></p>
 <h3><span id="github-token-设置">Github token 设置</span></h3><p><a target="_blank" rel="noopener" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens">github access token设置</a></p>
 <h3><span id="think">Think</span></h3><p>所有资料仅为参考，要根据实际问题具体分析</p>
 
