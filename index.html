@@ -73,6 +73,62 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-bigdata/spark/spark3/spark3学习笔记20230704" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/" class="article-date">
+  <time class="dt-published" datetime="2023-07-04T03:08:56.000Z" itemprop="datePublished">2023-07-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/">spark3学习笔记20230704</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+
+
+<!-- tocstop -->
+
+
+
+
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/" data-id="cljo12rbr0000k99a2y8w8wtx" data-title="spark3学习笔记20230704" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-bigdata/hadoop/hadoop_env/hadoop本地环境搭建" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" class="article-date">
@@ -822,14 +878,34 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>Grafana:  </p>
+        <!-- toc -->
+
+<ul>
+<li><a href="#prometheus">prometheus</a></li>
+<li><a href="#grafana">Grafana</a><ul>
+<li><a href="#dashboard">Dashboard</a></li>
+</ul>
+</li>
+<li><a href="#%E9%87%87%E9%9B%86%E5%99%A8">采集器</a><ul>
+<li><a href="#node_exporter">node_exporter</a></li>
+<li><a href="#cadvisor">cadvisor</a></li>
+<li><a href="#elasticsearch_exporter">elasticsearch_exporter</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="prometheus">prometheus</span></h2><p>.&#x2F;prometheus –config.file&#x3D;prometheus.yml</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:9090/">http://localhost:9090</a></p>
+<h2><span id="grafana">Grafana</span></h2><h3><span id="dashboard">Dashboard</span></h3><p><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/">Grafana 各种dashboard</a>:<a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/">https://grafana.com/grafana/dashboards/</a></p>
 <p>bin&#x2F;grafana-server</p>
 <p><a target="_blank" rel="noopener" href="http://localhost:3000/">http://localhost:3000/</a></p>
-<p>Node_exporter:</p>
-<p>curl  <a target="_blank" rel="noopener" href="http://localhost:9100/metrics">http://localhost:9100/metrics</a></p>
-<p>prometheus:</p>
-<p>.&#x2F;prometheus –config.file&#x3D;prometheus.yml</p>
-<p><a target="_blank" rel="noopener" href="http://localhost:9090/">http://localhost:9090</a></p>
+<h2><span id="采集器">采集器</span></h2><h3><span id="node_exporter">node_exporter</span></h3><p>curl  <a target="_blank" rel="noopener" href="http://localhost:9100/metrics">http://localhost:9100/metrics</a></p>
+<h3><span id="cadvisor">cadvisor</span></h3><p><a target="_blank" rel="noopener" href="https://github.com/google/cadvisor">容器监控</a>：cAdvisor (Container Advisor) provides container users an understanding of the resource usage and performance characteristics of their running containers.</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md">Monitoring cAdvisor with Prometheus</a></p>
+<p><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/14282-cadvisor-exporter/">cadvisor Grafana dashboard</a></p>
+<h3><span id="elasticsearch_exporter">elasticsearch_exporter</span></h3><p><a target="_blank" rel="noopener" href="https://github.com/prometheus-community/elasticsearch_exporter">Exporter</a></p>
+<p><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/14191-elasticsearch-overview/">Grafana</a></p>
 
       
     </div>
@@ -1877,60 +1953,6 @@ cache
 
 
   
-    <article id="post-bigdata/nosql/hbase/HBase概览" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/" class="article-date">
-  <time class="dt-published" datetime="2023-07-03T07:44:53.000Z" itemprop="datePublished">2023-07-03</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/">HBase概览</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <!-- toc -->
-
-<ul>
-<li><a href="#hbase">HBase</a><ul>
-<li><a href="#one">One</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-<h2><span id="hbase">HBase</span></h2><h3><span id="one">One</span></h3><img src="/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/截屏2023-07-03 15.49.39.png">
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/03/bigdata/nosql/hbase/HBase%E6%A6%82%E8%A7%88/" data-id="cljmkav790000qj9ack1hbz8f" data-title="HBase概览" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1946,7 +1968,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -1988,6 +2010,10 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/">spark3学习笔记20230704</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">hadoop本地环境搭建</a>
           </li>
         
@@ -2001,10 +2027,6 @@ cache
         
           <li>
             <a href="/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/">prometheus使用</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/">ansible使用</a>
           </li>
         
       </ul>
