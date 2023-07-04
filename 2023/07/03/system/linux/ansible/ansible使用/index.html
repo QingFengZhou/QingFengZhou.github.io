@@ -6,12 +6,12 @@
   
   <title>ansible使用 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="环境搭建 基于alpine 镜像搭建 安装步骤 参考资料   基于centos 7 镜像搭建 安装步骤   虚拟机多结点 virturebox网卡配置 虚拟机网络配置     入门使用 配置文件 常用模块 Playbook 执行shell 执行script   Become_user用法 用法 总体操作流程 参考文献        环境搭建基于alpine 镜像搭建alpine:3.17.3">
+  <meta name="description" content="环境搭建 基于alpine 镜像搭建 安装步骤 参考资料   基于centos 7 镜像搭建 安装步骤   虚拟机多结点 virturebox网卡配置 虚拟机网络配置 参考资料     入门使用 配置文件 常用模块 shell 模块 script 模块   Playbook 执行shell 执行script   Become_user用法 用法 总体操作流程 参考文献        环境搭建">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ansible使用">
 <meta property="og:url" content="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="环境搭建 基于alpine 镜像搭建 安装步骤 参考资料   基于centos 7 镜像搭建 安装步骤   虚拟机多结点 virturebox网卡配置 虚拟机网络配置     入门使用 配置文件 常用模块 Playbook 执行shell 执行script   Become_user用法 用法 总体操作流程 参考文献        环境搭建基于alpine 镜像搭建alpine:3.17.3">
+<meta property="og:description" content="环境搭建 基于alpine 镜像搭建 安装步骤 参考资料   基于centos 7 镜像搭建 安装步骤   虚拟机多结点 virturebox网卡配置 虚拟机网络配置 参考资料     入门使用 配置文件 常用模块 shell 模块 script 模块   Playbook 执行shell 执行script   Become_user用法 用法 总体操作流程 参考文献        环境搭建">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/%E6%88%AA%E5%B1%8F2023-07-04%2000.08.18.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/%E6%88%AA%E5%B1%8F2023-07-04%2000.08.18.png">
@@ -20,7 +20,7 @@
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/%E6%88%AA%E5%B1%8F2023-07-04%2000.42.09.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/%E6%88%AA%E5%B1%8F2023-07-04%2000.42.24.png">
 <meta property="article:published_time" content="2023-07-03T15:58:16.000Z">
-<meta property="article:modified_time" content="2023-07-03T17:17:43.355Z">
+<meta property="article:modified_time" content="2023-07-04T01:22:20.854Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/%E6%88%AA%E5%B1%8F2023-07-04%2000.08.18.png">
@@ -124,13 +124,18 @@
 <li><a href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%A4%9A%E7%BB%93%E7%82%B9">虚拟机多结点</a><ul>
 <li><a href="#virturebox%E7%BD%91%E5%8D%A1%E9%85%8D%E7%BD%AE">virturebox网卡配置</a></li>
 <li><a href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE">虚拟机网络配置</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99-1">参考资料</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><a href="#%E5%85%A5%E9%97%A8%E4%BD%BF%E7%94%A8">入门使用</a><ul>
 <li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
-<li><a href="#%E5%B8%B8%E7%94%A8%E6%A8%A1%E5%9D%97">常用模块</a></li>
+<li><a href="#%E5%B8%B8%E7%94%A8%E6%A8%A1%E5%9D%97">常用模块</a><ul>
+<li><a href="#shell-%E6%A8%A1%E5%9D%97">shell 模块</a></li>
+<li><a href="#script-%E6%A8%A1%E5%9D%97">script 模块</a></li>
+</ul>
+</li>
 <li><a href="#playbook">Playbook</a><ul>
 <li><a href="#%E6%89%A7%E8%A1%8Cshell">执行shell</a></li>
 <li><a href="#%E6%89%A7%E8%A1%8Cscript">执行script</a></li>
@@ -183,6 +188,7 @@
 <p>如何使用容器模拟物理机学习使用ansible?<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/goloving/p/15032636.html">https://www.cnblogs.com/goloving/p/15032636.html</a><br><a target="_blank" rel="noopener" href="http://mactech.sheridanc.on.ca/team/mark-galaszkiewicz/getting-started-docker-ansible/">http://mactech.sheridanc.on.ca/team/mark-galaszkiewicz/getting-started-docker-ansible/</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/shgh_2004/article/details/80599515">https://blog.csdn.net/shgh_2004/article/details/80599515</a><br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1632980">https://cloud.tencent.com/developer/article/1632980</a></p>
 <h3><span id="基于centos-7-镜像搭建">基于centos 7 镜像搭建</span></h3><p>Centos 7.9，启动多个docker容器，模拟练习使用ansible</p>
+<p>&#x2F;Users&#x2F;****&#x2F;Desktop&#x2F;mydirect&#x2F;github&#x2F;ansible&#x2F;env_build2</p>
 <h4><span id="安装步骤">安装步骤</span></h4><p>1、按如下目录结构创建文件</p>
 <img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.08.18.png">
 
@@ -215,7 +221,12 @@
 <p>4、测试连通性</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">; 测试连接</span><br><span class="line">ansible all -m ping</span><br><span class="line">ansible myvirtualmachines -m ping</span><br></pre></td></tr></table></figure>
 
-<h4><span id></span></h4><h3><span id="虚拟机多结点">虚拟机多结点</span></h3><p>使用virturebox和centos7搭建多台虚拟机</p>
+<p>5、所有结点关闭和启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker-compose stop</span><br><span class="line">docker-compose start</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="虚拟机多结点">虚拟机多结点</span></h3><p>使用virturebox和centos7搭建多台虚拟机</p>
 <p>网络配置需要配置两块网卡：其一保证可访问外网；其二分配固定ip，虚拟机之间互相访问</p>
 <h4><span id="virturebox网卡配置">virturebox网卡配置</span></h4><img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.41.12.png">
 
@@ -243,14 +254,15 @@
 <p>cat  &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-enp0s8 （静态：固定IP）</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">TYPE=static</span><br><span class="line">PROXY_METHOD=none</span><br><span class="line">BROWSER_ONLY=no</span><br><span class="line">BOOTPROTO=static</span><br><span class="line">DEFROUTE=yes</span><br><span class="line">IPV4_FAILURE_FATAL=no</span><br><span class="line">IPV6INIT=yes</span><br><span class="line">IPV6_AUTOCONF=yes</span><br><span class="line">IPV6_DEFROUTE=yes</span><br><span class="line">IPV6_FAILURE_FATAL=no</span><br><span class="line">IPV6_ADDR_GEN_MODE=stable-privacy</span><br><span class="line">NAME=enp0s8</span><br><span class="line">#UUID=55fa0f47-7b70-40c7-a4c1-59e912cf5cc9</span><br><span class="line">DEVICE=enp0s8</span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">IPADDR=192.168.56.101</span><br><span class="line">#NETMASK=255.255.255.0</span><br><span class="line">#GATEWAY=192.168.56.1</span><br></pre></td></tr></table></figure>
 
-
-
+<h4><span id="参考资料">参考资料</span></h4><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/341328334">VirtualBox虚拟机配置双网卡同时连接内外网</a></p>
 <h2><span id="入门使用">入门使用</span></h2><p>ansible是一个配置管理工具，通过ssh(或密码)管理多台主机，不是类似mysql的服务，底层基于python实现</p>
 <h3><span id="配置文件">配置文件</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ansible主要文件：</span><br><span class="line"></span><br><span class="line">/etc/ansible/hosts 主机清单文件</span><br><span class="line">/etc/ansible/ansible.cfg 主配置文件</span><br><span class="line"></span><br><span class="line">ansible-doc -l 模块文档查看</span><br><span class="line">ansible-doc ping 模块用法</span><br><span class="line">ansible-doc -s ping  模块用法</span><br></pre></td></tr></table></figure>
 
 
 
-<h3><span id="常用模块">常用模块</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<h3><span id="常用模块">常用模块</span></h3><h4><span id="shell-模块">shell 模块</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ansible myvirtualmachines -m shell -a &#x27;echo $HOSTNAME&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="script-模块">script 模块</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF &gt;&gt; /tmp/test1.sh </span><br><span class="line">#!/bin/bash</span><br><span class="line">echo  `date`</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ansible myvirtualmachines -m script -a /tmp/test1.sh</span><br></pre></td></tr></table></figure>
 
 
 
