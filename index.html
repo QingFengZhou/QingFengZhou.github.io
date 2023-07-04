@@ -73,6 +73,159 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-bigdata/hadoop/hadoop_env/hadoop本地环境搭建" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" class="article-date">
+  <time class="dt-published" datetime="2023-07-04T02:13:53.000Z" itemprop="datePublished">2023-07-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">hadoop本地环境搭建</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2><span id="env">Env</span></h2><p>macOS 12.4</p>
+<p>java version “1.8.0_102”</p>
+<p>Spark3.4.1  hadoop2.7.7</p>
+<h2><span id="install-hadoop-277">Install hadoop 2.7.7</span></h2><p>&#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;hadoop-2.7.7 </p>
+<p>Site:<a target="_blank" rel="noopener" href="http://apache.communilink.net/hadoop/common/hadoop-2.7.7/">http://apache.communilink.net/hadoop/common/hadoop-2.7.7/</a></p>
+<p>ref1:<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/de7eb61c983a">https://www.jianshu.com/p/de7eb61c983a</a></p>
+<p>ref2:<a target="_blank" rel="noopener" href="https://www.cnblogs.com/landed/p/6831758.html">https://www.cnblogs.com/landed/p/6831758.html</a></p>
+<p>.&#x2F;sbin&#x2F;start-all.sh</p>
+<p>Localhost:50070</p>
+<p>Localhost:8088</p>
+<h2><span id="install-mysql">Install mysql</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql-8.0.12-macos10.13-x86_64.dmg</span><br></pre></td></tr></table></figure>
+
+<p>root: Zoom@123</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MYSQL_HOME=/usr/local/mysql</span><br><span class="line">export MYSQL_HOME</span><br><span class="line"></span><br><span class="line">PATH=.:$MYSQL_HOME/bin:$PATH</span><br><span class="line">export PATH</span><br></pre></td></tr></table></figure>
+
+<p>mysql –version</p>
+<p>mysql -uroot -p</p>
+<h2><span id="install-hive">Install hive</span></h2><p>cd &#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;apache-hive-2.3.3-bin</p>
+<p>download mirror: <a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/apache/hive/stable-2/">https://mirrors.tuna.tsinghua.edu.cn/apache/hive/stable-2/</a></p>
+<p>#使用MySQL中的hive数据库，如果没有就创建一个<br>    <property><br>      <name>javax.jdo.option.ConnectionURL</name><br>      <value>jdbc:mysql:&#x2F;&#x2F;localhost:3306&#x2F;hive?createDatabaseIfNotExist&#x3D;true</value><br>      <description>JDBC connect string for a JDBC metastore</description><br>    </property></p>
+<p>#连接myslq驱动<br>    <property><br>      <name>javax.jdo.option.ConnectionDriverName</name><br>      <value>com.mysql.jdbc.Driver</value><br>      <description>Driver class name for a JDBC metastore</description><br>    </property></p>
+<p>#用户名<br>    <property><br>      <name>javax.jdo.option.ConnectionUserName</name><br>      <value>hive</value><br>      <description>username to use against metastore database</description><br>    </property></p>
+<p>#密码:<br>    <property><br>      <name>javax.jdo.option.ConnectionPassword</name><br>      <value>hive</value><br>      <description>password to use against metastore database</description><br>    </property></p>
+<p>#日志目录<br>    <property><br>      <name>hive.querylog.location</name><br>      <value>&#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;tmp&#x2F;hive&#x2F;querylog</value><br>      <description>Location of Hive run time structured log file</description><br>    </property></p>
+<pre><code>&lt;property&gt;
+  &lt;name&gt;hive.exec.local.scratchdir&lt;/name&gt;
+  &lt;value&gt;/Users/zhouqingfeng/Desktop/software/tmp/hive/scratchdir&lt;/value&gt;
+  &lt;description&gt;Local scratch space for Hive jobs&lt;/description&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;hive.downloaded.resources.dir&lt;/name&gt;
+  &lt;value&gt;/Users/zhouqingfeng/Desktop/software/tmp/hive/resoucesDir&lt;/value&gt;
+  &lt;description&gt;Temporary local directory for added resources in the remote file system.&lt;/description&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+  &lt;name&gt;hive.server2.logging.operation.log.location&lt;/name&gt;
+  &lt;value&gt;/Users/zhouqingfeng/Desktop/software/tmp/hive/operationlog&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+<hr>
+<h3><span id="start">Start</span></h3><p>启动hive:</p>
+<p>首先启动.&#x2F;hive –service metastore</p>
+<p>hive client:</p>
+<p>.&#x2F;hive</p>
+<p>使用hiveserver2，然后使用beeline链接hive</p>
+<p>.&#x2F;hive –service hiveserver2  |  hiveserver2   | lsof -i tcp:10000</p>
+<p>beeline -u “jdbc:hive2:&#x2F;&#x2F;localhost:10000” </p>
+<p>beeline -u “jdbc:hive2:&#x2F;&#x2F;192.168.43.65:10000”</p>
+<p>hiveserver2 web url: <a target="_blank" rel="noopener" href="http://localhost:10002/">http://localhost:10002/</a></p>
+<p>set hive.execution.engine &#x3D; mr;</p>
+<p>beeline远程客户端配置：</p>
+<p>修改conf&#x2F;hive-env.sh: HADOOP_HOME&#x3D;&#x2F;opt&#x2F;hadoop-2.7.7</p>
+<p>修改hadoop_home配置文件：&#x2F;opt&#x2F;hadoop-2.7.7&#x2F;etc&#x2F;hadoop&#x2F;hadoop-env.sh</p>
+<h3><span id="references">References</span></h3><p><a target="_blank" rel="noopener" href="http://lxw1234.com/archives/2016/01/600.htm">hiveserver2用户名和密码设置</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qiaojialin/article/details/55506439">https://blog.csdn.net/qiaojialin/article/details/55506439</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/micrari/p/7067968.html">https://www.cnblogs.com/micrari/p/7067968.html</a></p>
+<h2><span id="install-hbase">Install  HBase</span></h2><h3><span id="pseudo-distributed-local-install">Pseudo-Distributed Local Install</span></h3><p>Hbase-env.sh</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export  JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_102.jdk/Contents/Home </span><br></pre></td></tr></table></figure>
+
+<p>Hbase-site.xml</p>
+<pre><code>&lt;property&gt;
+  &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+ &lt;name&gt;hbase.rootdir&lt;/name&gt;
+ &lt;value&gt;hdfs://localhost:9000/hbase&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+<p>bin&#x2F;start-hbase.sh</p>
+<p>bin&#x2F;stop-hbase.sh</p>
+<p>Ref:<a target="_blank" rel="noopener" href="https://hbase.apache.org/book.html">https://hbase.apache.org/book.html</a></p>
+<h3><span id="simple-usage">Simple Usage</span></h3><p>create  ‘test’, ‘cf1’</p>
+<p>list  ‘test’  &#x2F;&#x2F;Use the <code>list</code> command to confirm your table exists</p>
+<p>describe ‘test’</p>
+<p>&#x2F;&#x2F;insert</p>
+<p>put ‘test’,  ‘row1’,  ‘cf1:c1’,  ‘c1’</p>
+<p>put ‘test’, ‘row1’, ‘cf1:a’, ‘value1’ </p>
+<p>put ‘test’,  ‘row1’,   ‘cf1:c2’,  ‘c2’</p>
+<p>put ‘test’,  ‘row2’,   ‘cf1:c3’,  ‘value1’</p>
+<p>&#x2F;&#x2F;select</p>
+<p>scan ‘test’</p>
+<p>get ‘test’,  ‘row1’</p>
+<p>get ‘test’,  ‘row1’,  ‘cf1’</p>
+<p>get ‘test’,  ‘row1’,  ‘cf1:c1’</p>
+<h3><span id="phoenix">phoenix</span></h3><h2><span id="install-zookeeper">Install Zookeeper</span></h2><p><a target="_blank" rel="noopener" href="http://apache.website-solution.net/zookeeper/">http://apache.website-solution.net/zookeeper/</a></p>
+<h2><span id="install-kafka">Install Kafka</span></h2><h2><span id="install-spark">Install Spark</span></h2><p>Spark  local:</p>
+<h3><span id="spark-yarn-deploy">Spark  yarn deploy</span></h3><h3><span id="spark-to-hbase">spark  to  hbase</span></h3><p>ETL</p>
+<p>mysql  -&gt;  hive -&gt; spark sql  ?</p>
+<p>machine learning  ?</p>
+<p>spark + machine learning  ?</p>
+<p>spark + AI ?</p>
+<h2><span id="hive-to-or-from-hbase">Hive to (or from) Hbase</span></h2><h3><span id="hive-to-hbase">Hive to hbase</span></h3><p>create hive:</p>
+<p>CREATE  TABLE tb2 (<br>name  string,<br>age int,<br>addr string<br>)<br>COMMENT ‘test table’</p>
+<p>ROW FORMAT DELIMITED</p>
+<p>FIELDS TERMINATED BY ‘,’</p>
+<p>STORED AS textfile;</p>
+<p>Load data to hive:</p>
+<p>hive  -e  “LOAD DATA LOCAL INPATH ‘&#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;tmp&#x2F;hive&#x2F;definedata&#x2F;tb2&#x2F;tb2.txt’ OVERWRITE INTO TABLE default.tb2” </p>
+<p>create another hive table:</p>
+<p>hbase: create  ‘test_tb2’,  ‘cf’</p>
+<p>create external table tb2_cp (<br>name  string,<br>age int,<br>addr string<br>) </p>
+<p>STORED BY ‘org.apache.hadoop.hive.hbase.HBaseStorageHandler’</p>
+<p>WITH SERDEPROPERTIES (“hbase.columns.mapping” &#x3D; “:key,  cf:age,  cf:addr”)</p>
+<p>TBLPROPERTIES (“hbase.table.name” &#x3D; “test_tb2”);</p>
+<p>insert into table:  this is slow because of mapreduce job</p>
+<p>insert into table  tb2_cp select * from tb2;  </p>
+<h3><span id="reference-hive-to-hbase">Reference  </span></h3>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" data-id="cljnns25s0000sq9aca136t58" data-title="hadoop本地环境搭建" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-bigdata/spark/spark_env/spark环境搭建" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/04/bigdata/spark/spark_env/spark%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" class="article-date">
@@ -1695,57 +1848,6 @@ cache
 
 
   
-    <article id="post-bigdata/spark/spark_file_read_partition_num" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/02/bigdata/spark/spark_file_read_partition_num/" class="article-date">
-  <time class="dt-published" datetime="2023-07-02T15:35:32.000Z" itemprop="datePublished">2023-07-02</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/bigdata-spark/">bigdata/spark</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/02/bigdata/spark/spark_file_read_partition_num/">spark_file_read_partition_num</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p>文件格式: text、csv、json、parquet、orc、avro</p>
-<p>压缩格式：snappy、gzip、bzip2、lzo、lz4 (bzip2和lzo支持切分)</p>
-<p>spark 读取数据分区个数计算：</p>
-<p>影响因子：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">block.size(默认128m)、openCostInBytes(文件打开开销，比如打开一个parquet文件需要4m)、</span><br><span class="line">minPartitionNum(分区个数，最少为2)、totalBytes(总内存开销:文件大小+openCostInBytes)、</span><br><span class="line">bytesPerCore(每个core的内存开心 totalBytes/core num)</span><br><span class="line">举例：10个核，block.size 128m，parquet文件总大小 = 113.918m，8个文件，</span><br><span class="line">计算最大分片大小maxSplitBytes 过程如下, 会读snappy.parquet进行切分：</span><br><span class="line"></span><br><span class="line">defaultMaxSplitBytes = 128MB</span><br><span class="line">openCostInBytes = 4MB</span><br><span class="line">minPartitionNum = max(10, 2) = 10</span><br><span class="line">totalBytes = 113.918 + 8 * 4MB = 145.918MB</span><br><span class="line">bytesPerCore = 145.918MB / 10 = 14.5918MB</span><br><span class="line">maxSplitBytes = 14.5918MB = Math.min(defaultMaxSplitBytes, Math.max(openCostInBytes, bytesPerCore))</span><br></pre></td></tr></table></figure>
-
-<p>测试：spark读取parquet 会对自动对小文件合并，大文件拆分，</p>
-<p>3个executor(3核)读取4.46m文件对自动进行切分为2个分片，读取54kb的parquet文件不会对文件切分</p>
-<p>参考：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/544905929">parquet 源数据分区个数计算剖析</a>   <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/490729788">文件压缩格式</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/02/bigdata/spark/spark_file_read_partition_num/" data-id="cljllibc90003029a6lrz68g3" data-title="spark_file_read_partition_num" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1761,7 +1863,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -1771,7 +1873,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
     </div>
   </div>
 
@@ -1781,7 +1883,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+      <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
     </div>
   </div>
 
@@ -1803,6 +1905,10 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">hadoop本地环境搭建</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/04/bigdata/spark/spark_env/spark%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">spark环境搭建</a>
           </li>
         
@@ -1816,10 +1922,6 @@ cache
         
           <li>
             <a href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/">ansible使用</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
           </li>
         
       </ul>
