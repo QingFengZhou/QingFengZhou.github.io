@@ -73,6 +73,65 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-bigdata/spark/spark_file_combine" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/02/bigdata/spark/spark_file_combine/" class="article-date">
+  <time class="dt-published" datetime="2023-07-02T15:30:09.000Z" itemprop="datePublished">2023-07-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark/">bigdata/spark</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/02/bigdata/spark/spark_file_combine/">spark_file_combine</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="小文件合并"><a href="#小文件合并" class="headerlink" title="小文件合并"></a>小文件合并</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">create external table if not exists emp_ext(</span><br><span class="line">    	empno int,</span><br><span class="line">	ename string,</span><br><span class="line">	job string,</span><br><span class="line">	mgr int,</span><br><span class="line">	hiredate string,</span><br><span class="line">	sal double,</span><br><span class="line">	comm double,</span><br><span class="line">	deptno int</span><br><span class="line">) row format delimited fields terminated by &#x27;\t&#x27;</span><br><span class="line">LOCATION &#x27;/user/hive/warehouse/emp&#x27;;</span><br><span class="line"></span><br><span class="line">CREATE EXTERNAL TABLE parquet_test1 (value string) </span><br><span class="line">STORED AS PARQUET </span><br><span class="line">LOCATION &#x27;/tmp/test_out/parquet_big/&#x27;</span><br><span class="line">TBLPROPERTIES (&quot;parquet.compression&quot;=&quot;SNAPPY&quot;)</span><br><span class="line">;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>(1)   使用 </p>
+<p>Spark sql:</p>
+<p>思路：创建临时表，通过查看文件目录大小判断分区个数，通过distribute by num_partitions重分区 写入到临时表，判断临时表和源表数据内容是否一致，如果一致，删除源表，重命名临时表</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># insert overwrite源表 报错</span><br><span class="line">insert overwrite table parquet_test1 select * from parquet_test1;</span><br><span class="line"></span><br><span class="line">create table parquet_test2 like  parquet_test1 LOCATION &#x27;/tmp/test_out/parquet_big3/&#x27;</span><br><span class="line"></span><br><span class="line">insert overwrite table parquet_test2 select * from parquet_test1 distribute by floor(rand()*2);</span><br><span class="line"></span><br><span class="line"># 判断源表parquet_test1 和 parquet_test2是否数据量一致</span><br><span class="line"># 删除源表parquet_test1</span><br><span class="line">drop table parquet_test1;</span><br><span class="line"></span><br><span class="line">ALTER TABLE parquet_test2 RENAME TO parquet_test1</span><br></pre></td></tr></table></figure>
+
+<p>Spark code:</p>
+<p>思路：数据写入临时文件目录，判断临时文件目录大小设定重分区个数，数据写入正式文件目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.hadoop.fs.&#123;FileSystem, Path&#125;</span><br><span class="line"></span><br><span class="line">    nowDF.persist()</span><br><span class="line">    val tempPath = &quot;/nativeinfopath/&quot;</span><br><span class="line">    nowDF.write.mode(&quot;overwrite&quot;).parquet(tempPath)</span><br><span class="line">    </span><br><span class="line">    val fs = FileSystem.get(sc.hadoopConfiguration)</span><br><span class="line">    val dirSize = fs.getContentSummary(new Path(tempPath)).getLength</span><br><span class="line">    val fileNum = dirSize / (128 * 1024 * 1024) </span><br><span class="line">    </span><br><span class="line">    val regularPath = &quot;&quot;</span><br><span class="line">    nowDF.coalesce(fileNum.toInt).write.mode(&quot;overwrite&quot;).parquet(regularPath)</span><br><span class="line">    nowDF.unpersist()</span><br><span class="line">    </span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+<p>（2）使用hive  insert  overwrite  (自动小文件合并，不需要创建临时表，分区表分区也适用)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CREATE EXTERNAL TABLE parquet_test1 (value string) </span><br><span class="line">STORED AS PARQUET </span><br><span class="line">LOCATION &#x27;/tmp/test_out/parquet_big/&#x27;</span><br><span class="line">TBLPROPERTIES (&quot;parquet.compression&quot;=&quot;SNAPPY&quot;)</span><br><span class="line">;</span><br><span class="line">set hive.execution.engine = mr;</span><br><span class="line">insert overwrite table parquet_test1 select * from parquet_test1;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--分区表</span><br><span class="line">day=`date  +&quot;%Y%m%d&quot; -d  &quot;-1 days&quot;`</span><br><span class="line">hive  -d  day=$&#123;day&#125;  -e  &quot;use gps; </span><br><span class="line">                           alter table gpsinfo  add partition (day=$&#123;day&#125;);</span><br><span class="line">                           insert overwrite table gpsinfo partition(day)  select * from gpsinfo where day=$&#123;day&#125;;&quot; </span><br></pre></td></tr></table></figure>
+
+<p>(3)  hive 分片大小和自动小文件合并参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">//每个Map最大输入大小(这个值决定了合并后文件的数量)</span><br><span class="line">set mapred.max.split.size=256000000;  </span><br><span class="line">//一个节点上split的至少的大小(这个值决定了多个DataNode上的文件是否需要合并)</span><br><span class="line">set mapred.min.split.size.per.node=100000000;</span><br><span class="line">//一个rack下split的至少的大小(这个值决定了rack上的文件是否需要合并)  </span><br><span class="line">set mapred.min.split.size.per.rack=100000000;</span><br><span class="line">//执行Map前进行小文件合并</span><br><span class="line">set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat; </span><br><span class="line">//设置map端输出进行合并，默认为true</span><br><span class="line">set hive.merge.mapfiles = true</span><br><span class="line">//设置reduce端输出进行合并，默认为false</span><br><span class="line">set hive.merge.mapredfiles = true</span><br><span class="line">//设置合并文件的大小</span><br><span class="line">set hive.merge.size.per.task = 256*1000*1000</span><br><span class="line">//当输出文件的平均大小小于该值时，启动一个独立的MapReduce任务进行文件merge。</span><br><span class="line">set hive.merge.smallfiles.avgsize=16000000</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/02/bigdata/spark/spark_file_combine/" data-id="cljllibc40001029a724i9b3s" data-title="spark_file_combine" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-bigdata/spark/spark_minio" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/02/bigdata/spark/spark_minio/" class="article-date">
@@ -296,7 +355,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -306,7 +365,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
     </div>
   </div>
 
@@ -316,7 +375,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+      <a href="/tags/spark/" style="font-size: 10px;">spark</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
     </div>
   </div>
 
@@ -338,6 +397,10 @@
       <ul>
         
           <li>
+            <a href="/2023/07/04/bigdata/spark/spark_env/spark%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">spark环境搭建</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/04/tools/draw/%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/processon/">processon</a>
           </li>
         
@@ -351,10 +414,6 @@
         
           <li>
             <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">linux常用命令</a>
           </li>
         
       </ul>
