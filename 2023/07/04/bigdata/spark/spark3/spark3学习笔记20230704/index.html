@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.44.01.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.44.15.png">
 <meta property="article:published_time" content="2023-07-04T03:08:56.000Z">
-<meta property="article:modified_time" content="2023-07-07T09:58:03.495Z">
+<meta property="article:modified_time" content="2023-07-07T10:10:03.564Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="spark">
 <meta name="twitter:card" content="summary">
@@ -418,11 +418,13 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 
 <h4><span id="分桶目的">分桶目的</span></h4><p>1、避免在join和聚合查询中，产生shuffle操作</p>
 <p>2、数据过滤查询中，应用桶裁剪，减少数据IO开销 (io读取和传输)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">There are two main areas where bucketing can help, the first one is to avoid shuffle in queries with joins and aggregations, the second one is to reduce the I/O with a feature called bucket pruning.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">From: https://towardsdatascience.com/best-practices-for-bucketing-in-spark-sql-ea9f23f7dd53</span><br><span class="line">分桶优势：</span><br><span class="line">There are two main areas where bucketing can help, the first one is to avoid shuffle in queries with joins and aggregations, the second one is to reduce the I/O with a feature called bucket pruning.</span><br></pre></td></tr></table></figure>
 
 
 
-<h4><span id="其他">其他</span></h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/wypblog/article/details/108786770">和hive分桶区别</a></p>
+<h4><span id="其他">其他</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#查看分桶信息</span><br><span class="line">spark.sql(&quot;DESCRIBE EXTENDED table_name&quot;).show(n=100, true)</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/wypblog/article/details/108786770">和hive分桶区别</a></p>
 <p>1、Spark 分桶和 Hive 分桶采用不同的 hash 算法。Hive 用的是 HiveHash，而 Spark 用的是 Murmur3，所以数据的分布是不一样的</p>
 <p>2、Hive 在生成分桶的时候会额外进行一个 Reduce 操作，以保证相同分桶的数据都存储在一个文件中。而 Spark SQL 在写分桶文件时不需要 Shuffle 操作，这样就会导致每个分桶最多产生 M 个文件(task个数)</p>
 <p>（spark的每个task针对每个桶多会产生一个文件(0个或1个)，结果是每个桶会有多个文件；而hive会自动进行reduce，将多个分桶文件合并）</p>
