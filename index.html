@@ -101,11 +101,16 @@
       
         <!-- toc -->
 
-
-
+<ul>
+<li><a href="#datasource">DataSource</a><ul>
+<li><a href="#%E9%80%9A%E7%94%A8optition%E8%AE%BE%E7%BD%AE">通用Optition设置</a></li>
+</ul>
+</li>
+</ul>
 <!-- tocstop -->
 
-<p>Test</p>
+<h2><span id="datasource">DataSource</span></h2><h3><span id="通用optition设置">通用Optition设置</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">examples/src/main/resources/dir1</span><br><span class="line">├── dir2</span><br><span class="line">│   └── file2.parquet</span><br><span class="line">├── file1.parquet</span><br><span class="line">└── file3.json</span><br><span class="line"></span><br><span class="line">#ignoreCorruptFiles 忽略不规范文件, 直接跳过file3.json</span><br><span class="line">    val testCorruptDF0  = spark.read.option(&quot;ignoreCorruptFiles&quot;, &quot;true&quot;)</span><br><span class="line">    .parquet(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1/&quot;,</span><br><span class="line">    &quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1/dir2/&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#递归查找parquet</span><br><span class="line">val recursiveLoadedDF = spark.read.format(&quot;parquet&quot;)</span><br><span class="line">  .option(&quot;recursiveFileLookup&quot;, &quot;true&quot;)</span><br><span class="line">  .option(&quot;ignoreCorruptFiles&quot;, &quot;true&quot;)</span><br><span class="line">  .load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1&quot;)</span><br><span class="line">  </span><br><span class="line"># 模式匹配, 找到路径下的所有parquet文件</span><br><span class="line">val testGlobFilterDF = spark.read.format(&quot;parquet&quot;)</span><br><span class="line">  .option(&quot;pathGlobFilter&quot;, &quot;*.parquet&quot;) // json file should be filtered out</span><br><span class="line">  .load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1&quot;)</span><br><span class="line">testGlobFilterDF.show()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 
       
     </div>
