@@ -4,18 +4,19 @@
   <meta charset="utf-8">
   
   
-  <title>20230630 | Hexo</title>
+  <title>20230707_sparksql | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Morning8:10 - 8:35 8:40 - 11:30 loon11:30 - 13:30 Afternoon13:30 - 18:0018:00 - 18:40">
+  <meta name="description" content="Table Cache Config Join Strategy Hint Coalesce hints AQE    Table Cache123456spark.catalog.cacheTable(&quot;tableName&quot;)spark.catalog.uncacheTable(&quot;tableName&quot;)dataFrame.cache()dataFra">
 <meta property="og:type" content="article">
-<meta property="og:title" content="20230630">
-<meta property="og:url" content="https://qingfengzhou.github.io/2023/06/30/life/daily/20230630/index.html">
+<meta property="og:title" content="20230707_sparksql">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/09/bigdata/spark/spark3/20230707_sparksql/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Morning8:10 - 8:35 8:40 - 11:30 loon11:30 - 13:30 Afternoon13:30 - 18:0018:00 - 18:40">
+<meta property="og:description" content="Table Cache Config Join Strategy Hint Coalesce hints AQE    Table Cache123456spark.catalog.cacheTable(&quot;tableName&quot;)spark.catalog.uncacheTable(&quot;tableName&quot;)dataFrame.cache()dataFra">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2023-06-30T09:39:44.000Z">
-<meta property="article:modified_time" content="2023-06-30T10:33:48.674Z">
+<meta property="article:published_time" content="2023-07-09T14:59:37.000Z">
+<meta property="article:modified_time" content="2023-07-09T15:22:24.036Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="spark">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -75,14 +76,14 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-life/daily/20230630" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-bigdata/spark/spark3/20230707_sparksql" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2023/06/30/life/daily/20230630/" class="article-date">
-  <time class="dt-published" datetime="2023-06-30T09:39:44.000Z" itemprop="datePublished">2023-06-30</time>
+    <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/" class="article-date">
+  <time class="dt-published" datetime="2023-07-09T14:59:37.000Z" itemprop="datePublished">2023-07-09</time>
 </a>
     
   <div class="article-category">
-    <a class="article-category-link" href="/categories/life-daily/">life/daily</a>
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
   </div>
 
   </div>
@@ -93,7 +94,7 @@
         
   
     <h1 class="p-name article-title" itemprop="headline name">
-      20230630
+      20230707_sparksql
     </h1>
   
 
@@ -101,33 +102,54 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h2 id="Morning"><a href="#Morning" class="headerlink" title="Morning"></a>Morning</h2><p>8:10 - 8:35</p>
-<p>8:40 - 11:30</p>
-<h2 id="loon"><a href="#loon" class="headerlink" title="loon"></a>loon</h2><p>11:30 - 13:30</p>
-<h2 id="Afternoon"><a href="#Afternoon" class="headerlink" title="Afternoon"></a>Afternoon</h2><p>13:30 - 18:00<br>18:00 - 18:40</p>
+        <!-- toc -->
+
+<ul>
+<li><a href="#table-cache">Table Cache</a></li>
+<li><a href="#config">Config</a></li>
+<li><a href="#join-strategy-hint">Join Strategy Hint</a></li>
+<li><a href="#coalesce-hints">Coalesce hints</a></li>
+<li><a href="#aqe">AQE</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="table-cache">Table Cache</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">spark.catalog.cacheTable(&quot;tableName&quot;)</span><br><span class="line">spark.catalog.uncacheTable(&quot;tableName&quot;)</span><br><span class="line"></span><br><span class="line">dataFrame.cache()</span><br><span class="line">dataFrame.unpersist()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="config">Config</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">spark.sql.autoBroadcastJoinThreshold  	10485760 (10m)</span><br><span class="line">Configures the maximum size in bytes for a table that will be broadcast</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="join-strategy-hint">Join Strategy Hint</span></h2><p>The join strategy hints, namely <code>BROADCAST</code>, <code>MERGE</code>, <code>SHUFFLE_HASH</code> and <code>SHUFFLE_REPLICATE_NL</code>, instruct Spark to use the hinted strategy.</p>
+<p><code>BROADCAST</code> 细分为两种：broadcast hash join or broadcast nested loop join </p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">spark.table(<span class="string">&quot;src&quot;</span>).join(spark.table(<span class="string">&quot;records&quot;</span>).hint(<span class="string">&quot;broadcast&quot;</span>), <span class="string">&quot;key&quot;</span>).show()</span><br><span class="line"></span><br><span class="line">-- <span class="type">We</span> accept <span class="type">BROADCAST</span>, <span class="type">BROADCASTJOIN</span> and <span class="type">MAPJOIN</span> <span class="keyword">for</span> broadcast hint</span><br><span class="line"><span class="type">SELECT</span> <span class="comment">/*+ BROADCAST(r) */</span> * <span class="type">FROM</span> records r <span class="type">JOIN</span> src s <span class="type">ON</span> r.key = s.key</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="coalesce-hints">Coalesce hints</span></h2><p>Coalesce hints allow Spark SQL users to control the number of output files just like <code>coalesce</code>, <code>repartition</code> and <code>repartitionByRange</code> in the Dataset API, they can be used for performance tuning and reducing the number of output files.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SELECT /*+ COALESCE(3) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION(3) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION(c) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION(3, c) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION_BY_RANGE(c) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION_BY_RANGE(3, c) */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE(3) */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE(c) */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE(3, c) */ * FROM t;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="aqe">AQE</span></h2><p>Adaptive Query Execution (AQE) is an optimization technique in Spark SQL that makes use of the runtime statistics to choose the most efficient query execution plan, which is enabled by default since Apache Spark 3.2.0. </p>
+<p>Spark SQL can turn on and off AQE by <code>spark.sql.adaptive.enabled</code> as an umbrella configuration。</p>
+<p>As of Spark 3.0, there are three major features in AQE: including coalescing post-shuffle partitions, converting sort-merge join to broadcast join, and skew join optimization.</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/06/30/life/daily/20230630/" data-id="cljieq5zk0001bt9a4yle9w6t" data-title="20230630" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="https://qingfengzhou.github.io/2023/07/09/bigdata/spark/spark3/20230707_sparksql/" data-id="cljvl2jh80000619a7e0a2rjw" data-title="20230707_sparksql" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
     </footer>
   </div>
   
     
 <nav id="article-nav">
   
-    <a href="/2023/06/30/life/thought/20230629/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          20230629
-        
-      </div>
-    </a>
   
+    <a href="/2023/07/07/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230707/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">spark3学习笔记20230707</div>
+    </a>
   
 </nav>
 
