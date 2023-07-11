@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>20230711_structStreaming | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="执行引擎 Example StructStreaming BatchProcessing   Basics outputmode        执行引擎Spark SQL engine 两种处理模式： 默认 micro-batch processing engine,  最低延时 100ms，exactly-once fault-tolerance guarantees 可配置模式Conti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="20230711_structStreaming">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="执行引擎 Example StructStreaming BatchProcessing   Basics outputmode        执行引擎Spark SQL engine 两种处理模式： 默认 micro-batch processing engine,  最低延时 100ms，exactly-once fault-tolerance guarantees 可配置模式Conti">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-07-11T08:52:34.000Z">
+<meta property="article:modified_time" content="2023-07-11T10:20:00.760Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="spark">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-bigdata/spark/spark3/20230711_structStreaming" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/" class="article-date">
+  <time class="dt-published" datetime="2023-07-11T08:52:34.000Z" itemprop="datePublished">2023-07-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      20230711_structStreaming
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E">执行引擎</a><ul>
+<li><a href="#example">Example</a><ul>
+<li><a href="#structstreaming">StructStreaming</a></li>
+<li><a href="#batchprocessing">BatchProcessing</a></li>
+</ul>
+</li>
+<li><a href="#basics">Basics</a><ul>
+<li><a href="#outputmode"><strong>outputmode</strong></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="执行引擎">执行引擎</span></h2><p>Spark SQL engine</p>
+<p>两种处理模式：</p>
+<p>默认 <em>micro-batch processing</em> engine,  最低延时 100ms，exactly-once fault-tolerance guarantees</p>
+<p>可配置模式<strong>Continuous Processing</strong>，最低延时 ms，at-least-once guarantees</p>
+<p>Internally, by default, Structured Streaming queries are processed using a <em>micro-batch processing</em> engine, which processes data streams as a series of small batch jobs thereby achieving end-to-end latencies as low as 100 milliseconds and exactly-once fault-tolerance guarantees. However, since Spark 2.3, we have introduced a new low-latency processing mode called <strong>Continuous Processing</strong>, which can achieve end-to-end latencies as low as 1 millisecond with at-least-once guarantees. Without changing the Dataset&#x2F;DataFrame operations in your queries, you will be able to choose the mode based on your application requirements.</p>
+<h3><span id="example">Example</span></h3><h4><span id="structstreaming">StructStreaming</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * start server: nc -lk 9999</span><br><span class="line"> * 可以看到这里 的api写法基本跟batch processing 批处理的api保持一致，</span><br><span class="line"> * 不同的地方是：</span><br><span class="line"> * (1) spark.readStream | wordCounts.writeStream，batch api的写法 spark.read | wordCounts.write</span><br><span class="line"> * (2) 流处理触发运行，调用方法wordCounts.writeStream.start()，而批处理调用方法 wordCounts.write.save()</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">object ExampleStructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCount&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to localhost:9999</span><br><span class="line">    val lines = spark.readStream</span><br><span class="line">      .format(&quot;socket&quot;)</span><br><span class="line">      .option(&quot;host&quot;, &quot;localhost&quot;)</span><br><span class="line">      .option(&quot;port&quot;, 9999)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">    // dataframe to dataset; then Split the lines into words</span><br><span class="line">    val words = lines.as[String].flatMap(_.split(&quot; &quot;))</span><br><span class="line"></span><br><span class="line">    // Generate running word count</span><br><span class="line">    val wordCounts = words.groupBy(&quot;value&quot;).count()</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the running counts to the console</span><br><span class="line">    val query = wordCounts.writeStream</span><br><span class="line">      .outputMode(&quot;complete&quot;)</span><br><span class="line">      .format(&quot;console&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="batchprocessing">BatchProcessing</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line">object DatasetWordCountExample &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCount&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    val lines = spark.read.format(&quot;text&quot;).load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/README.md&quot;)</span><br><span class="line"></span><br><span class="line">    // dataframe to dataset; then Split the lines into words</span><br><span class="line">    val words = lines.as[String].flatMap(_.split(&quot; &quot;))</span><br><span class="line"></span><br><span class="line">    // Generate running word count</span><br><span class="line">    val wordCounts = words.groupBy(&quot;value&quot;).count()</span><br><span class="line"></span><br><span class="line">    wordCounts.write.mode(&quot;overwrite&quot;).format(&quot;parquet&quot;).save(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/tmp1&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="basics">Basics</span></h3><h4><span id="outputmode"><strong>outputmode</strong></span></h4><p><em>Complete Mode</em> -   结果集 每次输出所有数据</p>
+<p><em>Append Mode</em> -  结果集 每次只输出新增的数据（只包括新增，不包括变更的）</p>
+<p><em>Update Mode</em> -  结果集 每次只输出更新的数据（包括新增 和 变更的  new|update）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/" data-id="cljy55ft700000n9a3c2vb7n4" data-title="20230711_structStreaming" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">20230707_sparksql</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/">20230711_structStreaming</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/">20230707_sparksql</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/07/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230707/">spark3学习笔记20230707</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/05/bigdata/spark/sparksql/kyuubi/kyuubi_simple_usage/">kyuubi_simple_usage</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/">spark3学习笔记20230704</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

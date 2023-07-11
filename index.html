@@ -73,6 +73,80 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-bigdata/spark/spark3/20230711_structStreaming" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/" class="article-date">
+  <time class="dt-published" datetime="2023-07-11T08:52:34.000Z" itemprop="datePublished">2023-07-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/">20230711_structStreaming</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E">执行引擎</a><ul>
+<li><a href="#example">Example</a><ul>
+<li><a href="#structstreaming">StructStreaming</a></li>
+<li><a href="#batchprocessing">BatchProcessing</a></li>
+</ul>
+</li>
+<li><a href="#basics">Basics</a><ul>
+<li><a href="#outputmode"><strong>outputmode</strong></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="执行引擎">执行引擎</span></h2><p>Spark SQL engine</p>
+<p>两种处理模式：</p>
+<p>默认 <em>micro-batch processing</em> engine,  最低延时 100ms，exactly-once fault-tolerance guarantees</p>
+<p>可配置模式<strong>Continuous Processing</strong>，最低延时 ms，at-least-once guarantees</p>
+<p>Internally, by default, Structured Streaming queries are processed using a <em>micro-batch processing</em> engine, which processes data streams as a series of small batch jobs thereby achieving end-to-end latencies as low as 100 milliseconds and exactly-once fault-tolerance guarantees. However, since Spark 2.3, we have introduced a new low-latency processing mode called <strong>Continuous Processing</strong>, which can achieve end-to-end latencies as low as 1 millisecond with at-least-once guarantees. Without changing the Dataset&#x2F;DataFrame operations in your queries, you will be able to choose the mode based on your application requirements.</p>
+<h3><span id="example">Example</span></h3><h4><span id="structstreaming">StructStreaming</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * start server: nc -lk 9999</span><br><span class="line"> * 可以看到这里 的api写法基本跟batch processing 批处理的api保持一致，</span><br><span class="line"> * 不同的地方是：</span><br><span class="line"> * (1) spark.readStream | wordCounts.writeStream，batch api的写法 spark.read | wordCounts.write</span><br><span class="line"> * (2) 流处理触发运行，调用方法wordCounts.writeStream.start()，而批处理调用方法 wordCounts.write.save()</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">object ExampleStructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCount&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to localhost:9999</span><br><span class="line">    val lines = spark.readStream</span><br><span class="line">      .format(&quot;socket&quot;)</span><br><span class="line">      .option(&quot;host&quot;, &quot;localhost&quot;)</span><br><span class="line">      .option(&quot;port&quot;, 9999)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">    // dataframe to dataset; then Split the lines into words</span><br><span class="line">    val words = lines.as[String].flatMap(_.split(&quot; &quot;))</span><br><span class="line"></span><br><span class="line">    // Generate running word count</span><br><span class="line">    val wordCounts = words.groupBy(&quot;value&quot;).count()</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the running counts to the console</span><br><span class="line">    val query = wordCounts.writeStream</span><br><span class="line">      .outputMode(&quot;complete&quot;)</span><br><span class="line">      .format(&quot;console&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="batchprocessing">BatchProcessing</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line">object DatasetWordCountExample &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCount&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    val lines = spark.read.format(&quot;text&quot;).load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/README.md&quot;)</span><br><span class="line"></span><br><span class="line">    // dataframe to dataset; then Split the lines into words</span><br><span class="line">    val words = lines.as[String].flatMap(_.split(&quot; &quot;))</span><br><span class="line"></span><br><span class="line">    // Generate running word count</span><br><span class="line">    val wordCounts = words.groupBy(&quot;value&quot;).count()</span><br><span class="line"></span><br><span class="line">    wordCounts.write.mode(&quot;overwrite&quot;).format(&quot;parquet&quot;).save(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/tmp1&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="basics">Basics</span></h3><h4><span id="outputmode"><strong>outputmode</strong></span></h4><p><em>Complete Mode</em> -   结果集 每次输出所有数据</p>
+<p><em>Append Mode</em> -  结果集 每次只输出新增的数据（只包括新增，不包括变更的）</p>
+<p><em>Update Mode</em> -  结果集 每次只输出更新的数据（包括新增 和 变更的  new|update）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/" data-id="cljy55ft700000n9a3c2vb7n4" data-title="20230711_structStreaming" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-bigdata/spark/spark3/20230707_sparksql" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/" class="article-date">
@@ -2229,71 +2303,11 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 
 
   
-    <article id="post-tools/java/maven/maven远程仓库配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" class="article-date">
-  <time class="dt-published" datetime="2023-07-03T14:01:21.000Z" itemprop="datePublished">2023-07-03</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/tools-java-maven/">tools/java/maven</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <!-- toc -->
-
-
-
-<!-- tocstop -->
-
-<p>修改 MAVEN_HOME&#x2F;conf&#x2F;settings.xml文件，</p>
-<p>1、本地仓库位置 修改</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;localRepository&gt;$&#123;user.home&#125;/.m2/repository&lt;/localRepository&gt;</span><br><span class="line">默认位置 ~/.m2/repository </span><br></pre></td></tr></table></figure>
-
-
-
-<p>2、远程仓库地址 配置</p>
-<p>当本地仓库找不到对应依赖包时，从配置的远程仓库中拉取依赖包、下载到本地。</p>
-<p>如下示例在profiles  配置了两个远程仓库，id分别为repo、alimaven，id必须是唯一的，不能重复。</p>
-<p>activeProfiles 指明两个仓库都是激活状态，都可用于项目构建</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">&lt;profiles&gt;</span><br><span class="line">    &lt;!--</span><br><span class="line">     | Specifies a set of introductions to the build process, to be activated using one or more of the</span><br><span class="line">     | mechanisms described above. For inheritance purposes, and to activate profiles via &lt;activatedProfiles/&gt;</span><br><span class="line">     | or the command line, profiles have to have an ID that is unique.</span><br><span class="line">     |</span><br><span class="line">     | An encouraged best practice for profile identification is to use a consistent naming convention</span><br><span class="line">     | for profiles, such as &#x27;env-dev&#x27;, &#x27;env-test&#x27;, &#x27;env-production&#x27;, &#x27;user-jdcasey&#x27;, &#x27;user-brett&#x27;, etc.</span><br><span class="line">     | This will make it more intuitive to understand what the set of introduced profiles is attempting</span><br><span class="line">     | to accomplish, particularly when you only have a list of profile id&#x27;s for debug.</span><br><span class="line">   --&gt;</span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">              &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">              &lt;name&gt;Central Repository&lt;/name&gt;</span><br><span class="line">              &lt;url&gt;https://repo.maven.apache.org/maven2&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">           &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">           &lt;name&gt;alimaven&lt;/name&gt;</span><br><span class="line">           &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">&lt;/profiles&gt;</span><br><span class="line"></span><br><span class="line">  &lt;!-- activeProfiles</span><br><span class="line">   | List of profiles that are active for all builds.</span><br><span class="line">  &lt;/activeProfiles&gt;</span><br><span class="line">  --&gt;</span><br><span class="line"></span><br><span class="line">&lt;activeProfiles&gt;</span><br><span class="line">    &lt;activeProfile&gt;repo&lt;/activeProfile&gt;</span><br><span class="line">    &lt;activeProfile&gt;alimaven&lt;/activeProfile&gt;</span><br><span class="line">&lt;/activeProfiles&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" data-id="cljmy0mmf0000v29a26p20mk6" data-title="maven远程仓库配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -2346,6 +2360,10 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
       <ul>
         
           <li>
+            <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/">20230711_structStreaming</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/">20230707_sparksql</a>
           </li>
         
@@ -2359,10 +2377,6 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
         
           <li>
             <a href="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/">spark3学习笔记20230704</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/04/bigdata/hadoop/hadoop_env/hadoop%E6%9C%AC%E5%9C%B0%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">hadoop本地环境搭建</a>
           </li>
         
       </ul>
