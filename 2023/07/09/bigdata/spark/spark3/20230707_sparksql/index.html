@@ -6,15 +6,15 @@
   
   <title>20230707_sparksql | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Table Cache Config Join Strategy Hint Coalesce hints AQE    Table Cache123456spark.catalog.cacheTable(&quot;tableName&quot;)spark.catalog.uncacheTable(&quot;tableName&quot;)dataFrame.cache()dataFra">
+  <meta name="description" content="Table Cache Config Join Strategy Hint Coalesce hints Operator AQE 数据倾斜 DDL CTE Analyze Cache table REFRESH TABLE msck repair      Table Cache123456spark.catalog.cacheTable(&quot;tableName&quot;)spa">
 <meta property="og:type" content="article">
 <meta property="og:title" content="20230707_sparksql">
 <meta property="og:url" content="https://qingfengzhou.github.io/2023/07/09/bigdata/spark/spark3/20230707_sparksql/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Table Cache Config Join Strategy Hint Coalesce hints AQE    Table Cache123456spark.catalog.cacheTable(&quot;tableName&quot;)spark.catalog.uncacheTable(&quot;tableName&quot;)dataFrame.cache()dataFra">
+<meta property="og:description" content="Table Cache Config Join Strategy Hint Coalesce hints Operator AQE 数据倾斜 DDL CTE Analyze Cache table REFRESH TABLE msck repair      Table Cache123456spark.catalog.cacheTable(&quot;tableName&quot;)spa">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-07-09T14:59:37.000Z">
-<meta property="article:modified_time" content="2023-07-09T15:22:24.036Z">
+<meta property="article:modified_time" content="2023-07-11T03:11:01.200Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="spark">
 <meta name="twitter:card" content="summary">
@@ -109,7 +109,17 @@
 <li><a href="#config">Config</a></li>
 <li><a href="#join-strategy-hint">Join Strategy Hint</a></li>
 <li><a href="#coalesce-hints">Coalesce hints</a></li>
+<li><a href="#operator">Operator</a></li>
 <li><a href="#aqe">AQE</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C">数据倾斜</a></li>
+<li><a href="#ddl">DDL</a><ul>
+<li><a href="#cte">CTE</a></li>
+<li><a href="#analyze">Analyze</a></li>
+<li><a href="#cache-table">Cache table</a></li>
+<li><a href="#refresh-table">REFRESH TABLE</a></li>
+<li><a href="#msck-repair">msck repair</a></li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -126,9 +136,72 @@
 
 
 
-<h2><span id="aqe">AQE</span></h2><p>Adaptive Query Execution (AQE) is an optimization technique in Spark SQL that makes use of the runtime statistics to choose the most efficient query execution plan, which is enabled by default since Apache Spark 3.2.0. </p>
+<h2><span id="operator">Operator</span></h2><p>A Dataset is a strongly typed collection of domain-specific objects that can be transformed in parallel using functional or relational operations.</p>
+<p>支持 函数型算子 和  关系型算子 </p>
+<p>Spark SQL 执行引擎：catalyst优化器和</p>
+<p>tungsten优化(数据结构设计(基于unsaferow存储、内存页管理)和全阶段代码生成)</p>
+<h2><span id="aqe">AQE</span></h2><p>AQE 是 Spark SQL 的一种动态优化机制，在运行时，每当 Shuffle Map 阶段执行完毕，AQE 都会结合这个阶段的统计信息，基于既定的规则动态地调整、修正尚未执行的逻辑计划和物理计划，来完成对原始查询语句的运行时优化。</p>
+<p>Spark 3.2.0 以及之后的版本默认是开启状态。</p>
+<p>Adaptive Query Execution (AQE) is an optimization technique in Spark SQL that makes use of the runtime statistics to choose the most efficient query execution plan, which is enabled by default since Apache Spark 3.2.0.  </p>
 <p>Spark SQL can turn on and off AQE by <code>spark.sql.adaptive.enabled</code> as an umbrella configuration。</p>
 <p>As of Spark 3.0, there are three major features in AQE: including coalescing post-shuffle partitions, converting sort-merge join to broadcast join, and skew join optimization.</p>
+<p>（AQE 赖以优化的统计信息与 CBO 不同，这些统计信息并不是关于某张表或是哪个列，而是 Shuffle Map 阶段输出的中间文件。）</p>
+<p>自动分区合并(拆分) : reduce  合并数据量小的分区，减少小文件数量</p>
+<p>Join 策略调整：sort-merge join to broadcast join</p>
+<p>Join倾斜优化：倾斜分区会被拆分成多个分区 (倾斜分区拆分为多个数据分区、对另外一张表对应的数据分区进行复制)</p>
+<h2><span id="数据倾斜">数据倾斜</span></h2><p>单表引起的倾斜：</p>
+<p>1、map端聚合</p>
+<p>2、单次聚合改为分两次聚合完成 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select count(distinct uid) from t1 group by day</span><br><span class="line">select count(1) from ( select day, uid from t1 group by day, uid ) tmp group by day</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>多表join引起的倾斜：</p>
+<p>1、调整 spark.sql.autoBroadcastJoinThreshold,  尽量使用broadcastjoin</p>
+<p>2、<code>spark.sql.adaptive.enabled</code>  开启AQE，实现Join倾斜自动优化，可能出现executor粒度的数据倾斜(倾斜分区划分的任务重复分配到一个executor)</p>
+<p>3、使用两阶段shuffle，将倾斜key和非倾斜key分开处理，最后结果union。</p>
+<p>对于非倾斜key，常规处理；</p>
+<p>对于倾斜key，外表对应的key：加盐、添加随机后缀，内表对应的key：添加后缀、数据进行复制，内外表进行一阶段 join 聚合，第二阶段 将第一阶段聚合结果 的joinkey 去除后缀后，进行二次聚合。</p>
+<h2><span id="ddl">DDL</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">--Create bucketed table through CTAS and CTE</span><br><span class="line">CREATE TABLE student_bucket</span><br><span class="line">    USING parquet</span><br><span class="line">    CLUSTERED BY (id) INTO 4 buckets (</span><br><span class="line">    WITH tmpTable AS (</span><br><span class="line">        SELECT * FROM student WHERE id &gt; 100</span><br><span class="line">    )</span><br><span class="line">    SELECT * FROM tmpTable</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">CREATE TABLE student_parquet(id INT, name STRING, age INT) USING PARQUET</span><br><span class="line">    OPTIONS (</span><br><span class="line">      &#x27;parquet.bloom.filter.enabled&#x27;=&#x27;true&#x27;,</span><br><span class="line">      &#x27;parquet.bloom.filter.enabled#age&#x27;=&#x27;false&#x27;</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line"># 添加分区    </span><br><span class="line">ALTER TABLE table_identifier ADD [IF NOT EXISTS] </span><br><span class="line">    ( partition_spec [ partition_spec ... ] )</span><br><span class="line"></span><br><span class="line"># 刷新分区</span><br><span class="line">[MSCK] REPAIR TABLE table_identifier [&#123;ADD|DROP|SYNC&#125; PARTITIONS]</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="cte">CTE</span></h3><p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-cte.html">https://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-cte.html</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CTE</span><br><span class="line"># Common Table Expression (CTE)</span><br><span class="line">A common table expression (CTE) defines a temporary result set that a user can reference possibly multiple times within the scope of a SQL statement. </span><br><span class="line">表示一个临时结果集，用户可以在sql语句中引用多次</span><br><span class="line">-- CTE with multiple column aliases</span><br><span class="line">WITH t(x, y) AS (SELECT 1, 2)</span><br><span class="line">SELECT * FROM t WHERE x = 1 AND y = 2;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="analyze">Analyze</span></h3><p>获取表的统计信息，包括表的大小、行数，也可以针对字段进行统计</p>
+<p>The <code>ANALYZE TABLE</code> statement collects statistics about one specific table or all the tables in one specified database, that are to be used by the query optimizer to find a better query execution plan.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">analyze table emp compute statistics</span><br><span class="line"># noscan 使用noscan仅获取表大小, 不需要扫描整个表</span><br><span class="line"># Collects only the table’s size in bytes (which does not require scanning the entire table).</span><br><span class="line">analyze table emp compute statistics noscan;</span><br><span class="line">desc extended emp;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="cache-table">Cache table</span></h3><p><code>CACHE TABLE</code> statement caches contents of a table or output of a query with the given storage level. If a query is cached, then a temp view will be created for this query. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CACHE TABLE emp;</span><br><span class="line"></span><br><span class="line">CACHE TABLE emp OPTIONS (&#x27;storageLevel&#x27; &#x27;DISK_ONLY&#x27;) SELECT salary FROM emp</span><br><span class="line"></span><br><span class="line">CLEAR CACHE;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="refresh-table">REFRESH TABLE</span></h3><p>（Invalidates and refreshes all the cached data and metadata of the given table. For performance reasons, Spark SQL or the external data source library it uses might cache certain metadata about a table, such as the location of blocks (数据块的位置信息). When those change outside of Spark SQL, users should call this function to invalidate the cache.）</p>
+<p>更新表的缓存信息，包括元数据等。主要用于表的数据修改、表中元数据未修改的场景。(无法更新分区，msck是更新分区信息)</p>
+<p>Spark为了提高性能会缓存Parquet的元数据信息。当更新了Parquet表数据时，缓存的元数据信息未更新，导致Spark SQL查询不到新插入的数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-- The cached entries of the table will be refreshed  </span><br><span class="line">-- The table is resolved from the current database as the table name is unqualified.</span><br><span class="line"># 这个表的缓存信息 会更新</span><br><span class="line">REFRESH TABLE tbl1;</span><br><span class="line"></span><br><span class="line">##测试的情况，parquet表的数据目录新增数据后(手动增加)，spark sql查询不到新的数据，执行refresh，</span><br><span class="line">spark sql可以查询到新的数据</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>和msck区别：</p>
+<p>msck repair table </p>
+<p>作用是检查HDFS目录下存在（不存在）但表的metastore中不存在（存在）的元数据信息，更新metastore到hive。</p>
+<p>每次执行msck repair这个命令，都会检查所有分区的目录是否在hive元数据中存在，如果是每次新增一个分区的任务（daily的),那么使用这个语句将会越来越耗费时间，建议使用ALTER TABLE ADD PARTITION 命令。MSCK适合一次导入很多分区，需要将这些分区都更新到元数据信息中。</p>
+<h3><span id="msck-repair">msck repair</span></h3><p>只能作用与分区表，否则提示信息(because it is not a partitioned table.)</p>
+<p>更新分区元数据信息到hive ,  （适用于分区数据已更新，但是分区元数据未更新的情况）</p>
+<p><code>REPAIR TABLE</code> recovers all the partitions in the directory of a table and updates the Hive metastore. When creating a table using <code>PARTITIONED BY</code> clause, partitions are generated and registered in the Hive metastore. However, if the partitioned table is created from existing data, partitions are not registered automatically in the Hive metastore. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">-- create a partitioned table from existing data /tmp/namesAndAges.parquet</span><br><span class="line">CREATE TABLE tt1 (employee_name STRING, salary INT, department string) USING parquet PARTITIONED BY (department) location &#x27;/tmp/test/spark_ext&#x27;;</span><br><span class="line"></span><br><span class="line">-- SELECT * FROM tt1 does not return results</span><br><span class="line">SELECT * FROM tt1;</span><br><span class="line"></span><br><span class="line">refresh table tt1;</span><br><span class="line">-- SELECT * FROM tt1 does not return results</span><br><span class="line">SELECT * FROM tt1;</span><br><span class="line"></span><br><span class="line">-- run REPAIR TABLE to recovers all the partitions</span><br><span class="line">msck REPAIR TABLE tt1;</span><br><span class="line"></span><br><span class="line">-- SELECT * FROM tt1  returns results</span><br><span class="line">SELECT * FROM tt1;</span><br><span class="line">James	3000	Sales</span><br><span class="line">Robert	4100	Sales</span><br><span class="line">James	3000	Sales</span><br><span class="line">Michael	4600	Sales</span><br><span class="line">Maria	3000	Finance</span><br><span class="line">Kumar	2000	Marketing</span><br><span class="line">Scott	3300	Finance</span><br><span class="line">Jen	3900	Finance</span><br><span class="line">Jeff	3000	Marketing</span><br><span class="line">Saif	4100	Sales</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>distribute by</p>
+<p>cluster by</p>
 
       
     </div>
