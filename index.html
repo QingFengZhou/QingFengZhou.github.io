@@ -110,6 +110,8 @@
 </li>
 <li><a href="#basics">Basics</a><ul>
 <li><a href="#outputmode"><strong>outputmode</strong></a></li>
+<li><a href="#event-time">Event time</a></li>
+<li><a href="#time-window">Time Window</a></li>
 </ul>
 </li>
 </ul>
@@ -120,6 +122,20 @@
 <li><a href="#rate">Rate</a></li>
 </ul>
 </li>
+<li><a href="#%E5%BB%B6%E6%97%B6%E4%B9%B1%E5%BA%8F%E6%95%B0%E6%8D%AE">延时乱序数据</a><ul>
+<li><a href="#%E5%AE%9A%E4%B9%89">定义</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95">测试</a></li>
+<li><a href="#%E7%BB%93%E8%AE%BA">结论</a></li>
+</ul>
+</li>
+<li><a href="#%E7%8A%B6%E6%80%81%E5%AD%98%E5%82%A8">状态存储</a><ul>
+<li><a href="#hdfs-state-store-provider">HDFS state store provider</a></li>
+<li><a href="#rocksdb-state-store-implementation">RocksDB state store implementation</a></li>
+</ul>
+</li>
+<li><a href="#sink">Sink</a></li>
+<li><a href="#trigger">Trigger</a></li>
+<li><a href="#checkpoint">checkpoint</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -135,6 +151,11 @@
 <h3><span id="basics">Basics</span></h3><h4><span id="outputmode"><strong>outputmode</strong></span></h4><p><em>Complete Mode</em> -   结果集 每次输出所有数据</p>
 <p><em>Append Mode</em> -  结果集 每次只输出新增的数据（只包括新增，不包括变更的）</p>
 <p><em>Update Mode</em> -  结果集 每次只输出更新的数据（包括新增 和 变更的  new|update）</p>
+<h4><span id="event-time">Event time</span></h4><p>事件时间，只与事件本身有关</p>
+<h4><span id="time-window">Time Window</span></h4><p>滚动窗口：Tumbling windows are a series of fixed-sized, non-overlapping and contiguous time intervals</p>
+<p>滑动窗口：Sliding windows are similar to the tumbling windows from the point of being “fixed-sized”, but windows can overlap if the duration of slide is smaller than the duration of window, and in this case an input can be bound to the multiple windows.</p>
+<p>会话窗口： 窗口在一定间隔内没有接收到新的数据，进行关闭，窗口大小不固定</p>
+<p>a session window closes when there’s no input received within gap duration after receiving the latest input.</p>
 <h2><span id="source">Source</span></h2><h3><span id="socket">Socket</span></h3><p>对应example</p>
 <h3><span id="file">File</span></h3><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Read all the csv files written atomically in a directory</span></span><br><span class="line"><span class="keyword">val</span> userSchema = <span class="keyword">new</span> <span class="type">StructType</span>().add(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;string&quot;</span>).add(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;integer&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> csvDF = spark</span><br><span class="line">  .readStream</span><br><span class="line">  .option(<span class="string">&quot;sep&quot;</span>, <span class="string">&quot;;&quot;</span>)</span><br><span class="line">  .schema(userSchema)      <span class="comment">// Specify schema of the csv files</span></span><br><span class="line">  .csv(<span class="string">&quot;/path/to/directory&quot;</span>)    <span class="comment">// Equivalent to format(&quot;csv&quot;).load(&quot;/path/to/directory&quot;)</span></span><br></pre></td></tr></table></figure>
 
@@ -142,6 +163,123 @@
 
 <h3><span id="rate">Rate</span></h3><p>Generates data at the specified number of rows per second, each output row contains a <code>timestamp</code> and <code>value</code>. Where <code>timestamp</code> is a <code>Timestamp</code> type containing the time of message dispatch, and <code>value</code> is of <code>Long</code> type containing the message count, starting from 0 as the first row. </p>
 <figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create a streaming DataFrame</span></span><br><span class="line"><span class="keyword">val</span> df = spark.readStream</span><br><span class="line">  .format(<span class="string">&quot;rate&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;rowsPerSecond&quot;</span>, <span class="number">10</span>)</span><br><span class="line">  .load()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> query = df.writeStream</span><br><span class="line">  .option(<span class="string">&quot;checkpointLocation&quot;</span>, <span class="string">&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/out/rate/&quot;</span>)</span><br><span class="line">  .outputMode(<span class="string">&quot;update&quot;</span>)</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;numRows&quot;</span>, <span class="number">20</span>)</span><br><span class="line">  .option(<span class="string">&quot;truncate&quot;</span>, <span class="literal">false</span>)</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"> query.awaitTermination()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="延时乱序数据">延时乱序数据</span></h2><h3><span id="定义">定义</span></h3><p><strong>Watermark</strong>: 水位线</p>
+<p>Watemark &#x3D; the current max  event time - late threshold</p>
+<p>基于事件时间产生，本质是一个时间戳，和时间窗口结合，用于处理延时晚到的乱序时间。随着事件的不断流入(到计算逻辑flink或spark代码)，水位线不断上涨，当水位线 &gt;&#x3D; 窗口结束时间，流入到这个窗口的新的延时数据将不再被该窗口计算处理。</p>
+<p>水位线作用和定义：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">用来处理数据延迟，数据乱序。</span><br><span class="line"></span><br><span class="line">水印（更准确的说法是水位线，随着接收事件时间的不断增长而不断上涨）本质上是一个时间戳，代表事件时间比这个时间戳更小的数据已全部到达，（所有比这时间戳更早的数据视为延迟数据）当水印watermark&gt;=窗口对应的结束时间，对应窗口会触发计算并进行关闭</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>水印只与事件时间有关</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Spark 水印 和flink的水印 均是来自google的dataflow model,  其核心思想是在无边界、乱序的数据流中，在数据准确性、数据延迟性和计算性能开销之间 追求一个平衡。</span><br><span class="line">水位线本质是事件时间戳，仅仅只与 事件本身对应的时间属性event_time 和用户定义的允许数据延迟的时间（late threshold）有关，与系统本身的处理时间processing time 没有关系。 「之前一直理解不了，将processing time 和event time混淆到一块，误以为event time 和processing time时钟是同步的，其实两者是没有关系的，一个是事件本身决定的，一个是计算系统处理时间，我们通常讲窗口、水印是针对事件而言的，而现实中事件时间和处理时间可能中间间隔了好几个小时，水印本质解决的问题是有关在事件中多条数据乱序到达的问题，只能依赖与事件本身的时间去想办法解决，通过引入水位线的概念（由事件时间生成，随着数据的不断流入水位线不断上涨），当水位线&gt;=某个窗口结束时间（当然，这里窗口也是完全依据流入的数据事件时间划分的） 意味着在这之后流入到这个窗口的新的数据将不再被该窗口计算处理 」</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="测试">测试</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">import java.sql.Timestamp</span><br><span class="line"></span><br><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line">import org.apache.spark.sql.functions.window</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 测试水位线 watermark =  the current max  event time - late threshold</span><br><span class="line"> *</span><br><span class="line"> * 1、start server: nc -lk 9999</span><br><span class="line"> * 2、params: localhost 9999 10 (设置滚动窗口 10s间隔)</span><br><span class="line"> *</span><br><span class="line"> * 3、late threshold = 10s</span><br><span class="line"> */</span><br><span class="line">object ExampleWatermark_StructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    if (args.length &lt; 3) &#123;</span><br><span class="line">      System.err.println(&quot;Usage: StructuredNetworkWordCountWindowed &lt;hostname&gt; &lt;port&gt;&quot; +</span><br><span class="line">        &quot; &lt;window duration in seconds&gt; [&lt;slide duration in seconds&gt;]&quot;)</span><br><span class="line">      System.exit(1)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    val host = args(0)</span><br><span class="line">    val port = args(1).toInt</span><br><span class="line">    val windowSize = args(2).toInt</span><br><span class="line">    val slideSize = if (args.length == 3) windowSize else args(3).toInt</span><br><span class="line">    if (slideSize &gt; windowSize) &#123;</span><br><span class="line">      System.err.println(&quot;&lt;slide duration&gt; must be less than or equal to &lt;window duration&gt;&quot;)</span><br><span class="line">    &#125;</span><br><span class="line">    val windowDuration = s&quot;$windowSize seconds&quot;</span><br><span class="line">    val slideDuration = s&quot;$slideSize seconds&quot;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCountWindowed&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.setLogLevel(&quot;warn&quot;)</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to host:port</span><br><span class="line">    val lines = spark.readStream</span><br><span class="line">      .format(&quot;socket&quot;)</span><br><span class="line">      .option(&quot;host&quot;, host)</span><br><span class="line">      .option(&quot;port&quot;, port)</span><br><span class="line">      //      .option(&quot;includeTimestamp&quot;, true)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">    // Split the lines into words, retaining timestamps</span><br><span class="line">    //    val words = lines.as[(String, Timestamp)].flatMap(line =&gt;</span><br><span class="line">    //      line._1.split(&quot; &quot;).map(word =&gt; (word, line._2))</span><br><span class="line">    //    ).toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line"></span><br><span class="line">    val words = lines</span><br><span class="line">      .as[String]</span><br><span class="line">      .map(x =&gt; &#123;</span><br><span class="line">        val cont =x.split(&quot;,&quot;)</span><br><span class="line">        (cont(0), cont(1))</span><br><span class="line">      &#125; )</span><br><span class="line">      .toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line">      .selectExpr(&quot;CAST(word AS STRING)&quot;, &quot;CAST(timestamp AS TIMESTAMP)&quot; )</span><br><span class="line">      .as[(String,Timestamp)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Group the data by window and word and compute the count of each group</span><br><span class="line">    val windowedCounts =</span><br><span class="line">      words</span><br><span class="line">        .withWatermark(&quot;timestamp&quot;, &quot;10 seconds&quot;)</span><br><span class="line">        .groupBy(</span><br><span class="line">          window($&quot;timestamp&quot;, windowDuration, slideDuration), $&quot;word&quot;</span><br><span class="line">        ).count()</span><br><span class="line">    //.orderBy(&quot;window&quot;)</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the windowed word counts to the console</span><br><span class="line">    val query = windowedCounts.writeStream</span><br><span class="line">      .outputMode(&quot;update&quot;)  //if you want to use watermark, you must choose append or update mode</span><br><span class="line">      .format(&quot;console&quot;)</span><br><span class="line">      .option(&quot;truncate&quot;, &quot;false&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>注意</strong>：spark 水印只在append 模式和update模式下有作用，在complete模式下没有任何作用，所有数据都会输出。</p>
+<p>在上述example中，</p>
+<p>Terminal 开启端口本地测试 （nc -lk 9000 10），窗口为10s, 最大延迟时间也是10s,</p>
+<p>依次每行输入数据，</p>
+<p>spark,2020-09-04 10:02:41<br>spark,2020-09-04 10:02:42<br>spark,2020-09-04 10:02:49<br>spark,2020-09-04 10:02:48<br>spark,2020-09-04 10:02:21<br>spark,2020-09-04 10:02:31<br>spark,2020-09-04 10:02:32<br>spark,2020-09-04 10:02:49<br>spark,2020-09-04 10:02:51<br>spark,2020-09-04 10:02:59<br>spark,2020-09-04 10:02:53<br>spark,2020-09-04 10:03:06</p>
+<p>spark,2020-09-04 10:02:45</p>
+<p>spark,2020-09-04 10:03:07<br>spark,2020-09-04 10:02:53<br>spark,2020-09-04 10:03:08<br>spark,2020-09-04 10:03:13<br>spark,2020-09-04 10:03:13<br>spark,2020-09-04 10:03:33<br>spark,2020-09-04 10:03:36</p>
+<p>前四条数据依次输入，</p>
+<p>spark,2020-09-04 10:02:41<br>spark,2020-09-04 10:02:42<br>spark,2020-09-04 10:02:49<br>spark,2020-09-04 10:02:48</p>
+<p>输出结果为：</p>
+<p>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]|spark|4    |</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（可以看到窗口是[2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]，当时大概是11点30分测试的，这里划定的窗口完全是由事件时间决定的，与其他没有关系，这里水位线watermark=2020-09-04 10:02:49 - 10s = 2020-09-04 10:02:39， 意味着窗口结束时间T                                      2020-09-04 10:02:39 &gt;=T, 对应的流入该窗口内的新数据不再被处理，最接近水位线的窗口是                                                                     [2020-09-04 10:02:20.0,2020-09-04 10:02:30.0] ,  因此后面接着输入了一条位于该窗口内的新的数据，spark,2020-09-04 10:02:21，但是没有结果输出，因为水位线高过了窗口结束时间T = 2020-09-04 10:02:30.0）</span><br></pre></td></tr></table></figure>
+
+<p>输入spark,2020-09-04 10:02:21，</p>
+<p>没有结果输出</p>
+<p>输入spark,2020-09-04 10:02:31，</p>
+<p>输出结果为：</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]|spark|1    |<br>+———————————————+—–+—–+</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:39 &gt;= 2020-09-04 10:02:40.0 不成立， 老的窗口 [2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]  流入的新数据继续被处理）</span><br></pre></td></tr></table></figure>
+
+<p>输入spark,2020-09-04 10:02:32，</p>
+<p>输出结果为：</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]|spark|2    |<br>+———————————————+—–+—–+    </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:39 &gt;= 2020-09-04 10:02:40.0 不成立，老的窗口 [2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]  流入的新数据继续被处理 ）</span><br></pre></td></tr></table></figure>
+
+<p>输入spark,2020-09-04 10:02:49，</p>
+<p>输出：</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]|spark|5    |    </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:39 ）</span><br></pre></td></tr></table></figure>
+
+<p>输入 </p>
+<p>spark,2020-09-04 10:02:51<br>spark,2020-09-04 10:02:59<br>spark,2020-09-04 10:02:53</p>
+<p>输出</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:50.0,2020-09-04 10:03:00.0]|spark|3    |<br>+———————————————+—–+—–+       </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线上涨2020-09-04 10:02:49 &gt;= 2020-09-04 10:02:40.0 成立 ，有新窗口出现，老的窗口 [2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]  流入的新数据不再处理）</span><br></pre></td></tr></table></figure>
+
+<p>输入 spark,2020-09-04 10:03:06 </p>
+<p>输出 </p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:03:00.0,2020-09-04 10:03:10.0]|spark|1    |</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线上涨 2020-09-04 10:02:56 &gt;= 2020-09-04 10:02:50.0 成立 ，有新窗口出现，老的窗口 [2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]  流入的新数据不再处理）</span><br></pre></td></tr></table></figure>
+
+<p>输入 spark,2020-09-04 10:02:45 </p>
+<p>输出为，没有结果输出</p>
+<p>+——+—-+—–+<br>|window|word|count|<br>+——+—-+—–+<br>+——+—-+—–+</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:56 保持不变，老的窗口 [2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]  流入的新数据不再处理，因此流入 位于老窗口的 新数据spark,2020-09-04 10:02:45后，老窗口结果没更新）</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="结论">结论</span></h3><p>Flink&#x2F;spark  用事件时间 + 窗口 + 水印来解决实际生产中的数据乱序问题，有如下的触发条件：</p>
+<p>watermark 时间 &gt;&#x3D; window_end_time (后续到达的落入之前窗口的数据被丢弃掉)；</p>
+<p>在 [window_start_time,window_end_time) 中有数据存在，这个窗口是左闭右开的。</p>
+<p>此外，WaterMark 的生成是以对象的形式发送到下游，同样会消耗内存，因此水印的生成时间和频率都要进行严格控制，否则会影响我们的正常作业。</p>
+<h2><span id="状态存储">状态存储</span></h2><h3><span id="hdfs-state-store-provider">HDFS state store provider</span></h3><p>The HDFS backend state store provider is the default implementation of [[StateStoreProvider]] and [[StateStore]] in which all the data is stored in memory map in the first stage, and then backed by files in an HDFS-compatible file system. 占用executor内存</p>
+<h3><span id="rocksdb-state-store-implementation">RocksDB state store implementation</span></h3><p>(嵌入式key-value数据库，不需要额外安装）不消耗executor内存，适用于大状态存储</p>
+<p>As of Spark 3.2, we add a new built-in state store implementation, RocksDB state store provider.</p>
+<p>Rather than keeping the state in the JVM memory, this solution uses RocksDB to efficiently manage the state in the native memory and the local disk.</p>
+<h2><span id="sink">Sink</span></h2><p>There are a few types of built-in output sinks.</p>
+<ul>
+<li><strong>File sink</strong> - Stores the output to a directory.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;parquet&quot;)        // can be &quot;orc&quot;, &quot;json&quot;, &quot;csv&quot;, etc.</span><br><span class="line">    .option(&quot;path&quot;, &quot;path/to/destination/dir&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Kafka sink</strong> - Stores the output to one or more topics in Kafka.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;kafka&quot;)</span><br><span class="line">    .option(&quot;kafka.bootstrap.servers&quot;, &quot;host1:port1,host2:port2&quot;)</span><br><span class="line">    .option(&quot;topic&quot;, &quot;updates&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Foreach sink</strong> - Runs arbitrary computation on the records in the output. See later in the section for more details.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .foreach(...)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Console sink (for debugging)</strong> - Prints the output to the console&#x2F;stdout every time there is a trigger. Both, Append and Complete output modes, are supported. This should be used for debugging purposes on low data volumes as the entire output is collected and stored in the driver’s memory after every trigger.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;console&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Memory sink (for debugging)</strong> - The output is stored in memory as an in-memory table. Both, Append and Complete output modes, are supported. This should be used for debugging purposes on low data volumes as the entire output is collected and stored in the driver’s memory. Hence, use it with caution.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;memory&quot;)</span><br><span class="line">    .queryName(&quot;tableName&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<p><strong>ForeachBatch</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">streamingDF.writeStream.foreachBatch &#123; (batchDF: <span class="type">DataFrame</span>, batchId: <span class="type">Long</span>) =&gt;</span><br><span class="line">  batchDF.persist()</span><br><span class="line">  batchDF.write.format(...).save(...)  <span class="comment">// location 1</span></span><br><span class="line">  batchDF.write.format(...).save(...)  <span class="comment">// location 2</span></span><br><span class="line">  batchDF.unpersist()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="trigger">Trigger</span></h2><p>触发器，多长时间执行一次</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.sql.streaming.<span class="type">Trigger</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Default trigger (runs micro-batch as soon as it can)</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// ProcessingTime trigger with two-seconds micro-batch interval</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">ProcessingTime</span>(<span class="string">&quot;2 seconds&quot;</span>))</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// One-time trigger (Deprecated, encouraged to use Available-now trigger)</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">Once</span>())</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Available-now trigger</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">AvailableNow</span>())</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Continuous trigger with one-second checkpointing interval</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">Continuous</span>(<span class="string">&quot;1 second&quot;</span>))</span><br><span class="line">  .start()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="checkpoint">checkpoint</span></h2><p>任务失败恢复、重启</p>
+<p>In case of a failure or intentional shutdown, you can recover the previous progress and state of a previous query, and continue where it left off. This is done using checkpointing and write-ahead logs. You can configure a query with a checkpoint location, and the query will save all the progress information (i.e. range of offsets processed in each trigger) and the running aggregates (e.g. word counts in the <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/3.4.1/structured-streaming-programming-guide.html#quick-example">quick example</a>) to the checkpoint location. This checkpoint location has to be a path in an HDFS compatible file system, and can be set as an option in the DataStreamWriter when <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/3.4.1/structured-streaming-programming-guide.html#starting-streaming-queries">starting a query</a>.</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">aggDF</span><br><span class="line">  .writeStream</span><br><span class="line">  .outputMode(<span class="string">&quot;complete&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;checkpointLocation&quot;</span>, <span class="string">&quot;path/to/HDFS/dir&quot;</span>)</span><br><span class="line">  .format(<span class="string">&quot;memory&quot;</span>)</span><br><span class="line">  .start()</span><br></pre></td></tr></table></figure>
+
+
       
     </div>
     <footer class="article-footer">
