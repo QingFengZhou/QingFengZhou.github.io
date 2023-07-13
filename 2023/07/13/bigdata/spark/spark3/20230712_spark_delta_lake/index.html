@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>20230713_delta_lake | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Env Examples Test Batch 资料    EnvSpark 3.4.1 12345&lt;dependency&gt;  &lt;groupId&gt;io.delta&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;delta-core_2.12&lt;&#x2F;artifactId&gt;  &lt;version&gt;2.4.0&lt;&#x2F;version">
+<meta property="og:type" content="article">
+<meta property="og:title" content="20230713_delta_lake">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Env Examples Test Batch 资料    EnvSpark 3.4.1 12345&lt;dependency&gt;  &lt;groupId&gt;io.delta&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;delta-core_2.12&lt;&#x2F;artifactId&gt;  &lt;version&gt;2.4.0&lt;&#x2F;version">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-07-13T07:27:47.000Z">
+<meta property="article:modified_time" content="2023-07-13T07:30:45.320Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="spark">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-bigdata/spark/spark3/20230712_spark_delta_lake" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/" class="article-date">
+  <time class="dt-published" datetime="2023-07-13T07:27:47.000Z" itemprop="datePublished">2023-07-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      20230713_delta_lake
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#env">Env</a></li>
+<li><a href="#examples-test">Examples Test</a></li>
+<li><a href="#batch">Batch</a></li>
+<li><a href="#%E8%B5%84%E6%96%99">资料</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="env">Env</span></h2><p>Spark 3.4.1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;io.delta&lt;/groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;delta-core_2.12&lt;/artifactId&gt;</span><br><span class="line">  &lt;version&gt;2.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bin/spark-sql --packages io.delta:delta-core_2.12:2.4.0 \</span><br><span class="line">--conf &quot;spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension&quot; \</span><br><span class="line">--conf &quot;spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog&quot; \</span><br><span class="line">--conf spark.hadoop.hive.cli.print.header=true</span><br><span class="line"></span><br><span class="line">bin/spark-shell --packages io.delta:delta-core_2.12:2.4.0 \</span><br><span class="line">--conf &quot;spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension&quot; \</span><br><span class="line">--conf &quot;spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog&quot; \</span><br><span class="line">--conf spark.hadoop.hive.cli.print.header=true</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="examples-test">Examples Test</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"># create delta table, 这里是设定了表的路径, 未指定表名</span><br><span class="line">CREATE TABLE delta.`/tmp/delta-table` USING DELTA AS SELECT col1 as id FROM VALUES 0,1,2,3,4;</span><br><span class="line"></span><br><span class="line">#overwrite</span><br><span class="line">INSERT OVERWRITE delta.`/tmp/delta-table` SELECT col1 as id FROM VALUES 5,6,7,8,9;</span><br><span class="line"></span><br><span class="line">-- Update every even value by adding 100 to it</span><br><span class="line">UPDATE delta.`/tmp/delta-table` SET id = id + 100 WHERE id % 2 == 0;</span><br><span class="line"></span><br><span class="line">-- Delete very even value</span><br><span class="line">DELETE FROM delta.`/tmp/delta-table` WHERE id % 2 == 0;</span><br><span class="line"></span><br><span class="line">-- Upsert (merge) new data</span><br><span class="line">CREATE TEMP VIEW newData AS SELECT col1 AS id FROM VALUES 1,3,5,7,9,11,13,15,17,19;</span><br><span class="line"></span><br><span class="line">MERGE INTO delta.`/tmp/delta-table` AS oldData</span><br><span class="line">USING newData</span><br><span class="line">ON oldData.id = newData.id</span><br><span class="line">WHEN MATCHED</span><br><span class="line">  THEN UPDATE SET id = newData.id</span><br><span class="line">WHEN NOT MATCHED</span><br><span class="line">  THEN INSERT (id) VALUES (newData.id);</span><br><span class="line"></span><br><span class="line">SELECT * FROM delta.`/tmp/delta-table`;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- 查询快照：历史版本</span><br><span class="line">-- Read older versions of data using time travel</span><br><span class="line">SELECT * FROM delta.`/tmp/delta-table` VERSION AS OF 0;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--struct stream write to delta</span><br><span class="line">val streamingDf = spark.readStream.format(&quot;rate&quot;).load()</span><br><span class="line">val stream = streamingDf.select($&quot;value&quot; as &quot;id&quot;).writeStream.format(&quot;delta&quot;).option(&quot;checkpointLocation&quot;, &quot;/tmp/checkpoint&quot;).start(&quot;/tmp/delta-table2&quot;)</span><br><span class="line"></span><br><span class="line">--struct stream read from delta</span><br><span class="line"></span><br><span class="line">val stream2 = spark.readStream.format(&quot;delta&quot;).load(&quot;/tmp/delta-table2&quot;).writeStream.format(&quot;console&quot;).start()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="batch">Batch</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE IF NOT EXISTS default.people10m (</span><br><span class="line">  id INT,</span><br><span class="line">  firstName STRING,</span><br><span class="line">  middleName STRING,</span><br><span class="line">  lastName STRING,</span><br><span class="line">  gender STRING,</span><br><span class="line">  birthDate TIMESTAMP,</span><br><span class="line">  ssn STRING,</span><br><span class="line">  salary INT</span><br><span class="line">) USING DELTA</span><br><span class="line"></span><br><span class="line">insert into default.people10m values(1, &#x27;jimmy&#x27;, &#x27;dell&#x27;, &#x27;li&#x27;, &#x27;m&#x27;, &#x27;2001-11-12 12:21:21&#x27;, &#x27;ssn1&#x27;, 2600);</span><br><span class="line">insert into default.people10m values(2, &#x27;Jack&#x27;, &#x27;dell&#x27;, &#x27;li&#x27;, &#x27;m&#x27;, &#x27;2002-10-12 12:21:21&#x27;, &#x27;ssn1&#x27;, 2600);</span><br><span class="line">insert into default.people10m values(3, &#x27;lisa&#x27;, &#x27;dell&#x27;, &#x27;li&#x27;, &#x27;f&#x27;, &#x27;2001-09-16 12:21:21&#x27;, &#x27;ssn1&#x27;, 2600);</span><br><span class="line"></span><br><span class="line">DESCRIBE HISTORY default.people10m</span><br><span class="line">SELECT * FROM default.people10m TIMESTAMP AS OF &#x27;2018-10-18T22:15:12.013Z&#x27;</span><br><span class="line">SELECT * FROM delta.`/tmp/delta/people10m` VERSION AS OF 123</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2><span id="资料">资料</span></h2><p><a target="_blank" rel="noopener" href="https://delta.io/">官网</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/" data-id="clk0u7fkf00019p9aaj3hhad7" data-title="20230713_delta_lake" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          spark_terminal_tips
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/07/12/bigdata/spark/spark3/20230712_pyspark/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">20230712_pyspark</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/">spark_terminal_tips</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/">20230713_delta_lake</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/12/bigdata/spark/spark3/20230712_pyspark/">20230712_pyspark</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/">20230711_structStreaming</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/">20230707_sparksql</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

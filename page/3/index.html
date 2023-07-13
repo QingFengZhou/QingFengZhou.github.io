@@ -73,6 +73,123 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-bigdata/spark/spark_minio" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/02/bigdata/spark/spark_minio/" class="article-date">
+  <time class="dt-published" datetime="2023-07-02T15:29:29.000Z" itemprop="datePublished">2023-07-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark/">bigdata/spark</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/02/bigdata/spark/spark_minio/">spark_minio</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="Mino"><a href="#Mino" class="headerlink" title="Mino"></a>Mino</h3><p><a target="_blank" rel="noopener" href="https://min.io/docs/minio/macos/operations/install-deploy-manage/deploy-minio-single-node-single-drive.html#connect-to-the-minio-deployment">官方文档</a></p>
+<p>本地安装Web控制台: <a target="_blank" rel="noopener" href="http://192.168.43.65:9011/">http://192.168.43.65:9011/</a></p>
+<p>最小化安装</p>
+<p>server start:  minio server –address “:9001”  –console-address :9011</p>
+<p>client install and start: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># 为搭建的s3 服务设置别名 local</span><br><span class="line">api: http://192.168.43.65:9001  </span><br><span class="line">access key: 4PtooCkozQcSIT5QLJFR  (创建的某个用户对应的key)</span><br><span class="line">secret key: 4PtooCkozQcSIT5QLJFR</span><br><span class="line"></span><br><span class="line">mc alias set local  http://192.168.43.65:9001 4PtooCkozQcSIT5QLJFR  4PtooCkozQcSIT5QLJFR</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#查看文件列表</span><br><span class="line">mc ls   local/bucktest111</span><br><span class="line"></span><br><span class="line">#查看某个文件</span><br><span class="line">mc cat   local/bucktest111/tmp/pingan_art0629</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="Spark-读写minio"><a href="#Spark-读写minio" class="headerlink" title="Spark 读写minio"></a>Spark 读写minio</h4><p>Spark 3.4.1  </p>
+<p>minio  version RELEASE.2023-06-23T20-26-00Z, 依赖版本一定要匹配，不然会读取出错 </p>
+<p>（1） 使用minio jar包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">    &lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;spark-sql_2.12&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;3.4.1&lt;/version&gt;</span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;!-- https://mvnrepository.com/artifact/io.minio/spark-select --&gt;</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;io.minio&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;spark-select_2.11&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;2.1&lt;/version&gt;</span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;org.apache.hadoop&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;hadoop-aws&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;3.3.1&lt;/version&gt;</span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">        &lt;groupId&gt;com.google.guava&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;guava&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;23.6-jre&lt;/version&gt;</span><br><span class="line">    &lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;/dependencies&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Test Code:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">import com.amazonaws.SDKGlobalConfiguration</span><br><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">object MinioExample &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">//    System.setProperty(SDKGlobalConfiguration.DISABLE_CERT_CHECKING_SYSTEM_PROPERTY, &quot;true&quot;)</span><br><span class="line"></span><br><span class="line">    lazy val spark = SparkSession.builder().appName(&quot;MinIOTest&quot;).master(&quot;local[*]&quot;).getOrCreate()</span><br><span class="line"></span><br><span class="line">    val s3accessKeyAws = &quot;4PtooCkozQcSIT5QLJFR&quot;</span><br><span class="line">    val s3secretKeyAws = &quot;4PtooCkozQcSIT5QLJFR&quot;</span><br><span class="line">    val connectionTimeOut = &quot;600000&quot;</span><br><span class="line">    val s3endPointLoc: String = &quot;http://192.168.43.65:9001&quot;</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.endpoint&quot;, s3endPointLoc)</span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.access.key&quot;, s3accessKeyAws)</span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.secret.key&quot;, s3secretKeyAws)</span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.connection.timeout&quot;, connectionTimeOut)</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;spark.sql.debug.maxToStringFields&quot;, &quot;100&quot;)</span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.path.style.access&quot;, &quot;true&quot;)</span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.impl&quot;, &quot;org.apache.hadoop.fs.s3a.S3AFileSystem&quot;)</span><br><span class="line">    spark.sparkContext.hadoopConfiguration.set(&quot;fs.s3a.connection.ssl.enabled&quot;, &quot;false&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val sourceBucket: String = &quot;bucktest111&quot;</span><br><span class="line">    val inputPath: String = s&quot;s3a://$sourceBucket/tmp/credentials2.json&quot;</span><br><span class="line">    val outputPath = s&quot;s3a://$sourceBucket/tmp/credentials4&quot;</span><br><span class="line"></span><br><span class="line">    val df = spark</span><br><span class="line">      .read</span><br><span class="line">      //.format(&quot;minioSelectJSON&quot;) // minioSelectCSV  for csv or &quot;minioSelectJSON&quot; for JSON or &quot;minioSelectParquet&quot; for Parquet</span><br><span class="line">      .json(inputPath)</span><br><span class="line"></span><br><span class="line">    df.show()</span><br><span class="line">    df.write.mode(&quot;overwrite&quot;).json(outputPath)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>（2）使用<a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/cloud-integration.html">spark官方</a>提供的包，简单、高效</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-sql_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-hadoop-cloud_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/02/bigdata/spark/spark_minio/" data-id="cljllibca0004029aamiueeex" data-title="spark_minio" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-bigdata/spark/spark_connect" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/02/bigdata/spark/spark_connect/" class="article-date">
+  <time class="dt-published" datetime="2023-07-02T15:28:37.000Z" itemprop="datePublished">2023-07-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark/">bigdata/spark</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/02/bigdata/spark/spark_connect/">spark_connect</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Spark-Connect"><a href="#Spark-Connect" class="headerlink" title="Spark Connect"></a>Spark Connect</h2><p>Env: spark3.4.1 hadoop2.7.7</p>
+<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>Server: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./sbin/start-connect-server.sh --packages org.apache.spark:spark-connect_2.12:3.4.1 --master yarn  --conf spark.sql.catalogImplementation=hive</span><br><span class="line"></span><br><span class="line">./sbin/stop-connect-server.sh </span><br></pre></td></tr></table></figure>
+
+<p>Client：</p>
+<p>1、Pyspark:</p>
+<p>python最低版本3.9, 需要安装多个依赖包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/pyspark --remote <span class="string">&quot;sc://localhost&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>2、maven Scala： 注：目前scala client不太稳定，还没正式对外release，使用方式来自stackoverflow</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- https://mvnrepository.com/artifact/org.apache.spark/spark-connect-client-jvm --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-connect-client-jvm_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-catalyst_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-core_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Test code:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">object SparkConnectTest &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line">    val ip = &quot;192.168.43.65&quot;</span><br><span class="line">    val spark = SparkSession.builder().remote(s&quot;sc://$ip&quot;).build()</span><br><span class="line">//    spark.sql(&quot;show databases&quot;).show()</span><br><span class="line">//    spark.sql(&quot;use test_zhou&quot;)</span><br><span class="line">//    spark.sql(&quot;select addr, count(1) cnt from users group by addr&quot;).show()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    val ds1 = spark.read.text(&quot;/tmp/output.txt&quot;)</span><br><span class="line">    val cnt = ds1.count()</span><br><span class="line"></span><br><span class="line">    println(cnt)</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/02/bigdata/spark/spark_connect/" data-id="cljllibbx0000029aavti3wcr" data-title="spark_connect" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-life/thought/20230629" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/06/30/life/thought/20230629/" class="article-date">
@@ -179,7 +296,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdate-spark-spark-env/">bigdate/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -221,6 +338,14 @@
       <ul>
         
           <li>
+            <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/">spark_terminal_tips</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/">20230713_delta_lake</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/12/bigdata/spark/spark3/20230712_pyspark/">20230712_pyspark</a>
           </li>
         
@@ -230,14 +355,6 @@
         
           <li>
             <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/">20230707_sparksql</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/07/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230707/">spark3学习笔记20230707</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/05/bigdata/spark/sparksql/kyuubi/kyuubi_simple_usage/">kyuubi_simple_usage</a>
           </li>
         
       </ul>
