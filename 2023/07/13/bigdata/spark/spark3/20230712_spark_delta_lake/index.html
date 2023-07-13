@@ -6,15 +6,15 @@
   
   <title>20230713_delta_lake | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Env Examples Test Batch 资料    EnvSpark 3.4.1 12345&lt;dependency&gt;  &lt;groupId&gt;io.delta&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;delta-core_2.12&lt;&#x2F;artifactId&gt;  &lt;version&gt;2.4.0&lt;&#x2F;version">
+  <meta name="description" content="Env Examples Test Batch 总结 资料    EnvSpark 3.4.1 12345&lt;dependency&gt;  &lt;groupId&gt;io.delta&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;delta-core_2.12&lt;&#x2F;artifactId&gt;  &lt;version&gt;2.4.0&lt;&#x2F;vers">
 <meta property="og:type" content="article">
 <meta property="og:title" content="20230713_delta_lake">
 <meta property="og:url" content="https://qingfengzhou.github.io/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Env Examples Test Batch 资料    EnvSpark 3.4.1 12345&lt;dependency&gt;  &lt;groupId&gt;io.delta&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;delta-core_2.12&lt;&#x2F;artifactId&gt;  &lt;version&gt;2.4.0&lt;&#x2F;version">
+<meta property="og:description" content="Env Examples Test Batch 总结 资料    EnvSpark 3.4.1 12345&lt;dependency&gt;  &lt;groupId&gt;io.delta&lt;&#x2F;groupId&gt;  &lt;artifactId&gt;delta-core_2.12&lt;&#x2F;artifactId&gt;  &lt;version&gt;2.4.0&lt;&#x2F;vers">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-07-13T07:27:47.000Z">
-<meta property="article:modified_time" content="2023-07-13T07:30:45.320Z">
+<meta property="article:modified_time" content="2023-07-13T08:06:02.256Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="spark">
 <meta name="twitter:card" content="summary">
@@ -108,6 +108,7 @@
 <li><a href="#env">Env</a></li>
 <li><a href="#examples-test">Examples Test</a></li>
 <li><a href="#batch">Batch</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
 <li><a href="#%E8%B5%84%E6%96%99">资料</a></li>
 </ul>
 <!-- tocstop -->
@@ -129,8 +130,14 @@
 
 
 
-
-
+<h2><span id="总结">总结</span></h2><p>Delta lake是数据湖的一种开源实现，</p>
+<p>它是一种新型的存储格式(tableFormat)，可以看成是对传统数据仓库功能的扩展，弥补了传统数据仓库的不足</p>
+<p>(1)  统一存储，相当于是大一统的储存，传统数仓主要是存储结构化数据，湖存储可以存储结构化、半结构化、非结构化数据。（表、音频、视频、文本等，底层是hdfs | oss对象存储，对象存储本身适合存储任意格式的数据）</p>
+<p>(2)  支持事务，满足ACID，传统数仓不支持事务</p>
+<p>(3)  流批统一。delta 表可以作为流计算的输入|输出，也可以作为批计算的输入|输出</p>
+<p>(4)  支持time travel。可以存储数据的多个快照版本，查看历史版本数据。</p>
+<p>(5)  支持upsert 和delete操作</p>
+<p>(6) Scalable metadata handling: 支持管理超大规模表对应的元数据</p>
 <h2><span id="资料">资料</span></h2><p><a target="_blank" rel="noopener" href="https://delta.io/">官网</a></p>
 
       
