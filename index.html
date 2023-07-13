@@ -1897,10 +1897,12 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 </ul>
 </li>
 <li><a href="#spark-yarn-deploy">Spark yarn deploy</a><ul>
+<li><a href="#conf">Conf</a><ul>
 <li><a href="#spark-envsh">spark-env.sh</a></li>
 <li><a href="#spark-defaultsconf">spark-defaults.conf</a></li>
+<li><a href="#history-server">history-server</a></li>
 </ul>
-<ul>
+</li>
 <li><a href="#spark-connect-hive">Spark connect Hive</a></li>
 <li><a href="#spark-to-hbase">spark to  hbase</a></li>
 </ul>
@@ -1990,7 +1992,7 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 
 <h2><span id="install-spark">Install Spark</span></h2><h3><span id="spark-local">Spark  local</span></h3><h3><span id="spark-standalone">spark  standalone</span></h3><p>vi  $spark_home&#x2F;conf&#x2F;slaves</p>
 <p>sh $spark_home&#x2F;sbin&#x2F;start-all.sh</p>
-<h2><span id="spark-yarn-deploy">Spark  yarn deploy</span></h2><h4><span id="spark-envsh">spark-env.sh</span></h4><p>vi   $spark_home&#x2F;conf&#x2F;spark-env.sh</p>
+<h2><span id="spark-yarn-deploy">Spark  yarn deploy</span></h2><h3><span id="conf">Conf</span></h3><h4><span id="spark-envsh">spark-env.sh</span></h4><p>vi   $spark_home&#x2F;conf&#x2F;spark-env.sh</p>
 <p>HADOOP_CONF_DIR&#x3D;$HADOOP_HOME&#x2F;etc&#x2F;hadoop<br>YARN_CONF_DIR&#x3D;$HADOOP_HOME&#x2F;etc&#x2F;hadoop</p>
 <p>core-site.xml</p>
 <p>hive-site.xml</p>
@@ -2004,6 +2006,10 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 <p>#上传jar包到指定hdfs位置</p>
 <p>spark.yarn.jars&#x3D;hdfs:&#x2F;&#x2F;localhost:9000&#x2F;spark&#x2F;jars&#x2F;jars&#x2F;*</p>
 <p>spark.sql.shuffle.partitions.num 200 (修改默认属性值)</p>
+<h4><span id="history-server">history-server</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./sbin/start-history-server.sh </span><br></pre></td></tr></table></figure>
+
+
+
 <h3><span id="spark-connect-hive">Spark connect Hive</span></h3><p>Hive 1.2</p>
 <p>spark-2.4.0-bin-hadoop2.7</p>
 <p>cp  $hive_home&#x2F;conf&#x2F;hive-site.xml  $spark_home&#x2F;conf&#x2F;</p>
@@ -2052,7 +2058,7 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 <p>!connect jdbc:hive2:&#x2F;&#x2F;10.20.30.111:10000</p>
 <p>.&#x2F;bin&#x2F;beeline -u jdbc:hive2:&#x2F;&#x2F;bdp-2:10000&#x2F; </p>
 <p>&#x2F;&#x2F;开启kerberos</p>
-<p>!connect  jdbc:hive2:&#x2F;&#x2F;10.20.30.111:10000&#x2F;test_zq;principal&#x3D;hive&#x2F;<a href="mailto:&#98;&#100;&#112;&#x32;&#64;&#x54;&#69;&#83;&#x54;&#46;&#x43;&#79;&#x4d;">&#98;&#100;&#112;&#x32;&#64;&#x54;&#69;&#83;&#x54;&#46;&#x43;&#79;&#x4d;</a>;authentication&#x3D;kerberos</p>
+<p>!connect  jdbc:hive2:&#x2F;&#x2F;10.20.30.111:10000&#x2F;test_zq;principal&#x3D;hive&#x2F;<a href="mailto:&#98;&#x64;&#112;&#x32;&#x40;&#x54;&#69;&#x53;&#84;&#46;&#67;&#79;&#x4d;">&#98;&#x64;&#112;&#x32;&#x40;&#x54;&#69;&#x53;&#84;&#46;&#67;&#79;&#x4d;</a>;authentication&#x3D;kerberos</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!connect jdbc:hive2://bdp-3:10000/default</span><br></pre></td></tr></table></figure>
 
 <p>用户可以远程连接thrift server, 提交spark sql</p>
