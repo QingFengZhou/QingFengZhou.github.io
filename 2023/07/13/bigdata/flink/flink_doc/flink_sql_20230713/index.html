@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>flink_sql_20230713 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Env Arch Basic 任务部署 任务提交测试        Envlocal:  12345cd &#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;flink&#x2F;flink-1.17.1.&#x2F;bin&#x2F;start-cluster.shhttp:&#x2F;&#x2F;localhost:8081&#x2F;    ArchBasicJobManager resourceManager （资源管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="flink_sql_20230713">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Env Arch Basic 任务部署 任务提交测试        Envlocal:  12345cd &#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;flink&#x2F;flink-1.17.1.&#x2F;bin&#x2F;start-cluster.shhttp:&#x2F;&#x2F;localhost:8081&#x2F;    ArchBasicJobManager resourceManager （资源管理">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-07-13T08:39:40.000Z">
+<meta property="article:modified_time" content="2023-07-13T10:09:49.622Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="flink">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-bigdata/flink/flink_doc/flink_sql_20230713" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/" class="article-date">
+  <time class="dt-published" datetime="2023-07-13T08:39:40.000Z" itemprop="datePublished">2023-07-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      flink_sql_20230713
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#env">Env</a></li>
+<li><a href="#arch">Arch</a><ul>
+<li><a href="#basic">Basic</a></li>
+<li><a href="#%E4%BB%BB%E5%8A%A1%E9%83%A8%E7%BD%B2">任务部署</a><ul>
+<li><a href="#%E4%BB%BB%E5%8A%A1%E6%8F%90%E4%BA%A4%E6%B5%8B%E8%AF%95">任务提交测试</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="env">Env</span></h2><p>local: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd /Users/zhouqingfeng/Desktop/software/flink/flink-1.17.1</span><br><span class="line"></span><br><span class="line">./bin/start-cluster.sh</span><br><span class="line"></span><br><span class="line">http://localhost:8081/</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="arch">Arch</span></h2><h3><span id="basic">Basic</span></h3><p><strong>JobManager</strong></p>
+<p>resourceManager （资源管理(包括task slot) ）</p>
+<p>任务分发(dispatcher) </p>
+<p>任务管理 (JobMaster管理每个JobGraph)</p>
+<p><strong>TaskManager</strong></p>
+<p>执行job Task</p>
+<p><strong>Client</strong> </p>
+<p>核心是执行每个Flink Application main( )方法，类似spark driver，</p>
+<p>下载application 依赖到本地、执行main方法生成JobGraph、上传依赖和JobGraph到集群。</p>
+<p>Application mode出现之前client 都运行在本地。</p>
+<p><strong>任务部署模式</strong></p>
+<ul>
+<li><p>in Application Mode     </p>
+<p>main() 方法运行在 Jobmaster，类似spark 的yarn-cluster，driver单独运行，client开销非常小</p>
+</li>
+<li><p>in a Per-Job Mode (deprecated)</p>
+<p>main() 方法运行在client，开销比较大 </p>
+</li>
+<li><p>in Session Mode</p>
+<p>main() 方法运行在client，开销比较大</p>
+</li>
+</ul>
+<h3><span id="任务部署">任务部署</span></h3><p><a target="_blank" rel="noopener" href="https://nightlies.apache.org/flink/flink-docs-release-1.17/docs/deployment/resource-providers/yarn/#deployment-modes-supported-by-flink-on-yarn">flink任务部署到集群</a></p>
+<h4><span id="任务提交测试">任务提交测试</span></h4><p>Flink 1.12.*提交到hadoop yarn</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">Syntax: run [OPTIONS] &lt;jar-file&gt; &lt;arguments&gt; </span><br><span class="line"></span><br><span class="line">  Options for yarn-cluster mode:</span><br><span class="line">     -d,--detached                        If present, runs the job in detached</span><br><span class="line">                                          mode</span><br><span class="line">     -m,--jobmanager &lt;arg&gt;                Set to yarn-cluster to use YARN</span><br><span class="line">                                          execution mode.</span><br><span class="line">     -yat,--yarnapplicationType &lt;arg&gt;     Set a custom application type for the</span><br><span class="line">                                          application on YARN</span><br><span class="line">     -yD &lt;property=value&gt;                 use value for given property</span><br><span class="line">     -yd,--yarndetached                   If present, runs the job in detached</span><br><span class="line">                                          mode (deprecated; use non-YARN</span><br><span class="line">                                          specific option instead)</span><br><span class="line">     -yh,--yarnhelp                       Help for the Yarn session CLI.</span><br><span class="line">     -yid,--yarnapplicationId &lt;arg&gt;       Attach to running YARN session</span><br><span class="line">     -yj,--yarnjar &lt;arg&gt;                  Path to Flink jar file</span><br><span class="line">     -yjm,--yarnjobManagerMemory &lt;arg&gt;    Memory for JobManager Container with</span><br><span class="line">                                          optional unit (default: MB)</span><br><span class="line">     -ynl,--yarnnodeLabel &lt;arg&gt;           Specify YARN node label for the YARN</span><br><span class="line">                                          application</span><br><span class="line">     -ynm,--yarnname &lt;arg&gt;                Set a custom name for the application</span><br><span class="line">                                          on YARN</span><br><span class="line">     -yq,--yarnquery                      Display available YARN resources</span><br><span class="line">                                          (memory, cores)</span><br><span class="line">     -yqu,--yarnqueue &lt;arg&gt;               Specify YARN queue.</span><br><span class="line">     -ys,--yarnslots &lt;arg&gt;                Number of slots per TaskManager</span><br><span class="line">     -yt,--yarnship &lt;arg&gt;                 Ship files in the specified directory</span><br><span class="line">                                          (t for transfer)</span><br><span class="line">     -ytm,--yarntaskManagerMemory &lt;arg&gt;   Memory per TaskManager Container with</span><br><span class="line">                                          optional unit (default: MB)</span><br><span class="line">     -yz,--yarnzookeeperNamespace &lt;arg&gt;   Namespace to create the Zookeeper</span><br><span class="line">                                          sub-paths for high availability mode</span><br><span class="line">     -z,--zookeeperNamespace &lt;arg&gt;        Namespace to create the Zookeeper</span><br><span class="line">                                          sub-paths for high availability mode</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>简单测试</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">bin/flink run -m yarn-cluster -yjm 1024 -ytm 1024 -ys 1  examples/batch/WordCount.jar  \</span><br><span class="line">--input   hdfs://localhost:9000/tmp/test/flink/ \</span><br><span class="line">--output  hdfs://localhost:9000/tmp/test/fout</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#file local</span><br><span class="line"></span><br><span class="line">bin/flink run -m yarn-cluster -yjm 1024 -ytm 1024 -ys 1  examples/batch/WordCount.jar  --input    file:///Users/zhouqingfeng/Desktop/target/datalake/flink/flink-1.12.3/README.txt    --output  file:///Users/zhouqingfeng/Desktop/target/datalake/flink/flink-1.12.3/out.txt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bin/flink run -m yarn-cluster -yjm 1024 -ytm 1024 -ys 1   -ynm  flinkTest -c com.test1.flink.connector.KafkaStreamTableTest1 \</span><br><span class="line">/Users/zhouqingfeng/Desktop/target/datalake/flink/projects/test/flink-playgrounds-master/table-walkthrough/target/spend-report-1.0.0.jar</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bin/flink run -m yarn-cluster -yjm 1024 -ytm 1024 -ys 1   -ynm  flinkTest -c com.test1.flink.connector.HiveTest2  /Users/zhouqingfeng/Desktop/target/datalake/flink/projects/test/flink-playgrounds-master/table-walkthrough/target/spend-report-1.0.0.jar</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/" data-id="clk0zo6b70000cu9a9fpjej36" data-title="flink_sql_20230713" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/flink/" rel="tag">flink</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">spark_terminal_tips</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/">flink_sql_20230713</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/">spark_terminal_tips</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/">20230713_delta_lake</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/12/bigdata/spark/spark3/20230712_pyspark/">20230712_pyspark</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/">20230711_structStreaming</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
