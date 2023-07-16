@@ -6,15 +6,15 @@
   
   <title>flink_sql_20230713 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Env Arch Basic 任务部署 任务提交测试        Envlocal:  12345cd &#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;flink&#x2F;flink-1.17.1.&#x2F;bin&#x2F;start-cluster.shhttp:&#x2F;&#x2F;localhost:8081&#x2F;    ArchBasicJobManager resourceManager （资源管理">
+  <meta name="description" content="Env Arch Basic JobManager TaskManager Client 任务部署模式   任务部署 任务提交测试     Sql Example Concepts dynamic table Versioned table Versioned table source Versioned table views     Join Regular Join Interval">
 <meta property="og:type" content="article">
 <meta property="og:title" content="flink_sql_20230713">
 <meta property="og:url" content="https://qingfengzhou.github.io/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Env Arch Basic 任务部署 任务提交测试        Envlocal:  12345cd &#x2F;Users&#x2F;zhouqingfeng&#x2F;Desktop&#x2F;software&#x2F;flink&#x2F;flink-1.17.1.&#x2F;bin&#x2F;start-cluster.shhttp:&#x2F;&#x2F;localhost:8081&#x2F;    ArchBasicJobManager resourceManager （资源管理">
+<meta property="og:description" content="Env Arch Basic JobManager TaskManager Client 任务部署模式   任务部署 任务提交测试     Sql Example Concepts dynamic table Versioned table Versioned table source Versioned table views     Join Regular Join Interval">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-07-13T08:39:40.000Z">
-<meta property="article:modified_time" content="2023-07-13T10:09:49.622Z">
+<meta property="article:modified_time" content="2023-07-16T11:34:38.454Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="flink">
 <meta name="twitter:card" content="summary">
@@ -107,9 +107,38 @@
 <ul>
 <li><a href="#env">Env</a></li>
 <li><a href="#arch">Arch</a><ul>
-<li><a href="#basic">Basic</a></li>
+<li><a href="#basic">Basic</a><ul>
+<li><a href="#jobmanager"><strong>JobManager</strong></a></li>
+<li><a href="#taskmanager"><strong>TaskManager</strong></a></li>
+<li><a href="#client"><strong>Client</strong></a></li>
+<li><a href="#%E4%BB%BB%E5%8A%A1%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F"><strong>任务部署模式</strong></a></li>
+</ul>
+</li>
 <li><a href="#%E4%BB%BB%E5%8A%A1%E9%83%A8%E7%BD%B2">任务部署</a><ul>
 <li><a href="#%E4%BB%BB%E5%8A%A1%E6%8F%90%E4%BA%A4%E6%B5%8B%E8%AF%95">任务提交测试</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sql">Sql</a><ul>
+<li><a href="#example">Example</a></li>
+<li><a href="#concepts">Concepts</a><ul>
+<li><a href="#dynamic-table">dynamic table</a></li>
+<li><a href="#versioned-table">Versioned table</a><ul>
+<li><a href="#versioned-table-source">Versioned table source</a></li>
+<li><a href="#versioned-table-views">Versioned table views</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#join">Join</a><ul>
+<li><a href="#regular-join">Regular Join</a></li>
+<li><a href="#interval-join">Interval Join</a></li>
+<li><a href="#temporal-join">Temporal Join</a><ul>
+<li><a href="#code-test">Code Test</a></li>
+</ul>
+</li>
+<li><a href="#lookup-join">Lookup Join</a></li>
 </ul>
 </li>
 </ul>
@@ -122,18 +151,14 @@
 
 
 
-<h2><span id="arch">Arch</span></h2><h3><span id="basic">Basic</span></h3><p><strong>JobManager</strong></p>
-<p>resourceManager （资源管理(包括task slot) ）</p>
+<h2><span id="arch">Arch</span></h2><h3><span id="basic">Basic</span></h3><h4><span id="jobmanager"><strong>JobManager</strong></span></h4><p>resourceManager （资源管理(包括task slot) ）</p>
 <p>任务分发(dispatcher) </p>
 <p>任务管理 (JobMaster管理每个JobGraph)</p>
-<p><strong>TaskManager</strong></p>
-<p>执行job Task</p>
-<p><strong>Client</strong> </p>
-<p>核心是执行每个Flink Application main( )方法，类似spark driver，</p>
+<h4><span id="taskmanager"><strong>TaskManager</strong></span></h4><p>执行job Task</p>
+<h4><span id="client"><strong>Client</strong></span></h4><p>核心是执行每个Flink Application main( )方法，类似spark driver，</p>
 <p>下载application 依赖到本地、执行main方法生成JobGraph、上传依赖和JobGraph到集群。</p>
 <p>Application mode出现之前client 都运行在本地。</p>
-<p><strong>任务部署模式</strong></p>
-<ul>
+<h4><span id="任务部署模式"><strong>任务部署模式</strong></span></h4><ul>
 <li><p>in Application Mode     </p>
 <p>main() 方法运行在 Jobmaster，类似spark 的yarn-cluster，driver单独运行，client开销非常小</p>
 </li>
@@ -155,9 +180,35 @@
 
 
 
+<h2><span id="sql">Sql</span></h2><h3><span id="example">Example</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">./bin/sql-client.sh</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF &gt;&gt; 12.csv</span></span><br><span class="line"><span class="string">1,lisa,fina</span></span><br><span class="line"><span class="string">2,john,sales</span></span><br><span class="line"><span class="string">3,jimmy,sales</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE employee_info (</span><br><span class="line">    emp_id INT,</span><br><span class="line">    name VARCHAR,</span><br><span class="line">    dept VARCHAR</span><br><span class="line">) WITH ( </span><br><span class="line">    &#x27;connector&#x27; = &#x27;filesystem&#x27;,</span><br><span class="line">    &#x27;path&#x27; = &#x27;file:/Users/zhouqingfeng/Desktop/software/flink/flink-1.17.1/test/12.csv&#x27;,</span><br><span class="line">    &#x27;format&#x27; = &#x27;csv&#x27;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">select * from employee_info;</span><br></pre></td></tr></table></figure>
 
 
 
+<h3><span id="concepts">Concepts</span></h3><h4><span id="dynamic-table">dynamic table</span></h4><p><a target="_blank" rel="noopener" href="https://nightlies.apache.org/flink/flink-docs-release-1.17/docs/dev/table/concepts/dynamic_tables/">流表转换</a></p>
+<h4><span id="versioned-table">Versioned table</span></h4><p>key的值随时间不短变化，表记录key的历史值</p>
+<p>Flink SQL operates over dynamic tables that evolve, which may either be append-only or updating.</p>
+<p>Versioned tables represent a special type of updating table that remembers the past values for each key.</p>
+<p>Flink SQL can define versioned tables over any dynamic table with a <code>PRIMARY KEY</code> constraint and time attribute.</p>
+<p>Fink sql基于主键约束和时间属性 定义版本表。</p>
+<h5><span id="versioned-table-source">Versioned table source</span></h5><h5><span id="versioned-table-views">Versioned table views</span></h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-connector-kafka<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.17.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.kafka<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>kafka-clients<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> currency_rates (</span><br><span class="line">	currency      STRING,</span><br><span class="line">	rate          <span class="type">DECIMAL</span>(<span class="number">32</span>, <span class="number">10</span>),</span><br><span class="line">	`update_time` <span class="type">TIMESTAMP</span>(<span class="number">3</span>) METADATA <span class="keyword">FROM</span> <span class="string">&#x27;timestamp&#x27;</span>,</span><br><span class="line">	WATERMARK <span class="keyword">FOR</span> update_time <span class="keyword">AS</span> update_time</span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">	<span class="string">&#x27;connector&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;kafka&#x27;</span>,</span><br><span class="line">	<span class="string">&#x27;topic&#x27;</span>	    <span class="operator">=</span> <span class="string">&#x27;rates&#x27;</span>,</span><br><span class="line">	<span class="string">&#x27;properties.bootstrap.servers&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;localhost:9092&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;properties.group.id&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;testGroup&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;scan.startup.mode&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;latest-offset&#x27;</span>,</span><br><span class="line">	<span class="string">&#x27;format&#x27;</span>    <span class="operator">=</span> <span class="string">&#x27;json&#x27;</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">&#123;&quot;currency&quot;:&quot;Yen&quot;, &quot;rate&quot;:<span class="number">102</span>&#125;</span><br><span class="line">&#123;&quot;currency&quot;:&quot;Euro&quot;, &quot;rate&quot;:<span class="number">114</span>&#125;</span><br><span class="line">&#123;&quot;currency&quot;:&quot;USD&quot;, &quot;rate&quot;:<span class="number">1</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Define a versioned view</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">VIEW</span> versioned_rates <span class="keyword">AS</span>              </span><br><span class="line"><span class="keyword">SELECT</span> currency, rate, update_time              <span class="comment">-- (1) `update_time` keeps the event time</span></span><br><span class="line">  <span class="keyword">FROM</span> (</span><br><span class="line">      <span class="keyword">SELECT</span> <span class="operator">*</span>,</span><br><span class="line">      <span class="built_in">ROW_NUMBER</span>() <span class="keyword">OVER</span> (<span class="keyword">PARTITION</span> <span class="keyword">BY</span> currency  <span class="comment">-- (2) the inferred unique key `currency` can be a primary key</span></span><br><span class="line">         <span class="keyword">ORDER</span> <span class="keyword">BY</span> update_time <span class="keyword">DESC</span>) <span class="keyword">AS</span> rownum </span><br><span class="line">      <span class="keyword">FROM</span> currency_rates)</span><br><span class="line"><span class="keyword">WHERE</span> rownum <span class="operator">=</span> <span class="number">1</span>; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> print_table ( </span><br><span class="line">	currency      STRING,</span><br><span class="line">	rate          <span class="type">DECIMAL</span>(<span class="number">32</span>, <span class="number">10</span>),</span><br><span class="line">	`update_time` <span class="type">TIMESTAMP</span>(<span class="number">3</span>)</span><br><span class="line">)</span><br><span class="line"><span class="keyword">with</span> ( </span><br><span class="line">  <span class="string">&#x27;connector&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;print&#x27;</span> </span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> print_table  <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> versioned_rates;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3><span id="join">Join</span></h3><h4><span id="regular-join">Regular Join</span></h4><h4><span id="interval-join">Interval Join</span></h4><h4><span id="temporal-join">Temporal Join</span></h4><p>Temporal table 时态表，就是版本表，存储表的多个快照(历史版本)，这里就是版本表</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/679659?spm=a2c6h.12873639.0.0.27345d11AZJgKz#slide-10">Temporal Table JOIN内部原理</a>，内部类似拉链表，存储表的多个快照版本，</p>
+<p>相当于flink在内存里存储了多个key的状态，每个状态对应不同的时间窗口(数据有效期)</p>
+<p>其他资料：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/475660438">Flink temporal table join研究</a></p>
+<h5><span id="code-test">Code Test</span></h5><h4><span id="lookup-join">Lookup Join</span></h4><p>A lookup join is typically used to enrich a table with data that is queried from an external system.</p>
+<p>常规维表join，每次查询最新数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- Customers is backed by the JDBC connector and can be used for lookup joins</span></span><br><span class="line"><span class="keyword">CREATE</span> TEMPORARY <span class="keyword">TABLE</span> Customers (</span><br><span class="line">  id <span class="type">INT</span>,</span><br><span class="line">  name STRING,</span><br><span class="line">  country STRING,</span><br><span class="line">  zip STRING</span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">&#x27;connector&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;jdbc&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;url&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;jdbc:mysql://mysqlhost:3306/customerdb&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;table-name&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;customers&#x27;</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- enrich each order with customer information</span></span><br><span class="line"><span class="keyword">SELECT</span> o.order_id, o.total, c.country, c.zip</span><br><span class="line"><span class="keyword">FROM</span> Orders <span class="keyword">AS</span> o</span><br><span class="line">  <span class="keyword">JOIN</span> Customers <span class="keyword">FOR</span> <span class="built_in">SYSTEM_TIME</span> <span class="keyword">AS</span> <span class="keyword">OF</span> o.proc_time <span class="keyword">AS</span> c</span><br><span class="line">    <span class="keyword">ON</span> o.customer_id <span class="operator">=</span> c.id;</span><br></pre></td></tr></table></figure>
       
     </div>
     <footer class="article-footer">
