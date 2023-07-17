@@ -9,20 +9,20 @@
   <meta name="description" content="Example wordcount SparkLauncher   DataSet Dataset API Common Cube 数据立方     SparkSql Group by 分组 cube用法   org.apache.spark.sql.functions collect_list min percentile_approx kurtosis Product skewness">
 <meta property="og:type" content="article">
 <meta property="og:title" content="spark3学习笔记20230704">
-<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/index.html">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="Example wordcount SparkLauncher   DataSet Dataset API Common Cube 数据立方     SparkSql Group by 分组 cube用法   org.apache.spark.sql.functions collect_list min percentile_approx kurtosis Product skewness">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.43.39.png">
-<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.44.01.png">
-<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.45.02.png">
-<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.44.15.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/%E6%88%AA%E5%B1%8F2023-07-07%2017.43.39.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/%E6%88%AA%E5%B1%8F2023-07-07%2017.44.01.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/%E6%88%AA%E5%B1%8F2023-07-07%2017.45.02.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/%E6%88%AA%E5%B1%8F2023-07-07%2017.44.15.png">
 <meta property="article:published_time" content="2023-07-04T03:08:56.000Z">
-<meta property="article:modified_time" content="2023-07-12T09:50:42.361Z">
+<meta property="article:modified_time" content="2023-07-17T03:04:05.462Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="spark">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/%E6%88%AA%E5%B1%8F2023-07-07%2017.43.39.png">
+<meta name="twitter:image" content="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/%E6%88%AA%E5%B1%8F2023-07-07%2017.43.39.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -81,9 +81,9 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-bigdata/spark/spark3/spark3学习笔记20230704" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-bigdata/spark/spark3/20230704_spark_dateframe" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/" class="article-date">
+    <a href="/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/" class="article-date">
   <time class="dt-published" datetime="2023-07-04T03:08:56.000Z" itemprop="datePublished">2023-07-04</time>
 </a>
     
@@ -406,24 +406,24 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 <p>结果产生三个分区，每个分区最多产生三个桶(可能少于3)，桶号可通过文件名或计算得到</p>
 <p>三个分区：</p>
 <p>对应三个目录</p>
-<img src="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/截屏2023-07-07 17.43.39.png">
+<img src="/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/截屏2023-07-07 17.43.39.png">
 
 
 
 <p>文件名查看桶号：</p>
 <p>最后面的00001、00002表示桶号</p>
-<img src="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/截屏2023-07-07 17.44.01.png">
+<img src="/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/截屏2023-07-07 17.44.01.png">
 
 
 
-<img src="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/截屏2023-07-07 17.45.02.png">
+<img src="/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/截屏2023-07-07 17.45.02.png">
 
 
 
 
 
 <p>桶号计算方式如上，查询结果如下，bucket列对应桶号</p>
-<img src="/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/截屏2023-07-07 17.44.15.png">
+<img src="/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/截屏2023-07-07 17.44.15.png">
 
 
 
@@ -460,7 +460,7 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/spark3%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B020230704/" data-id="cljo12rbr0000k99a2y8w8wtx" data-title="spark3学习笔记20230704" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="https://qingfengzhou.github.io/2023/07/04/bigdata/spark/spark3/20230704_spark_dateframe/" data-id="clk6a7uwm00002h9aec785n5p" data-title="spark3学习笔记20230704" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
