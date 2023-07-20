@@ -16,8 +16,10 @@
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.32.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.40.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.57.00.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-20%2009.10.43.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-20%2009.10.52.png">
 <meta property="article:published_time" content="2023-07-19T06:03:10.000Z">
-<meta property="article:modified_time" content="2023-07-20T00:02:45.653Z">
+<meta property="article:modified_time" content="2023-07-20T01:15:15.411Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="java">
 <meta name="twitter:card" content="summary">
@@ -255,7 +257,18 @@
 <p><strong>线程数量</strong></p>
 <p>对于 CPU 密集型的计算场景，理论上“线程的数量 &#x3D;CPU 核数”就是最合适的。不过在工程上，线程的数量一般会设置为“CPU 核数 +1”，这样的话，当线程因为偶尔的内存页失效或其他原因导致阻塞时，这个额外的线程可以顶上，从而保证 CPU 的利用率。</p>
 <p>对于 I&#x2F;O 密集型计算场景，最佳的线程数是与程序中 CPU 计算和 I&#x2F;O 操作的耗时比相关的，我们可以总结出这样一个公式：最佳线程数 &#x3D;CPU 核数 * [ 1 +（I&#x2F;O 耗时 &#x2F; CPU 耗时）]</p>
-<h2><span id="调用栈">调用栈</span></h2><h2><span id="others">Others</span></h2><p><strong>java 进程异常和 线程栈信息</strong></p>
+<h2><span id="调用栈">调用栈</span></h2><p>每个线程都有自己的调用栈，线程调用一次方法，产生一个栈帧，压入调用栈。每个栈帧里都有对应方法需要的参数、局部变量、返回地址。当方法返回时，对应的栈帧从调用栈弹出。</p>
+<img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/截屏2023-07-20 09.10.43.png">
+
+<img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/截屏2023-07-20 09.10.52.png">
+
+
+
+
+
+
+
+<h2><span id="others">Others</span></h2><p><strong>java 进程异常和 线程栈信息</strong></p>
 <p>1、Java VisualVM</p>
 <p>2、jstack 使用.  </p>
 <p>查看所有线程dump信息， jstack  -l   23027  &gt;&gt; &#x2F;tmp&#x2F;23027.txt</p>
