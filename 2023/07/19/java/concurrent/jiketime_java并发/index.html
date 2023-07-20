@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>jiketime_java并发 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="并发源头 synchronize 案例 解决方法1 解决方法2 解决方法3     wait-notify Usage Others wait 和 sleep 区别     管程 usage Code Test   Others   Thread 状态 调用栈 Others      并发源头可见性：多核cpu缓存导致，  原子性：线程切换导致，解决方法： 有序性：编译优化导致指令重排序，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jiketime_java并发">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="并发源头 synchronize 案例 解决方法1 解决方法2 解决方法3     wait-notify Usage Others wait 和 sleep 区别     管程 usage Code Test   Others   Thread 状态 调用栈 Others      并发源头可见性：多核cpu缓存导致，  原子性：线程切换导致，解决方法： 有序性：编译优化导致指令重排序，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.32.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.40.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.57.00.png">
+<meta property="article:published_time" content="2023-07-19T06:03:10.000Z">
+<meta property="article:modified_time" content="2023-07-20T00:02:45.653Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.32.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-java/concurrent/jiketime_java并发" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/" class="article-date">
+  <time class="dt-published" datetime="2023-07-19T06:03:10.000Z" itemprop="datePublished">2023-07-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java-concurrent/">java/concurrent</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      jiketime_java并发
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#%E5%B9%B6%E5%8F%91%E6%BA%90%E5%A4%B4">并发源头</a></li>
+<li><a href="#synchronize">synchronize</a><ul>
+<li><a href="#%E6%A1%88%E4%BE%8B">案例</a><ul>
+<li><a href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%951">解决方法1</a></li>
+<li><a href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%952">解决方法2</a></li>
+<li><a href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%953">解决方法3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#wait-notify">wait-notify</a><ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#others">Others</a><ul>
+<li><a href="#wait-%E5%92%8C-sleep-%E5%8C%BA%E5%88%AB">wait 和 sleep 区别</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E7%AE%A1%E7%A8%8B">管程</a><ul>
+<li><a href="#usage">usage</a><ul>
+<li><a href="#code-test">Code Test</a></li>
+</ul>
+</li>
+<li><a href="#others-1">Others</a></li>
+</ul>
+</li>
+<li><a href="#thread">Thread</a><ul>
+<li><a href="#%E7%8A%B6%E6%80%81"><strong>状态</strong></a></li>
+<li><a href="#%E8%B0%83%E7%94%A8%E6%A0%88">调用栈</a></li>
+<li><a href="#others-2">Others</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h1><span id="并发源头">并发源头</span></h1><p>可见性：多核cpu缓存导致， </p>
+<p>原子性：线程切换导致，解决方法：</p>
+<p>有序性：编译优化导致指令重排序，</p>
+<p>常见解决方法：volatile 修饰 变量，synchronized 同步，线程顺序执行</p>
+<h1><span id="synchronize">synchronize</span></h1><p>修饰静态方法、非静态方法、代码快，锁定的对象不一样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class X &#123;</span><br><span class="line">  // 修饰非静态方法, 锁定的当前实例对象this</span><br><span class="line">  synchronized void foo() &#123;</span><br><span class="line">    // 临界区</span><br><span class="line">  &#125;</span><br><span class="line">  // 修饰静态方法, 锁定的是当前类的class对象, 对象例子Class X</span><br><span class="line">  synchronized static void bar() &#123;</span><br><span class="line">    // 临界区</span><br><span class="line">  &#125;</span><br><span class="line">  // 修饰代码块, 锁定一个指定的对象，对应例子 对象Obj</span><br><span class="line">  Object obj = new Object()；</span><br><span class="line">  void baz() &#123;</span><br><span class="line">    synchronized(obj) &#123;</span><br><span class="line">      // 临界区</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="案例">案例</span></h2><p>假设有 A、B、C 三个账户，余额都是 200 元，我们用两个线程分别执行两个转账操作：账户 A 转给账户 B 100 元，账户 B 转给账户 C 100 元，最后我们期望的结果应该是账户 A 的余额是 100 元，账户 B 的余额是 200 元， 账户 C 的余额是 300 元。</p>
+<p>我们假设线程 1 执行账户 A 转账户 B 的操作，线程 2 执行账户 B 转账户 C 的操作。这两个线程分别在两颗 CPU 上同时执行，那它们是互斥的吗？我们期望是，但实际上并不是。因为线程 1 锁定的是账户 A 的实例（A.this），而线程 2 锁定的是账户 B 的实例（B.this），所以这两个线程可以同时进入临界区 transfer()。同时进入临界区的结果是什么呢？线程 1 和线程 2 都会读到账户 B 的余额为 200，导致最终账户 B 的余额可能是 300（线程 1 后于线程 2 写 B.balance，线程 2 写的 B.balance 值被线程 1 覆盖），可能是 100（线程 1 先于线程 2 写 B.balance，线程 1 写的 B.balance 值被线程 2 覆盖），就是不可能是 200。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">package test.zhou.java.concurrent;</span><br><span class="line"></span><br><span class="line">public class AccountTest &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception&#123;</span><br><span class="line">        Account a = new Account(200);</span><br><span class="line">        Account b = new Account(200);</span><br><span class="line">        Account c = new Account(200);</span><br><span class="line">        Thread t1 = new Thread(()-&gt;&#123;</span><br><span class="line">            a.transfer(b, 100);</span><br><span class="line">        &#125;);</span><br><span class="line">        Thread t2 = new Thread(()-&gt;&#123;</span><br><span class="line">            b.transfer(c, 100);</span><br><span class="line">        &#125;);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line"></span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        System.out.println(a.balance);</span><br><span class="line">        System.out.println(b.balance);</span><br><span class="line">        System.out.println(c.balance);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Account &#123;</span><br><span class="line"></span><br><span class="line">    public int balance;</span><br><span class="line"></span><br><span class="line">    public Account(int balance) &#123;</span><br><span class="line">        this.balance = balance;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // 转账</span><br><span class="line">    synchronized void transfer(</span><br><span class="line">            Account target, int amt) &#123;</span><br><span class="line">        if (this.balance &gt;= amt) &#123;</span><br><span class="line">            this.balance -= amt;</span><br><span class="line">            target.balance += amt;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>账户转账结果错误，</p>
+<h3><span id="解决方法1">解决方法1</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class Account &#123;</span><br><span class="line">  private int balance;</span><br><span class="line">  // 转账</span><br><span class="line">  void transfer(Account target, int amt)&#123;</span><br><span class="line">    // 锁定转出账户</span><br><span class="line">    synchronized(this) &#123;              </span><br><span class="line">      // 锁定转入账户</span><br><span class="line">      synchronized(target) &#123;           </span><br><span class="line">        if (this.balance &gt; amt) &#123;</span><br><span class="line">          this.balance -= amt;</span><br><span class="line">          target.balance += amt;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="解决方法2">解决方法2</span></h3><p>方法1 可能出现死锁（一组互相竞争资源的线程因互相等待，导致“永久”阻塞的现象）</p>
+<p>死锁条件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1、互斥，共享资源 X 和 Y 只能被一个线程占用；</span><br><span class="line">2、占有且等待，线程 T1 已经取得共享资源 X，在等待共享资源 Y 的时候，不释放共享资源 X；</span><br><span class="line">3、不可抢占，其他线程不能强行抢占线程 T1 占有的资源；</span><br><span class="line">4、循环等待，线程 T1 等待线程 T2 占有的资源，线程 T2 等待线程 T1 占有的资源，就是循环等待。</span><br></pre></td></tr></table></figure>
+
+
+
+<p>一次性申请所有资源：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class Allocator &#123;</span><br><span class="line">  private List&lt;Object&gt; als =</span><br><span class="line">    new ArrayList&lt;&gt;();</span><br><span class="line">  // 一次性申请所有资源</span><br><span class="line">  synchronized boolean apply(</span><br><span class="line">    Object from, Object to)&#123;</span><br><span class="line">    if(als.contains(from) ||</span><br><span class="line">         als.contains(to))&#123;</span><br><span class="line">      return false;  </span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      als.add(from);</span><br><span class="line">      als.add(to);  </span><br><span class="line">    &#125;</span><br><span class="line">    return true;</span><br><span class="line">  &#125;</span><br><span class="line">  // 归还资源</span><br><span class="line">  synchronized void free(</span><br><span class="line">    Object from, Object to)&#123;</span><br><span class="line">    als.remove(from);</span><br><span class="line">    als.remove(to);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Account &#123;</span><br><span class="line">  // actr应该为单例</span><br><span class="line">  private Allocator actr;</span><br><span class="line">  private int balance;</span><br><span class="line">  // 转账</span><br><span class="line">  void transfer(Account target, int amt)&#123;</span><br><span class="line">    // 一次性申请转出账户和转入账户，直到成功</span><br><span class="line">    while(!actr.apply(this, target))</span><br><span class="line">      ；</span><br><span class="line">    try&#123;</span><br><span class="line">      // 锁定转出账户</span><br><span class="line">      synchronized(this)&#123;              </span><br><span class="line">        // 锁定转入账户</span><br><span class="line">        synchronized(target)&#123;           </span><br><span class="line">          if (this.balance &gt; amt)&#123;</span><br><span class="line">            this.balance -= amt;</span><br><span class="line">            target.balance += amt;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      actr.free(this, target)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="解决方法3">解决方法3</span></h3><p>方法2  执行同步方法 actr.apply(this, target)，actr是单例，多线程操作需要等待获取actr锁，仍然可能存在瓶颈。</p>
+<p>方法3 是先对资源进行排序，依次加锁，效率更高。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class Account &#123;</span><br><span class="line">  private int id;</span><br><span class="line">  private int balance;</span><br><span class="line">  // 转账</span><br><span class="line">  void transfer(Account target, int amt)&#123;</span><br><span class="line">    Account left = this        ①</span><br><span class="line">    Account right = target;    ②</span><br><span class="line">    if (this.id &gt; target.id) &#123; ③</span><br><span class="line">      left = target;           ④</span><br><span class="line">      right = this;            ⑤</span><br><span class="line">    &#125;                          ⑥</span><br><span class="line">    // 锁定序号小的账户</span><br><span class="line">    synchronized(left)&#123;</span><br><span class="line">      // 锁定序号大的账户</span><br><span class="line">      synchronized(right)&#123; </span><br><span class="line">        if (this.balance &gt; amt)&#123;</span><br><span class="line">          this.balance -= amt;</span><br><span class="line">          target.balance += amt;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1><span id="wait-notify">wait-notify</span></h1><p>如果线程要求的条件不满足，则线程阻塞自己，进入等待状态；当线程要求的条件满足后，通知等待的线程重新执行。</p>
+<p>在 Java 语言里，等待 - 通知机制可以有多种实现方式，比如 Java 语言内置的 synchronized 配合 wait()、notify()、notifyAll() 这三个方法就能轻松实现</p>
+<p>线程等待 wait 状态：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在并发程序中，当一个线程进入临界区后，由于某些条件不满足，需要进入等待状态，Java 对象的 wait() 方法就能够满足这种需求。如上图所示，当调用 wait() 方法后，当前线程就会被阻塞，并且进入到右边的等待队列中，这个等待队列也是互斥锁的等待队列。 线程在进入等待队列的同时，会释放持有的互斥锁，线程释放锁后，其他线程就有机会获得锁，并进入临界区了。</span><br></pre></td></tr></table></figure>
+
+<p>线程通知机制：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">当条件满足时调用 notify()，会通知等待队列（互斥锁的等待队列）中的线程，告诉它条件曾经满足过。</span><br><span class="line"></span><br><span class="line">因为 notify() 只能保证在通知时间点，条件是满足的。而被通知线程的执行时间点和通知的时间点基本上不会重合，所以当线程执行的时候，很可能条件已经不满足了（保不齐有其他线程插队）。这一点你需要格外注意。</span><br><span class="line"></span><br><span class="line">除此之外，还有一个需要注意的点，被通知的线程要想重新执行，仍然需要获取到互斥锁（因为曾经获取的锁在调用 wait() 时已经释放了）</span><br><span class="line"></span><br><span class="line">wait() 和 notify() 是object 对象的方法, sleep是线程的静态方法</span><br></pre></td></tr></table></figure>
+
+<img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/截屏2023-07-19 16.19.32.png">
+
+<img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/截屏2023-07-19 16.19.40.png">
+
+
+
+
+
+<h2><span id="usage">Usage</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class Allocator &#123;</span><br><span class="line">  private List&lt;Object&gt; als;</span><br><span class="line">  // 一次性申请所有资源</span><br><span class="line">  synchronized void apply(</span><br><span class="line">    Object from, Object to)&#123;</span><br><span class="line">    // 经典写法</span><br><span class="line">    while(als.contains(from) ||</span><br><span class="line">         als.contains(to))&#123;</span><br><span class="line">      try&#123;</span><br><span class="line">        wait();</span><br><span class="line">      &#125;catch(Exception e)&#123;</span><br><span class="line">      &#125;   </span><br><span class="line">    &#125; </span><br><span class="line">    als.add(from);</span><br><span class="line">    als.add(to);  </span><br><span class="line">  &#125;</span><br><span class="line">  // 归还资源</span><br><span class="line">  synchronized void free(</span><br><span class="line">    Object from, Object to)&#123;</span><br><span class="line">    als.remove(from);</span><br><span class="line">    als.remove(to);</span><br><span class="line">    notifyAll();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="others">Others</span></h2><h3><span id="wait-和-sleep-区别">wait 和 sleep 区别</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">1. wait会释放锁 而sleep不会释放锁资源(如果占有锁).</span><br><span class="line">2. wait只能在同步方法和同步块中使用，而sleep任何地方都可以.</span><br><span class="line">3. wait无需捕捉异常，而sleep需要.</span><br><span class="line">4. sleep是Thread的方法，而wait是Object类的方法</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h1><span id="管程">管程</span></h1><p>Monitor，来自操作系统领域</p>
+<p>所谓管程，指的是管理共享变量以及对共享变量的操作过程，让他们支持并发。翻译为 Java 领域的语言，就是管理类的成员变量和成员方法，让这个类是线程安全的。</p>
+<p><strong>互斥 和 同步</strong></p>
+<p>在并发编程领域，有两大核心问题：</p>
+<p>一个是互斥，即同一时刻只允许一个线程访问共享资源；</p>
+<p>另一个是同步，即线程之间如何通信、协作。</p>
+<p><strong>互斥解决思路</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">管程解决互斥问题的思路很简单，就是将共享变量及其对共享变量的操作统一封装起来。</span><br><span class="line">假如我们要实现一个线程安全的阻塞队列，一个最直观的想法就是：</span><br><span class="line">将线程不安全的队列封装起来，对外提供线程安全的操作方法，例如入队操作和出队操作。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>同步解决思路：</strong></p>
+<p>引入了条件变量的概念，而且每个条件变量都对应有一个等待队列</p>
+<img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/截屏2023-07-19 16.57.00.png">
+
+
+
+<p>假设有个线程 T1 执行阻塞队列的出队操作，执行出队操作，需要注意有个前提条件，就是阻塞队列不能是空的（空队列只能出 Null 值，是不允许的），阻塞队列不空这个前提条件对应的就是管程里的条件变量。 如果线程 T1 进入管程后恰好发现阻塞队列是空的，那怎么办呢？等待啊，去哪里等呢？就去条件变量对应的等待队列里面等。此时线程 T1 就去“队列不空”这个条件变量的等待队列中等待。</p>
+<p>再假设之后另外一个线程 T2 执行阻塞队列的入队操作，入队操作执行成功之后，“阻塞队列不空”这个条件对于线程 T1 来说已经满足了，此时线程 T2 要通知 T1，告诉它需要的条件已经满足了。当线程 T1 得到通知后，会从等待队列里面出来，但是出来之后不是马上执行，而是重新进入到入口等待队列里面。</p>
+<h2><span id="usage">usage</span></h2><h3><span id="code-test">Code Test</span></h3><p>对于阻塞队列的入队操作，如果阻塞队列已满，就需要等待直到阻塞队列不满，所以这里用了notFull.await();</p>
+<p>对于阻塞出队操作，如果阻塞队列为空，就需要等待直到阻塞队列不空，所以就用了notEmpty.await();</p>
+<p>如果入队成功，那么阻塞队列就不空了，就需要通知条件变量：阻塞队列不空notEmpty对应的等待队列。</p>
+<p>如果出队成功，那就阻塞队列就不满了，就需要通知条件变量：阻塞队列不满notFull对应的等待队列。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public class BlockedQueue&lt;T&gt;&#123;</span><br><span class="line">  final Lock lock =</span><br><span class="line">    new ReentrantLock();</span><br><span class="line">  // 条件变量：队列不满  </span><br><span class="line">  final Condition notFull =</span><br><span class="line">    lock.newCondition();</span><br><span class="line">  // 条件变量：队列不空  </span><br><span class="line">  final Condition notEmpty =</span><br><span class="line">    lock.newCondition();</span><br><span class="line"></span><br><span class="line">  // 入队</span><br><span class="line">  void enq(T x) &#123;</span><br><span class="line">    lock.lock();</span><br><span class="line">    try &#123;</span><br><span class="line">      while (队列已满)&#123;</span><br><span class="line">        // 等待队列不满 </span><br><span class="line">        notFull.await();</span><br><span class="line">      &#125;  </span><br><span class="line">      // 省略入队操作...</span><br><span class="line">      //入队后,通知可出队</span><br><span class="line">      notEmpty.signal();</span><br><span class="line">    &#125;finally &#123;</span><br><span class="line">      lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  // 出队</span><br><span class="line">  void deq()&#123;</span><br><span class="line">    lock.lock();</span><br><span class="line">    try &#123;</span><br><span class="line">      while (队列已空)&#123;</span><br><span class="line">        // 等待队列不空</span><br><span class="line">        notEmpty.await();</span><br><span class="line">      &#125;</span><br><span class="line">      // 省略出队操作...</span><br><span class="line">      //出队后，通知可入队</span><br><span class="line">      notFull.signal();</span><br><span class="line">    &#125;finally &#123;</span><br><span class="line">      lock.unlock();</span><br><span class="line">    &#125;  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="others">Others</span></h2><p><strong>和 Java 内置的管程方案（synchronized） 对比</strong></p>
+<p>Java 内置的管程方案（synchronized）使用简单，synchronized 关键字修饰的代码块，在编译期会自动生成相关加锁和解锁的代码，但是仅支持一个条件变量；而 Java SDK 并发包实现的管程支持多个条件变量，不过并发包里的锁，需要开发人员自己进行加锁和解锁操作。</p>
+<h1><span id="thread">Thread</span></h1><h2><span id="状态"><strong>状态</strong></span></h2><p>1、NEW  初始化状态，刚创建未调用start方法</p>
+<p>2、RUNNABLE  可执行状态，调用start 方法</p>
+<p>3、Blocked  阻塞状态 </p>
+<p>线程阻塞等待同步锁</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Thread state for a thread blocked waiting for a monitor lock.</span><br><span class="line">A thread in the blocked state is waiting for a monitor lock to enter a synchronized block/method or reenter a synchronized block/method after calling Object</span><br></pre></td></tr></table></figure>
+
+<p>4、Waiting   无时限等待</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Object.wait with no timeout</span><br><span class="line">Thread.join with no timeout  等待一个线程执行完</span><br><span class="line">LockSupport.park</span><br></pre></td></tr></table></figure>
+
+<p>5、Timed_Waiting   有时限等待</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Thread.sleep</span><br><span class="line">Object.wait with timeout</span><br><span class="line">Thread.join with timeout</span><br><span class="line">LockSupport.parkNanos</span><br><span class="line">LockSupport.parkUntil</span><br></pre></td></tr></table></figure>
+
+<p>6、Terminated  终止状态</p>
+<p>thread1.interrupt()  中断一个线程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 线程处于wait状态， 调用interrupt() 方法，线程的中断状态会被清除 并且 抛出异常InterruptedException</span><br><span class="line">If this thread is blocked in an invocation of the wait(), wait(long), or wait(long, int) methods of the Object class, or of the join(), join(long), join(long, int), sleep(long), or sleep(long, int), methods of this class, then its interrupt status will be cleared and it will receive an InterruptedException.</span><br><span class="line"></span><br><span class="line">If this thread is blocked in an I/O operation upon an InterruptibleChannel then the channel will be closed, the thread&#x27;s interrupt status will be set, and the thread will receive a java.nio.channels.ClosedByInterruptException.</span><br><span class="line"></span><br><span class="line">If this thread is blocked in a java.nio.channels.Selector then the thread&#x27;s interrupt status will be set and it will return immediately from the selection operation, possibly with a non-zero value, just as if the selector&#x27;s wakeup method were invoked.</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p><strong>线程数量</strong></p>
+<p>对于 CPU 密集型的计算场景，理论上“线程的数量 &#x3D;CPU 核数”就是最合适的。不过在工程上，线程的数量一般会设置为“CPU 核数 +1”，这样的话，当线程因为偶尔的内存页失效或其他原因导致阻塞时，这个额外的线程可以顶上，从而保证 CPU 的利用率。</p>
+<p>对于 I&#x2F;O 密集型计算场景，最佳的线程数是与程序中 CPU 计算和 I&#x2F;O 操作的耗时比相关的，我们可以总结出这样一个公式：最佳线程数 &#x3D;CPU 核数 * [ 1 +（I&#x2F;O 耗时 &#x2F; CPU 耗时）]</p>
+<h2><span id="调用栈">调用栈</span></h2><h2><span id="others">Others</span></h2><p><strong>java 进程异常和 线程栈信息</strong></p>
+<p>1、Java VisualVM</p>
+<p>2、jstack 使用.  </p>
+<p>查看所有线程dump信息， jstack  -l   23027  &gt;&gt; &#x2F;tmp&#x2F;23027.txt</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">1.根据端口号57638查看对应进程pid/name=1463/java     </span><br><span class="line"></span><br><span class="line">   netstat -apn | grep  57638  </span><br><span class="line"></span><br><span class="line">tcp        0      0 ::ffff:172.20.5.10:57638    :::*                        LISTEN      1463/java           </span><br><span class="line">tcp        0      0 ::ffff:172.20.5.10:57638    ::ffff:172.20.5.14:59204    ESTABLISHED 1463/java</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">2. top 查看占用内存最多的几个进程</span><br><span class="line"></span><br><span class="line">ps aux | grep applicationName  查看对应applicationName的pid， 第二列表示pid 1463</span><br><span class="line"></span><br><span class="line">root      1463 12.5  2.3 5531468 3057636 ?     Sl   Oct12 315:22</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3. top  -p pid -H 查看进程pid对应的线程信息，这里每个线程映射对应到linux的一个进程PID</span><br><span class="line">top  -p 1463 -H</span><br><span class="line"></span><br><span class="line">  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                                      </span><br><span class="line"> 1463 root      20   0 5401m 2.9g  39m S  0.0  2.3   0:00.00 java                                                                                          </span><br><span class="line"> 1464 root      20   0 5401m 2.9g  39m S  0.0  2.3   0:01.69 java</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">4.  使用jstack查看对应线程的具体信息</span><br><span class="line">jstack pid | grep -A 10 hex(id)</span><br><span class="line">pid进程id,  -A 表示 取出对应行后，往后继续显示10行内容， </span><br><span class="line">hex(id) 表示线程PID对应的十六进制数字，全部用小写字母表示，</span><br><span class="line">可以借助计算器 或其他工具进行转换， 用python 转换： python -c &quot;print (hex(1464))&quot;</span><br><span class="line">jstack 1463 | grep -A 10 `python -c &quot;print (hex(1464))&quot;`</span><br><span class="line"></span><br><span class="line">&quot;main&quot; #1 prio=5 os_prio=0 tid=0x00007f15ac01e800 nid=0x5b8 waiting on condition [0x00007f15b0a37000]</span><br><span class="line">   java.lang.Thread.State: TIMED_WAITING (parking)</span><br><span class="line">at sun.misc.Unsafe.park(Native Method)</span><br><span class="line">- parking to wait for  &lt;0x0000000700016ba0&gt; (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)</span><br><span class="line">at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)</span><br><span class="line">at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)</span><br><span class="line">at java.util.concurrent.ThreadPoolExecutor.awaitTermination(ThreadPoolExecutor.java:1465)</span><br><span class="line">at org.apache.spark.rpc.netty.Dispatcher.awaitTermination(Dispatcher.scala:180)</span><br><span class="line">at org.apache.spark.rpc.netty.NettyRpcEnv.awaitTermination(NettyRpcEnv.scala:273)</span><br><span class="line">at org.apache.spark.executor.CoarseGrainedExecutorBackend$$anonfun$run$1.apply$mcV$sp(CoarseGrainedExecutorBackend.scala:231)</span><br><span class="line">at org.apache.spark.deploy.SparkHadoopUtil$$anon$1.run(SparkHadoopUtil.scala:67)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>3、<a target="_blank" rel="noopener" href="https://arthas.aliyun.com/doc/advanced-use.html#as-sh-%E5%92%8C-arthas-boot-%E6%8A%80%E5%B7%A7">Arthas</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/" data-id="clkag9wyn00004v9a2apq02d6" data-title="jiketime_java并发" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/07/17/bigdata/sql/doc_sql/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">doc_sql</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/">jiketime_java并发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/17/bigdata/sql/doc_sql/">doc_sql</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/">flink_sql_20230713</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/">spark_terminal_tips</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/">20230713_delta_lake</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
