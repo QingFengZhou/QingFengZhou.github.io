@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>jvm_basic | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Classloader 类加载过程 类加载器 类加载机制   内存 内存划分 heap划分 MemoryError   GC References    Classloader        类加载过程    加载、链接(验证、准备、解析)、初始化 加载：JVM 读取 Class 文件，通过一个类的全限定名获取定义此类的二进制字节流，将这个字节流所代表的静态存储结构转化为方法区的运行时数据结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jvm_basic">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Classloader 类加载过程 类加载器 类加载机制   内存 内存划分 heap划分 MemoryError   GC References    Classloader        类加载过程    加载、链接(验证、准备、解析)、初始化 加载：JVM 读取 Class 文件，通过一个类的全限定名获取定义此类的二进制字节流，将这个字节流所代表的静态存储结构转化为方法区的运行时数据结">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.08.42.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.09.06.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.30.58.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.43.34.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.43.41.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2018.12.03.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.44.39.png">
+<meta property="article:published_time" content="2023-07-20T08:33:13.000Z">
+<meta property="article:modified_time" content="2023-07-20T10:16:00.908Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/%E6%88%AA%E5%B1%8F2023-07-20%2017.08.42.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-java/jvm/jvm_basic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/20/java/jvm/jvm_basic/" class="article-date">
+  <time class="dt-published" datetime="2023-07-20T08:33:13.000Z" itemprop="datePublished">2023-07-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java-jvm/">java/jvm</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      jvm_basic
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#classloader">Classloader</a><ul>
+<li><a href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B">类加载过程</a></li>
+<li><a href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8">类加载器</a></li>
+<li><a href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6">类加载机制</a></li>
+</ul>
+</li>
+<li><a href="#%E5%86%85%E5%AD%98">内存</a><ul>
+<li><a href="#%E5%86%85%E5%AD%98%E5%88%92%E5%88%86">内存划分</a></li>
+<li><a href="#heap%E5%88%92%E5%88%86">heap划分</a></li>
+<li><a href="#memoryerror">MemoryError</a></li>
+</ul>
+</li>
+<li><a href="#gc">GC</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="classloader">Classloader</span></h2><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.08.42.png">
+
+
+
+
+
+
+
+<h3><span id="类加载过程">类加载过程</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.09.06.png">
+
+
+
+<p>加载、链接(验证、准备、解析)、初始化</p>
+<p>加载：JVM 读取 Class 文件，通过一个类的全限定名获取定义此类的二进制字节流，将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构。</p>
+<p>验证：主要用于确保 Class 文件的字节流中包含的信息符合当前虚拟机的要求，保证被加载类的正确性，进一步保障虚拟机自身的安全，只有通过验证的 Class 文件才能被 JVM 加载。</p>
+<p>主要包括四种验证：文件格式验证，元数据验证，字节码验证，符号引用验证。</p>
+<p>准备：主要工作是在方法区中为类变量分配内存空间并设置类中变量的初始值。</p>
+<p>初始值指不同数据类型的默认值，这里需要注意 final 类型的变量和非 final 类型的变量在准备阶段的数据初始化过程不同。</p>
+<p>解析：</p>
+<p>JVM 将常量池内的符号引用转换为直接引用的过程。事实上，解析操作往往会伴随着JVM在执行完初始化之后再执行。直接引用就是直接指向目标的指针、相对偏移量或一个间接定位到目标的句柄。</p>
+<p>解析动作主要针对类或接口、字段、类方法、接口方法、方法类型等。对应常量池中的CONSTANT Class info、CONSTANT Fieldref info、CONSTANT Methodref info等。</p>
+<p>初始化：</p>
+<p>主要通过执行类构造器的<clinit>方法为类进行初始化。<clinit>方法是在编译阶段由编译器自动收集类中静态语句块和变量的赋值操作组成的。在准备阶段，类中静态成员变量已经完成了默认初始化，而在初始化阶段，<clinit>方法将对静态成员变量进行显示初始化。</clinit></clinit></clinit></p>
+<h3><span id="类加载器">类加载器</span></h3><h3><span id="类加载机制">类加载机制</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.30.58.png">
+
+
+
+<p>双亲委派机制</p>
+<p>Java虚拟机对class文件采用的是按需加载的方式，也就是说当需要使用该类时才会将它的class文件加载到内存生成class对象。而且加载某个类的class文件时，Java虚拟机采用的是双亲委派模式，即把请求交由父类处理，它是一种任务委派模式。</p>
+<p>双亲委派机制指一个类在收到类加载请求后不会尝试自己加载这个类，而是把该类加载请求向上委派给其父类去完成，其父类在接收到该类加载请求后又会将其委派给自己的父类，以此类推，这样所有的类加载请求都被向上委派到启动类加载器中。若父类加载器在接收到类加载请求后发现自己也无法加载该类（通常原因是该类的 Class 文件在父类的类加载路径中不存在），则父类会将该信息反馈给子类并向下委派子类加载器加载该类，直到该类被成功加载，若找不到该类，则 JVM 会抛出 ClassNotFoud 异常。</p>
+<h2><span id="内存">内存</span></h2><h3><span id="内存划分">内存划分</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.43.34.png">
+
+
+
+
+
+<p>当我们通过前面的：类的加载 → 验证 → 准备 → 解析 → 初始化 这几个阶段完成后，执行引擎就会对我们的类进行使用，同时执行引擎将会使用到我们的运行时数据区。</p>
+<p>　　运行时数据区处在JVM 的内存区域。我们通过磁盘或者网络IO得到的数据，都需要先加载到内存中，然后CPU从内存中获取数据进行读取，也就是说内存充当了CPU和磁盘之间的桥梁。</p>
+<p>　　JVM 的运行时数据区分为<strong>线程私有区域（程序计数器、虚拟机栈、本地方法栈）</strong>、</p>
+<p>​       <strong>线程共享区域（堆、方法区）</strong>和直接内存，如图所示：</p>
+<p><strong>方法区</strong>：</p>
+<p>在jdk7及以前，习惯上把方法区，称为永久代。jdk8开始，使用元空间取代了永久代。</p>
+<p>JDK 1.8后，元空间存放在堆外内存中。它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码缓存等</p>
+<p><strong>程序计数器：</strong>存储指向下一条指令的地址</p>
+<p>本地方法栈： 执行native 方法，Native Method Stack 中登记 native方法</p>
+<img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.43.41.png">
+
+
+
+<h3><span id="heap划分">heap划分</span></h3><p>堆内存划分</p>
+<p>　　Minor GC：新生代的GC。</p>
+<p>　　Major GC：老年代的GC。</p>
+<p>　　Full GC：整堆收集，收集整个Java堆和方法区的垃圾收集</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-Xms10m：设置最小堆内存为10M。</span><br><span class="line">-Xmx10m：设置最大堆内存为10M。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 18.12.03.png">
+
+
+
+
+
+<h3><span id="memoryerror">MemoryError</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.44.39.png">
+
+
+
+
+
+
+
+
+
+<h2><span id="gc">GC</span></h2><p>。。。。</p>
+<h2><span id="references">References</span></h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ruoli-0/p/13882894.html#_label5">java jvm 博客园</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/" data-id="clkbsqtpj0000ss9acl8q6m2i" data-title="jvm_basic" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/07/20/java/designpattern/designpattern_pactice1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          designpattern_pactice1
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">jiketime_java并发</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/20/java/designpattern/designpattern_pactice1/">designpattern_pactice1</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/20/java/jvm/jvm_basic/">jvm_basic</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/">jiketime_java并发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/17/bigdata/sql/doc_sql/">doc_sql</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/">flink_sql_20230713</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

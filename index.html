@@ -73,6 +73,181 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-java/designpattern/designpattern_pactice1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/20/java/designpattern/designpattern_pactice1/" class="article-date">
+  <time class="dt-published" datetime="2023-07-20T08:35:04.000Z" itemprop="datePublished">2023-07-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/20/java/designpattern/designpattern_pactice1/">designpattern_pactice1</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/20/java/designpattern/designpattern_pactice1/" data-id="clkbsqtpo0001ss9a71pi1mjm" data-title="designpattern_pactice1" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-java/jvm/jvm_basic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/20/java/jvm/jvm_basic/" class="article-date">
+  <time class="dt-published" datetime="2023-07-20T08:33:13.000Z" itemprop="datePublished">2023-07-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java-jvm/">java/jvm</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/20/java/jvm/jvm_basic/">jvm_basic</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#classloader">Classloader</a><ul>
+<li><a href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B">类加载过程</a></li>
+<li><a href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8">类加载器</a></li>
+<li><a href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6">类加载机制</a></li>
+</ul>
+</li>
+<li><a href="#%E5%86%85%E5%AD%98">内存</a><ul>
+<li><a href="#%E5%86%85%E5%AD%98%E5%88%92%E5%88%86">内存划分</a></li>
+<li><a href="#heap%E5%88%92%E5%88%86">heap划分</a></li>
+<li><a href="#memoryerror">MemoryError</a></li>
+</ul>
+</li>
+<li><a href="#gc">GC</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="classloader">Classloader</span></h2><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.08.42.png">
+
+
+
+
+
+
+
+<h3><span id="类加载过程">类加载过程</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.09.06.png">
+
+
+
+<p>加载、链接(验证、准备、解析)、初始化</p>
+<p>加载：JVM 读取 Class 文件，通过一个类的全限定名获取定义此类的二进制字节流，将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构。</p>
+<p>验证：主要用于确保 Class 文件的字节流中包含的信息符合当前虚拟机的要求，保证被加载类的正确性，进一步保障虚拟机自身的安全，只有通过验证的 Class 文件才能被 JVM 加载。</p>
+<p>主要包括四种验证：文件格式验证，元数据验证，字节码验证，符号引用验证。</p>
+<p>准备：主要工作是在方法区中为类变量分配内存空间并设置类中变量的初始值。</p>
+<p>初始值指不同数据类型的默认值，这里需要注意 final 类型的变量和非 final 类型的变量在准备阶段的数据初始化过程不同。</p>
+<p>解析：</p>
+<p>JVM 将常量池内的符号引用转换为直接引用的过程。事实上，解析操作往往会伴随着JVM在执行完初始化之后再执行。直接引用就是直接指向目标的指针、相对偏移量或一个间接定位到目标的句柄。</p>
+<p>解析动作主要针对类或接口、字段、类方法、接口方法、方法类型等。对应常量池中的CONSTANT Class info、CONSTANT Fieldref info、CONSTANT Methodref info等。</p>
+<p>初始化：</p>
+<p>主要通过执行类构造器的<clinit>方法为类进行初始化。<clinit>方法是在编译阶段由编译器自动收集类中静态语句块和变量的赋值操作组成的。在准备阶段，类中静态成员变量已经完成了默认初始化，而在初始化阶段，<clinit>方法将对静态成员变量进行显示初始化。</clinit></clinit></clinit></p>
+<h3><span id="类加载器">类加载器</span></h3><h3><span id="类加载机制">类加载机制</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.30.58.png">
+
+
+
+<p>双亲委派机制</p>
+<p>Java虚拟机对class文件采用的是按需加载的方式，也就是说当需要使用该类时才会将它的class文件加载到内存生成class对象。而且加载某个类的class文件时，Java虚拟机采用的是双亲委派模式，即把请求交由父类处理，它是一种任务委派模式。</p>
+<p>双亲委派机制指一个类在收到类加载请求后不会尝试自己加载这个类，而是把该类加载请求向上委派给其父类去完成，其父类在接收到该类加载请求后又会将其委派给自己的父类，以此类推，这样所有的类加载请求都被向上委派到启动类加载器中。若父类加载器在接收到类加载请求后发现自己也无法加载该类（通常原因是该类的 Class 文件在父类的类加载路径中不存在），则父类会将该信息反馈给子类并向下委派子类加载器加载该类，直到该类被成功加载，若找不到该类，则 JVM 会抛出 ClassNotFoud 异常。</p>
+<h2><span id="内存">内存</span></h2><h3><span id="内存划分">内存划分</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.43.34.png">
+
+
+
+
+
+<p>当我们通过前面的：类的加载 → 验证 → 准备 → 解析 → 初始化 这几个阶段完成后，执行引擎就会对我们的类进行使用，同时执行引擎将会使用到我们的运行时数据区。</p>
+<p>　　运行时数据区处在JVM 的内存区域。我们通过磁盘或者网络IO得到的数据，都需要先加载到内存中，然后CPU从内存中获取数据进行读取，也就是说内存充当了CPU和磁盘之间的桥梁。</p>
+<p>　　JVM 的运行时数据区分为<strong>线程私有区域（程序计数器、虚拟机栈、本地方法栈）</strong>、</p>
+<p>​       <strong>线程共享区域（堆、方法区）</strong>和直接内存，如图所示：</p>
+<p><strong>方法区</strong>：</p>
+<p>在jdk7及以前，习惯上把方法区，称为永久代。jdk8开始，使用元空间取代了永久代。</p>
+<p>JDK 1.8后，元空间存放在堆外内存中。它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码缓存等</p>
+<p><strong>程序计数器：</strong>存储指向下一条指令的地址</p>
+<p>本地方法栈： 执行native 方法，Native Method Stack 中登记 native方法</p>
+<img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.43.41.png">
+
+
+
+<h3><span id="heap划分">heap划分</span></h3><p>堆内存划分</p>
+<p>　　Minor GC：新生代的GC。</p>
+<p>　　Major GC：老年代的GC。</p>
+<p>　　Full GC：整堆收集，收集整个Java堆和方法区的垃圾收集</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-Xms10m：设置最小堆内存为10M。</span><br><span class="line">-Xmx10m：设置最大堆内存为10M。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 18.12.03.png">
+
+
+
+
+
+<h3><span id="memoryerror">MemoryError</span></h3><img src="/2023/07/20/java/jvm/jvm_basic/截屏2023-07-20 17.44.39.png">
+
+
+
+
+
+
+
+
+
+<h2><span id="gc">GC</span></h2><p>。。。。</p>
+<h2><span id="references">References</span></h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ruoli-0/p/13882894.html#_label5">java jvm 博客园</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/20/java/jvm/jvm_basic/" data-id="clkbsqtpj0000ss9acl8q6m2i" data-title="jvm_basic" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/" rel="tag">java</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-java/concurrent/jiketime_java并发" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/" class="article-date">
@@ -1705,444 +1880,6 @@
 
 
   
-    <article id="post-bigdata/spark/spark3/20230707_spark_data_format" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/07/bigdata/spark/spark3/20230707_spark_data_format/" class="article-date">
-  <time class="dt-published" datetime="2023-07-07T14:24:20.000Z" itemprop="datePublished">2023-07-07</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/07/bigdata/spark/spark3/20230707_spark_data_format/">20230707_spark_data_format</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <!-- toc -->
-
-<ul>
-<li><a href="#datasource">DataSource</a><ul>
-<li><a href="#%E9%80%9A%E7%94%A8optition%E8%AE%BE%E7%BD%AE">通用Optition设置</a></li>
-</ul>
-</li>
-<li><a href="#paquet">Paquet</a><ul>
-<li><a href="#mergeschema">mergeSchema</a><ul>
-<li><a href="#merge-schema-test">Merge Schema Test</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#orc">ORC</a><ul>
-<li><a href="#mergeschema-1">mergeSchema</a><ul>
-<li><a href="#merge-schema-test-1">Merge Schema Test</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#json">JSON</a></li>
-<li><a href="#csv">CSV</a></li>
-<li><a href="#text">Text</a></li>
-<li><a href="#hive">HIVE</a><ul>
-<li><a href="#conncet">Conncet</a><ul>
-<li><a href="#sparksession">SparkSession</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
-</ul>
-</li>
-<li><a href="#hive-%E5%8F%82%E6%95%B0">Hive 参数</a></li>
-<li><a href="#%E5%88%9B%E5%BB%BAhive-%E8%A1%A8">创建Hive 表</a></li>
-<li><a href="#hive-%E5%86%85%E9%83%A8%E8%A1%A8-%E5%A4%96%E9%83%A8%E8%A1%A8-%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA%E8%A1%A8">Hive 内部表、外部表、动态分区表</a></li>
-<li><a href="#sql-hive%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA">SQL Hive动态分区</a></li>
-<li><a href="#%E5%A4%96%E9%83%A8%E8%A1%A8strogehandler">外部表StrogeHandler</a></li>
-</ul>
-</li>
-<li><a href="#jdbc">JDBC</a><ul>
-<li><a href="#connect">Connect</a><ul>
-<li><a href="#option">Option</a></li>
-</ul>
-</li>
-<li><a href="#sql">SQL</a></li>
-<li><a href="#scala">Scala</a></li>
-</ul>
-</li>
-<li><a href="#avro">Avro</a><ul>
-<li><a href="#%E5%8F%82%E6%95%B0">参数</a></li>
-<li><a href="#read">Read</a></li>
-</ul>
-</li>
-<li><a href="#protobuf-data">Protobuf Data</a></li>
-</ul>
-<!-- tocstop -->
-
-<h2><span id="datasource">DataSource</span></h2><h3><span id="通用optition设置">通用Optition设置</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">examples/src/main/resources/dir1</span><br><span class="line">├── dir2</span><br><span class="line">│   └── file2.parquet</span><br><span class="line">├── file1.parquet</span><br><span class="line">└── file3.json</span><br><span class="line"></span><br><span class="line">#ignoreCorruptFiles 忽略不规范文件, 直接跳过file3.json</span><br><span class="line">    val testCorruptDF0  = spark.read.option(&quot;ignoreCorruptFiles&quot;, &quot;true&quot;)</span><br><span class="line">    .parquet(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1/&quot;,</span><br><span class="line">    &quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1/dir2/&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#递归查找parquet</span><br><span class="line">val recursiveLoadedDF = spark.read.format(&quot;parquet&quot;)</span><br><span class="line">  .option(&quot;recursiveFileLookup&quot;, &quot;true&quot;)</span><br><span class="line">  .option(&quot;ignoreCorruptFiles&quot;, &quot;true&quot;)</span><br><span class="line">  .load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1&quot;)</span><br><span class="line">  </span><br><span class="line"># 模式匹配, 找到路径下的所有parquet文件</span><br><span class="line">val testGlobFilterDF = spark.read.format(&quot;parquet&quot;)</span><br><span class="line">  .option(&quot;pathGlobFilter&quot;, &quot;*.parquet&quot;) // json file should be filtered out</span><br><span class="line">  .load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/dir1&quot;)</span><br><span class="line">testGlobFilterDF.show()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="paquet">Paquet</span></h2><p><a target="_blank" rel="noopener" href="https://parquet.apache.org/">Parquet</a> is a columnar format that is supported by many other data processing systems. Spark SQL provides support for both reading and writing Parquet files that automatically preserves the schema of the original data. </p>
-<p>spark.sql.parquet.enableVectorizedReader 向量化读取</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">/</span><span class="operator">/</span> Hive metastore Parquet <span class="keyword">table</span>  parquet元数据刷新</span><br><span class="line">REFRESH <span class="keyword">TABLE</span> my_table;</span><br><span class="line">spark.catalog.refreshTable(&quot;my_table&quot;)</span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="mergeschema">mergeSchema</span></h3><p>spark.sql.parquet.mergeSchema</p>
-<p>schema自动合并，自动扩展 识别到新的字段，相当于实现自动添加新字段，默认是关闭的</p>
-<p>schema merging is a relatively expensive operation, and is not a necessity in most cases, we turned it off by default starting from 1.5.0.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">When true, the Parquet data source merges schemas collected from all data files, otherwise the schema is picked from the summary file or a random data file if no summary file is available.</span><br></pre></td></tr></table></figure>
-
-<h4><span id="merge-schema-test">Merge Schema Test</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">// This is used to implicitly convert an RDD to a DataFrame.</span><br><span class="line">import spark.implicits._</span><br><span class="line"></span><br><span class="line">// Create a simple DataFrame, store into a partition directory</span><br><span class="line">val squaresDF = spark.sparkContext.makeRDD(1 to 5).map(i =&gt; (i, i * i)).toDF(&quot;value&quot;, &quot;square&quot;)</span><br><span class="line">squaresDF.write.parquet(&quot;/tmp/parquet/test_table/key=1&quot;)</span><br><span class="line"></span><br><span class="line">// Create another DataFrame in a new partition directory,</span><br><span class="line">// adding a new column and dropping an existing column</span><br><span class="line">val cubesDF = spark.sparkContext.makeRDD(6 to 10).map(i =&gt; (i, i * i * i)).toDF(&quot;value&quot;, &quot;cube&quot;)</span><br><span class="line">cubesDF.write.parquet(&quot;/tmp/parquet/test_table/key=2&quot;)</span><br><span class="line"></span><br><span class="line">// Read the partitioned table</span><br><span class="line">val mergedDF = spark.read.option(&quot;mergeSchema&quot;, &quot;true&quot;).parquet(&quot;/tmp/parquet/test_table&quot;)</span><br><span class="line">mergedDF.printSchema()</span><br><span class="line"></span><br><span class="line">// The final schema consists of all 3 columns in the Parquet files together</span><br><span class="line">// with the partitioning column appeared in the partition directory paths</span><br><span class="line">// root</span><br><span class="line">//  |-- value: int (nullable = true)</span><br><span class="line">//  |-- square: int (nullable = true)</span><br><span class="line">//  |-- cube: int (nullable = true)</span><br><span class="line">//  |-- key: int (nullable = true)</span><br><span class="line"></span><br><span class="line">mergedDF.show()</span><br><span class="line">+-----+------+----+---+</span><br><span class="line">|value|square|cube|key|</span><br><span class="line">+-----+------+----+---+</span><br><span class="line">|    1|     1|null|  1|</span><br><span class="line">|    2|     4|null|  1|</span><br><span class="line">|    4|    16|null|  1|</span><br><span class="line">|    5|    25|null|  1|</span><br><span class="line">|    3|     9|null|  1|</span><br><span class="line">|    6|  null| 216|  2|</span><br><span class="line">|    7|  null| 343|  2|</span><br><span class="line">|    8|  null| 512|  2|</span><br><span class="line">|    9|  null| 729|  2|</span><br><span class="line">|   10|  null|1000|  2|</span><br><span class="line"></span><br><span class="line"># mergeSchema 默认关闭</span><br><span class="line">val mergedDF = spark.read.parquet(&quot;/tmp/parquet/test_table&quot;)</span><br><span class="line">mergedDF.show()</span><br><span class="line">// show 结果如下</span><br><span class="line">|value|square|key|</span><br><span class="line">+-----+------+---+</span><br><span class="line">|    1|     1|  1|</span><br><span class="line">|    2|     4|  1|</span><br><span class="line">|    4|    16|  1|</span><br><span class="line">|    5|    25|  1|</span><br><span class="line">|    3|     9|  1|</span><br><span class="line">|    6|  null|  2|</span><br><span class="line">|    7|  null|  2|</span><br><span class="line">|    8|  null|  2|</span><br><span class="line">|    9|  null|  2|</span><br><span class="line">|   10|  null|  2|</span><br><span class="line">+-----+------+---+</span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="orc">ORC</span></h2><p><a target="_blank" rel="noopener" href="https://orc.apache.org/">Apache ORC</a> is a columnar format which has more advanced features like native zstd compression, bloom filter and columnar encryption.  支持zstd压缩,  bloom过滤器和列加密</p>
-<p>spark.sql.orc.enableVectorizedReader 向量化读取</p>
-<h3><span id="mergeschema">mergeSchema</span></h3><p>spark.sql.orc.mergeSchema</p>
-<p>schema自动合并，自动扩展 识别到新的字段，相当于实现自动添加新字段，默认是关闭的</p>
-<p>schema merging is a relatively expensive operation, and is not a necessity in most cases, we turned it off by default.</p>
-<ol>
-<li>setting data source option <code>mergeSchema</code> to <code>true</code> when reading ORC files, or</li>
-<li>setting the global SQL option <code>spark.sql.orc.mergeSchema</code> to <code>true</code></li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">When true, the ORC data source merges schemas collected from all data files, otherwise the schema is picked from a random data file.</span><br></pre></td></tr></table></figure>
-
-<h4><span id="merge-schema-test">Merge Schema Test</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">// This is used to implicitly convert an RDD to a DataFrame.</span><br><span class="line">import spark.implicits._</span><br><span class="line"></span><br><span class="line">// Create a simple DataFrame, store into a partition directory</span><br><span class="line">val squaresDF = spark.sparkContext.makeRDD(1 to 5).map(i =&gt; (i, i * i)).toDF(&quot;value&quot;, &quot;square&quot;)</span><br><span class="line">squaresDF.write.orc(&quot;/tmp/orc/test_table/key=1&quot;)</span><br><span class="line"></span><br><span class="line">// Create another DataFrame in a new partition directory,</span><br><span class="line">// adding a new column and dropping an existing column</span><br><span class="line">val cubesDF = spark.sparkContext.makeRDD(6 to 10).map(i =&gt; (i, i * i * i)).toDF(&quot;value&quot;, &quot;cube&quot;)</span><br><span class="line">cubesDF.write.mode(&quot;overwrite&quot;).orc(&quot;/tmp/orc/test_table/key=2&quot;)</span><br><span class="line"></span><br><span class="line">// Read the partitioned table</span><br><span class="line">val mergedDF = spark.read.option(&quot;mergeSchema&quot;, &quot;true&quot;).orc(&quot;/tmp/orc/test_table&quot;)</span><br><span class="line">mergedDF.printSchema()</span><br><span class="line"></span><br><span class="line">// The final schema consists of all 3 columns in the Parquet files together</span><br><span class="line">// with the partitioning column appeared in the partition directory paths</span><br><span class="line">// root</span><br><span class="line">//  |-- value: int (nullable = true)</span><br><span class="line">//  |-- square: int (nullable = true)</span><br><span class="line">//  |-- cube: int (nullable = true)</span><br><span class="line">//  |-- key: int (nullable = true)</span><br><span class="line"></span><br><span class="line">mergedDF.show()</span><br><span class="line">+-----+------+----+---+</span><br><span class="line">|value|square|cube|key|</span><br><span class="line">+-----+------+----+---+</span><br><span class="line">|    1|     1|null|  1|</span><br><span class="line">|    2|     4|null|  1|</span><br><span class="line">|    4|    16|null|  1|</span><br><span class="line">|    5|    25|null|  1|</span><br><span class="line">|    3|     9|null|  1|</span><br><span class="line">|    6|  null| 216|  2|</span><br><span class="line">|    7|  null| 343|  2|</span><br><span class="line">|    8|  null| 512|  2|</span><br><span class="line">|    9|  null| 729|  2|</span><br><span class="line">|   10|  null|1000|  2|</span><br><span class="line"></span><br><span class="line"># mergeSchema 默认关闭</span><br><span class="line">val mergedDF = spark.read.orc(&quot;/tmp/orc/test_table&quot;)</span><br><span class="line">mergedDF.show()</span><br><span class="line">// show 结果如下</span><br><span class="line">|value|square|key|</span><br><span class="line">+-----+------+---+</span><br><span class="line">|    1|     1|  1|</span><br><span class="line">|    2|     4|  1|</span><br><span class="line">|    4|    16|  1|</span><br><span class="line">|    5|    25|  1|</span><br><span class="line">|    3|     9|  1|</span><br><span class="line">|    6|  null|  2|</span><br><span class="line">|    7|  null|  2|</span><br><span class="line">|    8|  null|  2|</span><br><span class="line">|    9|  null|  2|</span><br><span class="line">|   10|  null|  2|</span><br><span class="line">+-----+------+---+</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-<h2><span id="json">JSON</span></h2><p> Spark SQL automatically infer the schema of a JSON dataset and load it as a <code>Dataset[Row]</code>.</p>
-<h2><span id="csv">CSV</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// Read a csv with delimiter and a header</span><br><span class="line">val df3 = spark.read.option(&quot;delimiter&quot;, &quot;;&quot;).option(&quot;header&quot;, &quot;true&quot;).csv(path)</span><br><span class="line">df3.show(</span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="text">Text</span></h2><h2><span id="hive">HIVE</span></h2><h3><span id="conncet">Conncet</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-hive_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-
-<h4><span id="sparksession">SparkSession</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">  #config hive support</span><br><span class="line">  </span><br><span class="line">  val spark = SparkSession</span><br><span class="line">      .builder()</span><br><span class="line">      .appName(&quot;Spark SQL basic example&quot;)</span><br><span class="line">      .master(&quot;local[3]&quot;)</span><br><span class="line">      .config(&quot;spark.some.config.option&quot;, &quot;some-value&quot;)</span><br><span class="line">//      .config(&quot;spark.sql.catalogImplementation&quot;, &quot;hive&quot;)</span><br><span class="line">      .enableHiveSupport()  //&quot;spark.sql.catalogImplementation&quot;  &quot;hive&quot;</span><br><span class="line">      .getOrCreate()</span><br><span class="line">      </span><br><span class="line">   import spark.implicits._</span><br><span class="line">   import spark.sql</span><br></pre></td></tr></table></figure>
-
-<h4><span id="配置文件">配置文件</span></h4><p>配置Hive-site.xml</p>
-<p>copy  hive-site.xml   $SPARK_HOME&#x2F;conf</p>
-<p>mac本地连接配置xml：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spark.sparkContext.hadoopConfiguration.addResource(new Path(&quot;*/hive-site.xml&quot;))</span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="hive-参数">Hive 参数</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 动态分区设置</span><br><span class="line">hive.exec.dynamic.partition=true; 是开启动态分区</span><br><span class="line">hive.exec.dynamic.partition.mode=nonstrict; 这个属性默认值是strict,就是要求分区字段必须有一个是静态的分区值，随后会讲到，当前设置为nonstrict,那么可以全部动态分区</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="创建hive-表">创建Hive 表</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">import java.io.File</span><br><span class="line"></span><br><span class="line">import org.apache.spark.sql.&#123;Row, SaveMode, SparkSession&#125;</span><br><span class="line"></span><br><span class="line">case class Record(key: Int, value: String)</span><br><span class="line"></span><br><span class="line">// warehouseLocation points to the default location for managed databases and tables</span><br><span class="line">val warehouseLocation = new File(&quot;spark-warehouse&quot;).getAbsolutePath</span><br><span class="line"></span><br><span class="line">val spark = SparkSession</span><br><span class="line">  .builder()</span><br><span class="line">  .appName(&quot;Spark Hive Example&quot;)</span><br><span class="line">  .config(&quot;spark.sql.warehouse.dir&quot;, warehouseLocation)</span><br><span class="line">  .enableHiveSupport()</span><br><span class="line">  .getOrCreate()</span><br><span class="line"></span><br><span class="line">import spark.implicits._</span><br><span class="line">import spark.sql</span><br><span class="line"></span><br><span class="line">sql(&quot;use test_zhou&quot;)</span><br><span class="line">sql(&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive&quot;)</span><br><span class="line">sql(&quot;LOAD DATA LOCAL INPATH &#x27;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/kv1.txt&#x27; INTO TABLE src&quot;)</span><br><span class="line"></span><br><span class="line">// Queries are expressed in HiveQL</span><br><span class="line">sql(&quot;SELECT * FROM src&quot;).show()</span><br><span class="line">// +---+-------+</span><br><span class="line">// |key|  value|</span><br><span class="line">// +---+-------+</span><br><span class="line">// |238|val_238|</span><br><span class="line">// | 86| val_86|</span><br><span class="line">// |311|val_311|</span><br><span class="line">// ...</span><br><span class="line"></span><br><span class="line">// Aggregation queries are also supported.</span><br><span class="line">sql(&quot;SELECT COUNT(*) FROM src&quot;).show()</span><br><span class="line">// +--------+</span><br><span class="line">// |count(1)|</span><br><span class="line">// +--------+</span><br><span class="line">// |    500 |</span><br><span class="line">// +--------+</span><br><span class="line"></span><br><span class="line">// The results of SQL queries are themselves DataFrames and support all normal functions.</span><br><span class="line">val sqlDF = sql(&quot;SELECT key, value FROM src WHERE key &lt; 10 ORDER BY key&quot;)</span><br><span class="line"></span><br><span class="line">// The items in DataFrames are of type Row, which allows you to access each column by ordinal.</span><br><span class="line">val stringsDS = sqlDF.map &#123;</span><br><span class="line">  case Row(key: Int, value: String) =&gt; s&quot;Key: $key, Value: $value&quot;</span><br><span class="line">&#125;</span><br><span class="line">stringsDS.show()</span><br><span class="line">// +--------------------+</span><br><span class="line">// |               value|</span><br><span class="line">// +--------------------+</span><br><span class="line">// |Key: 0, Value: val_0|</span><br><span class="line">// |Key: 0, Value: val_0|</span><br><span class="line">// |Key: 0, Value: val_0|</span><br><span class="line">// ...</span><br><span class="line"></span><br><span class="line">// You can also use DataFrames to create temporary views within a SparkSession.</span><br><span class="line">val recordsDF = spark.createDataFrame((1 to 100).map(i =&gt; Record(i, s&quot;val_$i&quot;)))</span><br><span class="line">recordsDF.createOrReplaceTempView(&quot;records&quot;)</span><br><span class="line"></span><br><span class="line">// Queries can then join DataFrame data with data stored in Hive.</span><br><span class="line">sql(&quot;SELECT * FROM records r JOIN src s ON r.key = s.key&quot;).show()</span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="hive-内部表-外部表-动态分区表">Hive 内部表、外部表、动态分区表</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">//内部表</span><br><span class="line">// Create a Hive managed Parquet table, with HQL syntax instead of the Spark SQL native syntax</span><br><span class="line">// `USING hive`</span><br><span class="line">sql(&quot;CREATE TABLE hive_records(key int, value string) STORED AS PARQUET&quot;)</span><br><span class="line">// Save DataFrame to the Hive managed table</span><br><span class="line">val df = spark.table(&quot;src&quot;)</span><br><span class="line">df.write.mode(SaveMode.Overwrite).saveAsTable(&quot;hive_records&quot;)</span><br><span class="line">// After insertion, the Hive managed table has data now</span><br><span class="line">sql(&quot;SELECT * FROM hive_records&quot;).show()</span><br><span class="line"></span><br><span class="line">//外部表</span><br><span class="line">// Prepare a Parquet data directory</span><br><span class="line">val dataDir = &quot;/tmp/parquet_data&quot;</span><br><span class="line">spark.range(10).write.parquet(dataDir)</span><br><span class="line">// Create a Hive external Parquet table</span><br><span class="line">sql(s&quot;CREATE EXTERNAL TABLE hive_bigints(id bigint) STORED AS PARQUET LOCATION &#x27;$dataDir&#x27;&quot;)</span><br><span class="line">// The Hive external table should already have data</span><br><span class="line">sql(&quot;SELECT * FROM hive_bigints&quot;).show()</span><br><span class="line"></span><br><span class="line">//分区表</span><br><span class="line">// Turn on flag for Hive Dynamic Partitioning</span><br><span class="line">spark.sqlContext.setConf(&quot;hive.exec.dynamic.partition&quot;, &quot;true&quot;)</span><br><span class="line">spark.sqlContext.setConf(&quot;hive.exec.dynamic.partition.mode&quot;, &quot;nonstrict&quot;)</span><br><span class="line">// Create a Hive partitioned table using DataFrame API   </span><br><span class="line">//创建hive分区表, 指定format hive, 输出格式为text</span><br><span class="line">//查看schema: CREATE TABLE hive_part_tbl (value STRING,key INT)USING text PARTITIONED BY (key)</span><br><span class="line">df.write.partitionBy(&quot;key&quot;).format(&quot;hive&quot;).saveAsTable(&quot;hive_part_tbl&quot;)</span><br><span class="line">// Partitioned column `key` will be moved to the end of the schema, 分区列移动到schema尾部</span><br><span class="line">sql(&quot;SELECT * FROM hive_part_tbl&quot;).show()</span><br><span class="line"></span><br><span class="line">//创建spark分区表, 如果不指定format hive, 默认格式parquet</span><br><span class="line">// 输出目录多了一个_SUCCESS文件, 输出snappy.parquet格式</span><br><span class="line">// 查看schema: CREATE TABLE hive_part_tb2 (value STRING,key INT)USING parquet PARTITIONED BY (key)</span><br><span class="line">df.write.partitionBy(&quot;key&quot;).saveAsTable(&quot;hive_part_tb2&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//Spark SQL native syntax spark sql 原生(内置)语法创建 hive分区表</span><br><span class="line">CREATE external TABLE hive_part_tbl (value STRING,key INT)USING text PARTITIONED BY (key)</span><br><span class="line"></span><br><span class="line">//hive 语法 （hive HQL syntax ）创建 hive分区表</span><br><span class="line">//分区字段不能是表中已经存在的数据，可以将分区字段看作表的伪列</span><br><span class="line">CREATE external TABLE hive_par_tess(value STRING) STORED AS  textfile PARTITIONED BY (key INT) location &#x27;/user/hive/warehouse/test_zhou.db/hive_part_tbl&#x27;</span><br><span class="line"></span><br><span class="line">spark.sql(&quot;msck repair table hive_par_tess&quot;).show  //外部表 元数据刷新之后, 才能查看到数据</span><br><span class="line"></span><br><span class="line">#这种写法是错误的, 分区字段key不能写在前面ddl字段定义里, 要写在PARTITIONED By 后面, 和spark sql写法不同</span><br><span class="line">CREATE external TABLE hive_par_tess2(value STRING, key INT) STORED AS  textfile PARTITIONED BY (key INT) location &#x27;/user/hive/warehouse/test_zhou.db/hive_part_tbl&#x27;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="sql-hive动态分区">SQL Hive动态分区</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">create table test_part2(id int, name string) </span><br><span class="line">partitioned by (country string, province string );</span><br><span class="line"></span><br><span class="line">--静态分区 指定分区字段的值</span><br><span class="line">insert into table test_part2 partition(country=&#x27;china&#x27;, province=&#x27;sh&#x27;)  select id, name from test_part1 where id = 1 and name = &#x27;lisa&#x27;;</span><br><span class="line"></span><br><span class="line">insert into table test_part2 partition(country=&#x27;china&#x27;, province=&#x27;zj&#x27;)  values(2, &#x27;dal&#x27;)</span><br><span class="line">insert into table test_part2 partition(country=&#x27;china&#x27;, province=&#x27;zj&#x27;) select 2 as id, &#x27;cate&#x27; as name</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--半动态分区(一部分静态分区 + 一部分动态分区)</span><br><span class="line">set hive.exec.dynamici.partition=true;</span><br><span class="line"></span><br><span class="line">insert into table test_part2 partition(country=&#x27;china&#x27;, province)  select 2 as id, &#x27;cate&#x27; as name, &#x27;js&#x27; as province;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--全动态分区</span><br><span class="line">set hive.exec.dynamici.partition=true;</span><br><span class="line">set hive.exec.dynamic.partition.mode=nonstrict;</span><br><span class="line"></span><br><span class="line">insert into table test_part2 partition(country, province)  select 2 as id, &#x27;cate&#x27; as name, &#x27;american&#x27; as country,  &#x27;js&#x27; as province;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bin/spark-sql \</span><br><span class="line">--conf spark.hadoop.hive.exec.dynamic.partition=true   \</span><br><span class="line">--conf spark.hadoop.hive.exec.dynamic.partition.mode=nonstrict</span><br><span class="line"></span><br><span class="line">insert into table test_part2 partition(country, province)  select 2 as id, &#x27;cate&#x27; as name, &#x27;american&#x27; as country,  &#x27;tez&#x27; as province;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bin/spark-shell   \</span><br><span class="line">--conf spark.hadoop.hive.exec.dynamic.partition=true   \</span><br><span class="line">--conf spark.hadoop.hive.exec.dynamic.partition.mode=nonstrict</span><br><span class="line"></span><br><span class="line">spark.sql(&quot;insert into table test_zhou.test_part2 partition(country, province)  select 2 as id, &#x27;cate&#x27; as name, &#x27;american&#x27; as country,  &#x27;newyork&#x27; as province&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="外部表strogehandler">外部表StrogeHandler</span></h3><p>外部表StrogeHandler使用</p>
-<p>目前(Spark 3.4.1 ) spark sql原生内置sql语法还不支持使用Hive storage handler 建表，如果需要使用，</p>
-<p>先通过hive建表，再使用Spark sql读取数据( Hive storage handler is not supported yet when creating table, you can create a table using storage handler at Hive side, and use Spark SQL to read it.)</p>
-<p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/hadoop/current/hive.html">创建ES外部表</a></p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#待实践</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">EXTERNAL</span> <span class="keyword">TABLE</span> artists (...)</span><br><span class="line">STORED <span class="keyword">BY</span> <span class="string">&#x27;org.elasticsearch.hadoop.hive.EsStorageHandler&#x27;</span></span><br><span class="line">TBLPROPERTIES(<span class="string">&#x27;es.resource&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;radio/artists&#x27;</span>,</span><br><span class="line">              <span class="string">&#x27;es.index.auto.create&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;false&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<p><strong>创建HBase外部表</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#待实践</span><br><span class="line">create external table tb2_cp (</span><br><span class="line">name string,</span><br><span class="line">age int,</span><br><span class="line">addr string</span><br><span class="line">)</span><br><span class="line">STORED BY ‘org.apache.hadoop.hive.hbase.HBaseStorageHandler’</span><br><span class="line">WITH SERDEPROPERTIES (“hbase.columns.mapping” = “:key, cf:age, cf:addr”)</span><br><span class="line">TBLPROPERTIES (“hbase.table.name” = “test_tb2”);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="jdbc">JDBC</span></h2><h3><span id="connect">Connect</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;mysql&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;$&#123;mysqlConnectorVersion&#125;&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4><span id="option">Option</span></h4><p>prepareQuery 执行读取数据前，先执行此语句，相当于预处理</p>
-<p>fetchsize  一次读取行数</p>
-<p>batchsize  批量一次写入行数，默认1000</p>
-<h3><span id="sql">SQL</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CREATE TEMPORARY VIEW mysql_users_view</span><br><span class="line">USING org.apache.spark.sql.jdbc</span><br><span class="line">OPTIONS (</span><br><span class="line">  url &quot;jdbc:mysql://localhost&quot;,</span><br><span class="line">  dbtable &quot;test_zhou.users&quot;,</span><br><span class="line">  user &#x27;***&#x27;,</span><br><span class="line">  password &#x27;***&#x27;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<h3><span id="scala">Scala</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">//read jdbc</span><br><span class="line">val df1 = spark</span><br><span class="line">      .read</span><br><span class="line">      .format(&quot;jdbc&quot;)</span><br><span class="line">      .option(&quot;driver&quot;, &quot;com.mysql.cj.jdbc.Driver&quot;)</span><br><span class="line">      .option(&quot;url&quot;, &quot;jdbc:mysql://127.0.0.1:3306/test_zhou?characterEncoding=utf8&quot;)</span><br><span class="line">      .option(&quot;dbtable&quot;, &quot;users&quot;)</span><br><span class="line">      .option(&quot;user&quot;, &quot;**&quot;)</span><br><span class="line">      .option(&quot;password&quot;, &quot;***&quot;)</span><br><span class="line">      .option(&quot;abc&quot;, &quot;def&quot;)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">//read jdbc:  dbtable = subquey 指定一个子查询</span><br><span class="line">val df1 = spark</span><br><span class="line">      .read</span><br><span class="line">      .format(&quot;jdbc&quot;)</span><br><span class="line">      .option(&quot;driver&quot;, &quot;com.mysql.cj.jdbc.Driver&quot;)</span><br><span class="line">      .option(&quot;url&quot;, &quot;jdbc:mysql://127.0.0.1:3306/test_zhou?characterEncoding=utf8&quot;)</span><br><span class="line">      .option(&quot;dbtable&quot;, &quot;(select id, name from users) as subq&quot;)</span><br><span class="line">      .option(&quot;user&quot;, &quot;**&quot;)</span><br><span class="line">      .option(&quot;password&quot;, &quot;**&quot;)</span><br><span class="line">      .option(&quot;abc&quot;, &quot;def&quot;)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">//并行多分区同时读取 jdbc, 指定分区列</span><br><span class="line">spark.read.format(&quot;jdbc&quot;)</span><br><span class="line">.option(&quot;url&quot;, jdbcUrl)</span><br><span class="line">.option(&quot;dbtable&quot;, &quot;(select c1, c2 from t1) as subq&quot;)</span><br><span class="line">.option(&quot;partitionColumn&quot;, &quot;c1&quot;)</span><br><span class="line">.option(&quot;lowerBound&quot;, &quot;1&quot;)</span><br><span class="line">.option(&quot;upperBound&quot;, &quot;100&quot;)</span><br><span class="line">.option(&quot;numPartitions&quot;, &quot;3&quot;)</span><br><span class="line">.load()</span><br><span class="line"></span><br><span class="line">//并行多分区同时读取 jdbc</span><br><span class="line">val url = &quot;jdbc:mysql://127.0.0.1:3306/test_zhou?characterEncoding=utf8&quot;</span><br><span class="line">val table = &quot;(select * from test_zhou.users) E&quot;</span><br><span class="line">//每个条件对应一个partition数据, 对应一个task</span><br><span class="line">val partitionStr = &quot;id&lt;13 or id is null,  13&lt;=id and id &lt;18, id&gt;=18&quot;</span><br><span class="line">val partitionArray = partitionStr.split(&quot;,&quot;).map(_.trim)</span><br><span class="line">val javaProps = new java.util.Properties</span><br><span class="line">javaProps.put(&quot;user&quot;, &quot;root&quot;)</span><br><span class="line">javaProps.put(&quot;password&quot;, &quot;Zoom@123&quot;)</span><br><span class="line">val df = spark.read.jdbc(url, table, partitionArray, javaProps)</span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//write jdbc</span><br><span class="line">// Saving data to a JDBC source</span><br><span class="line">jdbcDF.write</span><br><span class="line">  .format(&quot;jdbc&quot;)</span><br><span class="line">  .option(&quot;url&quot;, &quot;jdbc:postgresql:dbserver&quot;)</span><br><span class="line">  .option(&quot;dbtable&quot;, &quot;schema.tablename&quot;)</span><br><span class="line">  .option(&quot;user&quot;, &quot;username&quot;)</span><br><span class="line">  .option(&quot;password&quot;, &quot;password&quot;)</span><br><span class="line">  .save()</span><br><span class="line"></span><br><span class="line">//写入时 指定table schema</span><br><span class="line">// Specifying create table column data types on write</span><br><span class="line">jdbcDF.write</span><br><span class="line">  .option(&quot;createTableColumnTypes&quot;, &quot;name CHAR(64), comments VARCHAR(1024)&quot;)</span><br><span class="line">  .jdbc(&quot;jdbc:postgresql:dbserver&quot;, &quot;schema.tablename&quot;, connectionProperties)</span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="avro">Avro</span></h2><p>Avro is built-in but external data source module since Spark 2.4</p>
-<p>（schema和data分两部分存储，文件头部存储schema， 数据本身存储为二进制格式）</p>
-<p>行式存储，写入速度快，文件可拆分，可压缩，可以独立地添加新的字段</p>
-<p>是一种基于行的、可高度拆分的数据格式</p>
-<p>为了最大程度地减小文件大小、并提高效率，它将schema存储为JSON格式，而将数据存储为二进制格式</p>
-<ul>
-<li>Avro是一种与语言无关的数据序列化。</li>
-<li>Avro将schema存储在文件的标题中，因此数据具有自描述性。</li>
-<li>Avro格式的文件既可以被拆分、又可以被压缩，因此非常适合于在Hadoop生态系统中进行数据的存储。</li>
-<li>由于Avro文件将负责读取的schema与负责写入的schema区分开来，因此它可以独立地添加新的字段。</li>
-<li>与序列文件(Sequence Files)相同，为了实现高度可拆分性，Avro文件也包含了用于分隔不同块(block)的同步标记。</li>
-<li>可以使用诸如snappy之类的压缩格式，来压缩不同的目标块。</li>
-</ul>
-<h3><span id="参数">参数</span></h3><p>avroSchema </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.option(&quot;avroSchema&quot;, avroSchema)</span><br></pre></td></tr></table></figure>
-
-<p>cat examples&#x2F;src&#x2F;main&#x2F;resources&#x2F;user_1.avsc</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">&#123;&quot;namespace&quot;: &quot;example.avro&quot;,</span><br><span class="line"> &quot;type&quot;: &quot;record&quot;,</span><br><span class="line"> &quot;name&quot;: &quot;User&quot;,</span><br><span class="line"> &quot;fields&quot;: [</span><br><span class="line">     &#123;&quot;name&quot;: &quot;name&quot;, &quot;type&quot;: &quot;string&quot;&#125;,</span><br><span class="line">     &#123;&quot;name&quot;: &quot;favorite_color&quot;, &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;]&#125;,</span><br><span class="line">     &#123;&quot;type&quot;: &#123;&quot;items&quot;: &quot;int&quot;, &quot;type&quot;: &quot;array&quot;&#125;, &quot;name&quot;: &quot;favorite_numbers&quot;&#125;</span><br><span class="line"> ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># java 读取schema 文件</span><br><span class="line">import java.nio.file.&#123;Files, Paths&#125;</span><br><span class="line">val avroSchema = new String(Files.readAllBytes(Paths.get(&quot;/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/user_1.avsc&quot;)))</span><br><span class="line">val usersDF = spark.read.format(&quot;avro&quot;).load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/users.avro&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="read">Read</span></h3><p>The <code>spark-avro</code> module is external and not included in <code>spark-submit</code> or <code>spark-shell</code> by default.</p>
-<p>读取时需要指定依赖, 或者添加到spark classpath</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">./bin/spark-shell --packages org.apache.spark:spark-avro_2.12:3.4.1</span><br><span class="line"></span><br><span class="line">val usersDF = spark.read.format(&quot;avro&quot;).load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/users.avro&quot;)</span><br><span class="line"></span><br><span class="line">//write</span><br><span class="line">usersDF.select(&quot;name&quot;, &quot;favorite_color&quot;).write.format(&quot;avro&quot;).save(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/avro/namesAndFavColors.avro&quot;)</span><br><span class="line"></span><br><span class="line">usersDF.select(&quot;name&quot;, &quot;favorite_numbers&quot;).write.mode(&quot;overwrite&quot;).format(&quot;avro&quot;).save(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/avro/namesAndFavNums.avro&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">import java.nio.file.&#123;Files, Paths&#125;</span><br><span class="line">val avroSchema = new String(Files.readAllBytes(Paths.get(&quot;/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/user_1.avsc&quot;)))</span><br><span class="line"></span><br><span class="line"># 读取失败</span><br><span class="line">val usersDF = spark.read.format(&quot;avro&quot;)</span><br><span class="line">.option(&quot;recursiveFileLookup&quot;, &quot;true&quot;)</span><br><span class="line">.option(&quot;ignoreCorruptFiles&quot;,&quot;true&quot;)</span><br><span class="line">.option(&quot;avroSchema&quot;, avroSchema)</span><br><span class="line">.load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/examples/src/main/resources/avro&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="protobuf-data">Protobuf Data</span></h2><p>Since Spark 3.4.0 release, <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/sql-programming-guide.html">Spark SQL</a> provides built-in support for reading and writing protobuf data.</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/07/bigdata/spark/spark3/20230707_spark_data_format/" data-id="clk6akm6f0000lk9agn6d7e23" data-title="20230707_spark_data_format" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-bigdata/spark/sparksql/kyuubi/kyuubi_simple_usage" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/05/bigdata/spark/sparksql/kyuubi/kyuubi_simple_usage/" class="article-date">
-  <time class="dt-published" datetime="2023-07-05T04:28:09.000Z" itemprop="datePublished">2023-07-05</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/05/bigdata/spark/sparksql/kyuubi/kyuubi_simple_usage/">kyuubi_simple_usage</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <!-- toc -->
-
-<ul>
-<li><a href="#kyuubi-%E6%98%AF%E4%BB%80%E4%B9%88">kyuubi 是什么</a></li>
-<li><a href="#%E7%8E%AF%E5%A2%83-%E9%83%A8%E7%BD%B2kyuubi-080-rc2">环境 部署kyuubi-0.8.0-rc2</a><ul>
-<li><a href="#compile">Compile</a></li>
-<li><a href="#install">install</a><ul>
-<li><a href="#%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE">变量设置</a></li>
-<li><a href="#sparkkyuubiauthenticationnone">spark.kyuubi.authentication&#x3D;NONE</a><ul>
-<li><a href="#%E9%97%AE%E9%A2%98">问题</a></li>
-</ul>
-</li>
-<li><a href="#sparkkyuubiauthenticationkerberos">spark.kyuubi.authentication&#x3D;kerberos</a></li>
-<li><a href="#kerberos-ha">kerberos + ha</a></li>
-</ul>
-</li>
-<li><a href="#test">Test</a><ul>
-<li><a href="#connections">Connections</a></li>
-<li><a href="#problems">Problems</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#%E7%8E%AF%E5%A2%83-%E9%83%A8%E7%BD%B2kyuubi-120">环境 部署kyuubi-1.2.0</a><ul>
-<li><a href="#zookeeper">Zookeeper</a></li>
-<li><a href="#ha">HA</a></li>
-<li><a href="#configuration">Configuration</a></li>
-<li><a href="#hive">Hive</a></li>
-<li><a href="#source">Source</a><ul>
-<li><a href="#kyuubiserver">KyuubiServer</a></li>
-<li><a href="#sparksqlengine">SparkSQLEngine</a></li>
-<li><a href="#servicediscovery">ServiceDiscovery</a></li>
-</ul>
-</li>
-<li><a href="#debug">Debug</a><ul>
-<li><a href="#server-debug">server debug</a></li>
-<li><a href="#app-debug">App debug</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#references">References</a></li>
-</ul>
-<!-- tocstop -->
-
-<h2><span id="kyuubi-是什么">kyuubi 是什么</span></h2><p>Kyuubi is a distributed multi-tenant JDBC server for large-scale data processing and analytics, built on top of Apache Spark。</p>
-<p>Kyuubi has enhanced the Thrift JDBC&#x2F;ODBC Server in some ways for solving these existing problems, as shown in the following table.</p>
-<p>简单的来说，是spark thrift server 的增强版，增加了权限管控、动态资源扩展、多租户等等。</p>
-<h2><span id="环境-部署kyuubi-080-rc2">环境 部署kyuubi-0.8.0-rc2</span></h2><h3><span id="compile">Compile</span></h3><p><a target="_blank" rel="noopener" href="https://github.com/yaooqinn/kyuubi/tree/v0.8.0-rc2">Download</a></p>
-<p>Tag &gt; v0.8.0-rc2 以后，编译需要spark3.0, </p>
-<p>Tag &lt;&#x3D; v0.8.0-rc2 , 编译可在pom.xml文件中指定spark 2.*版本，也可以直接使用<a target="_blank" rel="noopener" href="https://github.com/yaooqinn/kyuubi/releases/tag/v0.8.0-rc2">github realease 包</a></p>
-<p>由于生产中使用了spark 2.4, 实际测试编译 使用了<strong>v0.8.0-rc2 版本</strong>进行编译。</p>
-<p>.&#x2F;build&#x2F;mvn clean package -DskipTests</p>
-<p>.&#x2F;build&#x2F;dist –tgz （.&#x2F;build&#x2F;dist –tgz -Pspark-2.4.0 这里指定了spark 版本，但是没有生效，可在pom文件指定）</p>
-<p>编译过程中，出现jar包pentaho-aggdesigner-algorithm&#x2F;5.1.5-jhyde 找不到，可以手动<a target="_blank" rel="noopener" href="http://conjars.org/repo/org/pentaho/pentaho-aggdesigner-algorithm/5.1.5-jhyde/">下载</a>至本地maven仓库中</p>
-<h3><span id="install">install</span></h3><h4><span id="变量设置">变量设置</span></h4><p>在 kyuubi_home&#x2F;bin&#x2F;kyuubi-env.sh中， 修改spark_home:</p>
-<p>export SPARK_HOME&#x3D;&#x2F;Users&#x2F;Kent&#x2F;Documents&#x2F;spark</p>
-<h4><span id="sparkkyuubiauthenticationx3dnone">spark.kyuubi.authentication&#x3D;NONE</span></h4><p>1、无任何认证的情况，启动kyuubi 服务</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode client \</span><br><span class="line">--driver-memory 2g \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">--conf spark.kyuubi.authentication=NONE \</span><br><span class="line">--conf spark.kyuubi.backend.session.check.interval=1s \</span><br><span class="line">--conf spark.kyuubi.backend.session.idle.timeout=0min</span><br><span class="line"></span><br><span class="line">bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode client \</span><br><span class="line">--driver-memory 2g \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">--conf spark.kyuubi.authentication=NONE \</span><br><span class="line">--conf spark.kyuubi.backend.session.check.interval=5s \</span><br><span class="line">--conf spark.kyuubi.backend.session.idle.timeout=1min</span><br><span class="line"></span><br><span class="line">bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode cluster \</span><br><span class="line">--driver-memory 2g \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">--conf spark.kyuubi.authentication=NONE \</span><br><span class="line">--conf spark.kyuubi.backend.session.check.interval=1s \</span><br><span class="line">--conf spark.kyuubi.backend.session.idle.timeout=0min</span><br></pre></td></tr></table></figure>
-
-
-
-<p>2、使用beeline 连接</p>
-<p>cd   $spark_home (spark version &#x3D; spark-2.4.0-bin-hadoop2.7)</p>
-<p>bin&#x2F;beeline</p>
-<p>!connect jdbc:hive2:&#x2F;&#x2F;192.168.1.110:10010</p>
-<p>!connect jdbc:hive2:&#x2F;&#x2F;10.26.119.144:10010</p>
-<p>hive ( or username)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">!connect jdbc:hive2://10.26.119.144:10010/;hive.server2.proxy.user=zhouqingfeng#spark.executor.instances=2;spark.executor.cores=1;spark.executor.memory=512m</span><br><span class="line"></span><br><span class="line">!connect jdbc:hive2://10.26.119.144:10010/;hive.server2.proxy.user=zhouqingfeng#spark.executor.instances=3;spark.executor.cores=1;spark.executor.memory=512m</span><br></pre></td></tr></table></figure>
-
-<h5><span id="问题">问题</span></h5><p>1、这里hive 的版本是1.2.1，版本太高，貌似也会有连接不上的问题。</p>
-<p>2、使用beeline 连接!connect jdbc:hive2:&#x2F;&#x2F;localhost:10010 一直提示连上不上: Connection refused (state&#x3D;08S01,code&#x3D;0)</p>
-<p>最后使用命令查看端口 10010，lsof -i tcp:10010，发现服务是正常的， 切换成端口显示的Ip地址后，就可以正常连接了。  !connect jdbc:hive2:&#x2F;&#x2F;localhost:10010  -》  !connect jdbc:hive2:&#x2F;&#x2F;192.168.1.110:10010</p>
-<h4><span id="sparkkyuubiauthenticationx3dkerberos">spark.kyuubi.authentication&#x3D;kerberos</span></h4><p>hadoop yarn 开启了kerberos 认证的情况：</p>
-<p>–kerberos<br> Kyuubi requires a principal and keytab file specified in $SPARK_HOME&#x2F;conf&#x2F;spark-defaults.conf. </p>
-<p>spark.yarn.principal – Kerberos principal for Kyuubi server.<br>spark.yarn.keytab – Keytab for Kyuubi server principal.</p>
-<p>可以在 SPARK_HOME&#x2F;conf&#x2F;spark-defaults.conf 增加spark.yarn.principal 和 spark.yarn.keytab两个参数。</p>
-<p>也可以，在启动kyuubi 服务的时候 命令配置参数。</p>
-<p>1、启动kyuubi 服务</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode client \</span><br><span class="line">--driver-memory 2g \</span><br><span class="line">--principal    principal1 \</span><br><span class="line">--keytab       Keytab1 \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">--conf spark.kyuubi.authentication=KERBEROS</span><br></pre></td></tr></table></figure>
-
-
-
-<p>2、使用beeline 连接</p>
-<p>cd   $spark_home (spark version &#x3D; spark-2.4.0-bin-hadoop2.7)</p>
-<p>bin&#x2F;beeline</p>
-<p>!connect  jdbc:hive2:&#x2F;&#x2F;10.20.30.111:10000&#x2F;test_zq;principal&#x3D;hive&#x2F;<a href="mailto:&#98;&#x64;&#x70;&#50;&#64;&#x54;&#69;&#83;&#x54;&#46;&#x43;&#x4f;&#77;">&#98;&#x64;&#x70;&#50;&#64;&#x54;&#69;&#83;&#x54;&#46;&#x43;&#x4f;&#77;</a>;authentication&#x3D;kerberos</p>
-<p>hive</p>
-<p><strong>beeline 每个连接可以设置不同的spark 参数</strong>：</p>
-<p>jdbc:hive2:&#x2F;&#x2F;<host>:<port>&#x2F;;hive.server2.proxy.user&#x3D;tom#spark.yarn.queue&#x3D;theque;spark.executor.instances&#x3D;3;spark.executor.cores&#x3D;3;spark.executor.memory&#x3D;10g</port></host></p>
-<p>.&#x2F;bin&#x2F;beeline -u jdbc:hive2:&#x2F;&#x2F;localhost:10000&#x2F;   -n hive </p>
-<h4><span id="kerberos-ha">kerberos + ha</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode client \</span><br><span class="line">--driver-memory 2g \</span><br><span class="line">--num-executors 3 \</span><br><span class="line">--executor-cores 1 \</span><br><span class="line">--principal    principal1 \</span><br><span class="line">--keytab       Keytab1 \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">--conf spark.kyuubi.authentication=KERBEROS \</span><br><span class="line">--conf spark.kyuubi.ha.enabled=true \</span><br><span class="line">--conf spark.kyuubi.ha.zk.quorum=zk1:port1,zk2:port2 \</span><br><span class="line">--conf spark.kyuubi.ha.zk.namespace=kyuubiserver \</span><br><span class="line">--conf spark.kyuubi.ha.mode=load-balance</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode client \</span><br><span class="line">--driver-memory 2g \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">--conf spark.kyuubi.authentication=NONE \</span><br><span class="line">--conf spark.kyuubi.ha.enabled=true \</span><br><span class="line">--conf spark.kyuubi.ha.zk.quorum=10.20.145.31:2181 \</span><br><span class="line">--conf spark.kyuubi.ha.zk.namespace=kyuubiserver \</span><br><span class="line">--conf spark.kyuubi.ha.mode=load-balance</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">./bin/start-kyuubi.sh \</span><br><span class="line">--master yarn \</span><br><span class="line">--deploy-mode client \</span><br><span class="line">--conf spark.kyuubi.frontend.bind.port=10010 \</span><br><span class="line">-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=y</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>jdbc url</strong></p>
-<p>jdbc:hive2:&#x2F;&#x2F;zk1:port1,zk2:port2&#x2F;test_zq;serviceDiscoveryMode&#x3D;zooKeeper;zooKeeperNamespace&#x3D;kyuubiserver;principal&#x3D;hive&#x2F;<a href="mailto:&#98;&#x64;&#112;&#x32;&#64;&#x54;&#69;&#x53;&#84;&#x2e;&#x43;&#x4f;&#77;">&#98;&#x64;&#112;&#x32;&#64;&#x54;&#69;&#x53;&#84;&#x2e;&#x43;&#x4f;&#77;</a>;authentication&#x3D;kerberos</p>
-<p>username: hive or others</p>
-<h3><span id="test">Test</span></h3><h4><span id="connections">Connections</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">!connect jdbc:hive2://10.20.30.111:10010/;hive.server2.proxy.user=tom#spark.executor.instances=2;spark.executor.cores=1;spark.executor.memory=512m</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">!connect jdbc:hive2://10.20.30.111:10010/;hive.server2.proxy.user=tom#spark.executor.instances=4;spark.executor.cores=1;spark.executor.memory=512m</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">!connect jdbc:hive2://10.20.30.111:10010/;hive.server2.proxy.user=bob#spark.executor.instances=2;spark.executor.cores=1;spark.executor.memory=512m</span><br></pre></td></tr></table></figure>
-
-
-
-<h4><span id="problems">Problems</span></h4><p>修改同一个用户提交多个作业并发测试的问题：问题定位是SparkEnv导致，多个线程混用了同一个SparkEnv</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line">org.apache.spark.SparkException: Job aborted due to stage failure: Task 1 in stage 0.0 failed 4 times, most recent failure: Lost task 1.3 in stage 0.0 (TID 3, bdp-1.rdc.com, executor 1): java.io.IOException: org.apache.spark.SparkException: Failed to get broadcast_1_piece0 of broadcast_1</span><br><span class="line">        at org.apache.spark.util.Utils$.tryOrIOException(Utils.scala:1333)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast.readBroadcastBlock(TorrentBroadcast.scala:207)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast._value$lzycompute(TorrentBroadcast.scala:66)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast._value(TorrentBroadcast.scala:66)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast.getValue(TorrentBroadcast.scala:96)</span><br><span class="line">        at org.apache.spark.broadcast.Broadcast.value(Broadcast.scala:70)</span><br><span class="line">        at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:89)</span><br><span class="line">        at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:55)</span><br><span class="line">        at org.apache.spark.scheduler.Task.run(Task.scala:121)</span><br><span class="line">        at org.apache.spark.executor.Executor$TaskRunner$$anonfun$10.apply(Executor.scala:402)</span><br><span class="line">        at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:1360)</span><br><span class="line">        at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:408)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)</span><br><span class="line">        at java.lang.Thread.run(Thread.java:748)</span><br><span class="line">Caused by: org.apache.spark.SparkException: Failed to get broadcast_1_piece0 of broadcast_1</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$org$apache$spark$broadcast$TorrentBroadcast$$readBlocks$1.apply$mcVI$sp(TorrentBroadcast.scala:179)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$org$apache$spark$broadcast$TorrentBroadcast$$readBlocks$1.apply(TorrentBroadcast.scala:151)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$org$apache$spark$broadcast$TorrentBroadcast$$readBlocks$1.apply(TorrentBroadcast.scala:151)</span><br><span class="line">        at scala.collection.immutable.List.foreach(List.scala:392)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast.org$apache$spark$broadcast$TorrentBroadcast$$readBlocks(TorrentBroadcast.scala:151)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$readBroadcastBlock$1$$anonfun$apply$2.apply(TorrentBroadcast.scala:231)</span><br><span class="line">        at scala.Option.getOrElse(Option.scala:121)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$readBroadcastBlock$1.apply(TorrentBroadcast.scala:211)</span><br><span class="line">        at org.apache.spark.util.Utils$.tryOrIOException(Utils.scala:1326)</span><br><span class="line">        ... 14 more</span><br><span class="line"></span><br><span class="line">Driver stacktrace:</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler.org$apache$spark$scheduler$DAGScheduler$$failJobAndIndependentStages(DAGScheduler.scala:1887)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1875)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler$$anonfun$abortStage$1.apply(DAGScheduler.scala:1874)</span><br><span class="line">        at scala.collection.mutable.ResizableArray$class.foreach(ResizableArray.scala:59)</span><br><span class="line">        at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:48)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:1874)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:926)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler$$anonfun$handleTaskSetFailed$1.apply(DAGScheduler.scala:926)</span><br><span class="line">        at scala.Option.foreach(Option.scala:257)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler.handleTaskSetFailed(DAGScheduler.scala:926)</span><br><span class="line">        at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.doOnReceive(DAGScheduler.scala:2108)</span><br><span class="line">        at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2057)</span><br><span class="line">        at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onReceive(DAGScheduler.scala:2046)</span><br><span class="line">        at org.apache.spark.util.EventLoop$$anon$1.run(EventLoop.scala:49)</span><br><span class="line">        at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:737)</span><br><span class="line">        at org.apache.spark.SparkContext.runJob(SparkContext.scala:2061)</span><br><span class="line">        at org.apache.spark.SparkContext.runJob(SparkContext.scala:2082)</span><br><span class="line">        at org.apache.spark.SparkContext.runJob(SparkContext.scala:2101)</span><br><span class="line">        at org.apache.spark.SparkContext.runJob(SparkContext.scala:2126)</span><br><span class="line">        at org.apache.spark.rdd.RDD$$anonfun$collect$1.apply(RDD.scala:945)</span><br><span class="line">        at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:151)</span><br><span class="line">        at org.apache.spark.rdd.RDDOperationScope$.withScope(RDDOperationScope.scala:112)</span><br><span class="line">        at org.apache.spark.rdd.RDD.withScope(RDD.scala:363)</span><br><span class="line">        at org.apache.spark.rdd.RDD.collect(RDD.scala:944)</span><br><span class="line">        at org.apache.spark.sql.execution.SparkPlan.executeCollect(SparkPlan.scala:299)</span><br><span class="line">        at org.apache.spark.sql.Dataset.org$apache$spark$sql$Dataset$$collectFromPlan(Dataset.scala:3384)</span><br><span class="line">        at org.apache.spark.sql.Dataset$$anonfun$collect$1.apply(Dataset.scala:2783)</span><br><span class="line">        at org.apache.spark.sql.Dataset$$anonfun$collect$1.apply(Dataset.scala:2783)</span><br><span class="line">        at org.apache.spark.sql.Dataset$$anonfun$53.apply(Dataset.scala:3365)</span><br><span class="line">        at org.apache.spark.sql.execution.SQLExecution$$anonfun$withNewExecutionId$1.apply(SQLExecution.scala:78)</span><br><span class="line">        at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:125)</span><br><span class="line">        at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:73)</span><br><span class="line">        at org.apache.spark.sql.Dataset.withAction(Dataset.scala:3364)</span><br><span class="line">        at org.apache.spark.sql.Dataset.collect(Dataset.scala:2783)</span><br><span class="line">        at yaooqinn.kyuubi.operation.statement.ExecuteStatementInClientMode.execute(ExecuteStatementInClientMode.scala:184)</span><br><span class="line">        at yaooqinn.kyuubi.operation.statement.ExecuteStatementOperation$$anon$1$$anon$2.run(ExecuteStatementOperation.scala:74)</span><br><span class="line">        at yaooqinn.kyuubi.operation.statement.ExecuteStatementOperation$$anon$1$$anon$2.run(ExecuteStatementOperation.scala:70)</span><br><span class="line">        at java.security.AccessController.doPrivileged(Native Method)</span><br><span class="line">        at javax.security.auth.Subject.doAs(Subject.java:422)</span><br><span class="line">        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1698)</span><br><span class="line">        at yaooqinn.kyuubi.operation.statement.ExecuteStatementOperation$$anon$1.run(ExecuteStatementOperation.scala:70)</span><br><span class="line">        at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)</span><br><span class="line">        at java.util.concurrent.FutureTask.run(FutureTask.java:266)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)</span><br><span class="line">        at java.lang.Thread.run(Thread.java:748)</span><br><span class="line">Caused by: java.io.IOException: org.apache.spark.SparkException: Failed to get broadcast_1_piece0 of broadcast_1</span><br><span class="line">        at org.apache.spark.util.Utils$.tryOrIOException(Utils.scala:1333)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast.readBroadcastBlock(TorrentBroadcast.scala:207)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast._value$lzycompute(TorrentBroadcast.scala:66)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast._value(TorrentBroadcast.scala:66)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast.getValue(TorrentBroadcast.scala:96)</span><br><span class="line">        at org.apache.spark.broadcast.Broadcast.value(Broadcast.scala:70)</span><br><span class="line">        at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:89)</span><br><span class="line">        at org.apache.spark.scheduler.ShuffleMapTask.runTask(ShuffleMapTask.scala:55)</span><br><span class="line">        at org.apache.spark.scheduler.Task.run(Task.scala:121)</span><br><span class="line">        at org.apache.spark.executor.Executor$TaskRunner$$anonfun$10.apply(Executor.scala:402)</span><br><span class="line">        at org.apache.spark.util.Utils$.tryWithSafeFinally(Utils.scala:1360)</span><br><span class="line">        at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:408)</span><br><span class="line">        ... 3 more</span><br><span class="line">Caused by: org.apache.spark.SparkException: Failed to get broadcast_1_piece0 of broadcast_1</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$org$apache$spark$broadcast$TorrentBroadcast$$readBlocks$1.apply$mcVI$sp(TorrentBroadcast.scala:179)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$org$apache$spark$broadcast$TorrentBroadcast$$readBlocks$1.apply(TorrentBroadcast.scala:151)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$org$apache$spark$broadcast$TorrentBroadcast$$readBlocks$1.apply(TorrentBroadcast.scala:151)</span><br><span class="line">        at scala.collection.immutable.List.foreach(List.scala:392)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast.org$apache$spark$broadcast$TorrentBroadcast$$readBlocks(TorrentBroadcast.scala:151)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$readBroadcastBlock$1$$anonfun$apply$2.apply(TorrentBroadcast.scala:231)</span><br><span class="line">        at scala.Option.getOrElse(Option.scala:121)</span><br><span class="line">        at org.apache.spark.broadcast.TorrentBroadcast$$anonfun$readBroadcastBlock$1.apply(TorrentBroadcast.scala:211)</span><br><span class="line">        at org.apache.spark.util.Utils$.tryOrIOException(Utils.scala:1326)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="环境-部署kyuubi-120">环境 部署kyuubi-1.2.0</span></h2><p>kyuubi-1.2.0-bin-spark-3.0-hadoop2.7</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">bin/kyuubi start</span><br><span class="line">bin/kyuubi stop</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bin/kyuubi run (print in the foreground)</span><br><span class="line"></span><br><span class="line">jdbc:hive2://localhost:10009/</span><br><span class="line"></span><br><span class="line">beeline</span><br><span class="line"></span><br><span class="line">!connect jdbc:hive2://localhost:10009/;#spark.master=yarn;spark.executor.instances=2;spark.executor.cores=1;spark.executor.memory=512m</span><br><span class="line"></span><br><span class="line">bin/beeline -u &#x27;jdbc:hive2://localhost:10009/&#x27; -n zhouqingfeng</span><br><span class="line"></span><br><span class="line">//不支持在单个任务上配置kerberos | spark.kerberos.keytab and spark.kerberos.principal should not //use now.</span><br><span class="line"></span><br><span class="line">kinit -kt /home/demo/hive.keytab  spark/hd137@TEST.COM</span><br><span class="line"></span><br><span class="line">//submit to yarn</span><br><span class="line"></span><br><span class="line">jdbc:hive2://localhost:10009/;hive.server2.proxy.user=zhouqingfeng#spark.master=yarn;spark.submit.deployMode=client;spark.executor.instances=1;spark.executor.cores=1;spark.executor.memory=512m;spark.executor.heartbeatInterval=1000s;spark.network.timeout=1001s&quot;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="zookeeper">Zookeeper</span></h3><p><strong>第一步</strong></p>
-<p>找到thrift jdbc 连接地址：connection url (可配置多个KyuubiServer，对应多个jdbc url实现服务的Ha)</p>
-<p>ls &#x2F;kyuubi</p>
-<p>[serviceUri&#x3D;localhost:10009;version&#x3D;1.2.0;sequence&#x3D;0000000000]</p>
-<p><strong>第二步:</strong></p>
-<p>找到user对应的spark_submit应用的监听端口，user对应的sql 会由第一步转交给该spark_submit应用处理</p>
-<p>ls &#x2F;kyuubi_USER&#x2F;zhouqingfeng</p>
-<p>[serviceUri&#x3D;localhost:57486;version&#x3D;1.2.0;sequence&#x3D;0000000001]</p>
-<h3><span id="ha">HA</span></h3><p>jdbc:hive2:&#x2F;&#x2F;zk1:port1,zk2:port2&#x2F;test_zq;serviceDiscoveryMode&#x3D;zooKeeper;zooKeeperNamespace&#x3D;kyuubiserver;principal&#x3D;hive&#x2F;<a href="mailto:&#x62;&#100;&#112;&#x32;&#x40;&#x54;&#69;&#83;&#84;&#x2e;&#67;&#x4f;&#77;">&#x62;&#100;&#112;&#x32;&#x40;&#x54;&#69;&#83;&#84;&#x2e;&#67;&#x4f;&#77;</a>;authentication&#x3D;kerberos</p>
-<p>kyuubi.ha.enabled</p>
-<p>kyuubi.ha.zookeeper.quorum</p>
-<p>kyuubi.ha.zookeeper.client.port</p>
-<p>kyuubi.ha.zookeeper.namespace</p>
-<p>–conf spark.kyuubi.ha.enabled&#x3D;true <br>–conf spark.kyuubi.ha.zk.quorum&#x3D;zk1:port1,zk2:port2 <br>–conf spark.kyuubi.ha.zk.namespace&#x3D;kyuubiserver \</p>
-<p>–conf spark.kyuubi.ha.enabled&#x3D;true \</p>
-<h3><span id="configuration">Configuration</span></h3><p>$SPARK_HOME&#x2F;conf  -&gt; $Kyuubi_HOME&#x2F;conf -&gt; jdbc url  (low -&gt; high)</p>
-<p> <strong>kyuubi.session.engine.idle.timeout</strong></p>
-<p>engine timeout, the engine will self-terminate when it’s not accessed for this duration</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">kyuubi.engine.share.level  //CONNECTION  USER  SERVER</span><br><span class="line"></span><br><span class="line">Engines will be shared in different levels, available configs are:</span><br><span class="line">CONNECTION: engine will not be shared but only used by the current client connection</span><br><span class="line">USER: engine will be shared by all sessions created by a unique username, see also kyuubi.engine.share.level.sub.domain</span><br><span class="line">SERVER: the App will be shared by Kyuubi servers</span><br></pre></td></tr></table></figure>
-
-<h3><span id="hive">Hive</span></h3><p>For example, Spark 3.0 was released with a builtin Hive client (2.3.7), so, ideally, the version of server should &gt;&#x3D; 2.3.x.</p>
-<p>To prevent this problem, we can use Spark’s <a target="_blank" rel="noopener" href="http://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html#interacting-with-different-versions-of-hive-metastore">Interacting with Different Versions of Hive Metastore</a></p>
-<h3><span id="source">Source</span></h3><h4><span id="kyuubiserver">KyuubiServer</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">KyuubiServer  -&gt; KyuubiBackendService + FrontendService</span><br><span class="line"></span><br><span class="line">1、KinitAuxiliaryService   -&gt; kyuubiserver kerberos 认证</span><br><span class="line">2、MetricsSystem  -&gt; 指标收集</span><br><span class="line">3、KyuubiBackendService -&gt; kyuubi 后端</span><br><span class="line">4、FrontendService  -&gt; kyuubi前端接收用户jdbc connection (TServerSocket)</span><br><span class="line">5、KyuubiServiceDiscovery -&gt; A service for service discovery used by kyuubi server side.</span><br><span class="line">(创建启动zkclient, 与zkserver 建立连接， 创建节点对应kyuubi服务)</span><br><span class="line"></span><br><span class="line">(1)</span><br><span class="line">21/07/13 14:23:00 INFO service.KinitAuxiliaryService: Service[KinitAuxiliaryService] is initialized.</span><br><span class="line">(2)</span><br><span class="line">21/07/13 14:30:04 INFO metrics.JsonReporterService: Service[JsonReporterService] is initialized.</span><br><span class="line">21/07/13 14:41:19 INFO metrics.MetricsSystem: Service[MetricsSystem] is initialized.</span><br><span class="line">(3)</span><br><span class="line">KyuubiBackendService</span><br><span class="line"></span><br><span class="line">-&gt; AbstractBackendService -&gt; KyuubiSessionManager -&gt; KyuubiOperationManager</span><br><span class="line"></span><br><span class="line">backend.server.exec.pool.size</span><br><span class="line">Number of threads in the operation execution thread pool of Kyuubi server</span><br><span class="line"></span><br><span class="line">backend.engine.exec.pool.size</span><br><span class="line">Number of threads in the operation execution thread pool of SQL engine applications</span><br><span class="line"></span><br><span class="line">initialized：</span><br><span class="line">21/07/13 15:00:54 INFO util.ThreadUtils: KyuubiSessionManager-exec-pool: pool size: 100, wait queue size: 100, thread keepalive time: 60000 m</span><br><span class="line">21/07/13 15:05:22 INFO operation.KyuubiOperationManager: Service[KyuubiOperationManager] is initialized</span><br><span class="line">21/07/13 15:06:30 INFO session.KyuubiSessionManager: Service[KyuubiSessionManager] is initialized.</span><br><span class="line">21/07/13 15:09:07 INFO server.KyuubiBackendService: Service[KyuubiBackendService] is initialized.</span><br><span class="line">(4) 21/07/13 15:23:18 INFO service.FrontendService: Initializing FrontendService on host localhost at port 10009 with [9, 999] worker threads</span><br><span class="line">21/07/13 15:23:52 INFO service.FrontendService: Service[FrontendService] is initialized.</span><br><span class="line">(5)</span><br><span class="line">21/07/13 15:45:26 INFO client.KyuubiServiceDiscovery: Service[ServiceDiscovery] is initialized.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">started:</span><br><span class="line">21/07/13 15:46:42 INFO service.KinitAuxiliaryService: Service[KinitAuxiliaryService] is started.</span><br><span class="line">21/07/13 15:59:33 INFO metrics.JsonReporterService: Service[JsonReporterService] is started.</span><br><span class="line"></span><br><span class="line">21/07/13 16:06:57 INFO operation.KyuubiOperationManager: Service[KyuubiOperationManager] is started.</span><br><span class="line">21/07/13 16:07:13 INFO session.KyuubiSessionManager: Service[KyuubiSessionManager] is started.</span><br><span class="line">21/07/13 16:07:13 INFO server.KyuubiBackendService: Service[KyuubiBackendService] is started.</span><br><span class="line"></span><br><span class="line">21/07/13 16:19:14 INFO service.FrontendService: Service[FrontendService] is started.</span><br><span class="line"></span><br><span class="line">21/07/13 16:23:48 INFO client.ServiceDiscovery: Created a /kyuubi/serviceUri=localhost:10009;version=1.2.0;sequence=0000000000 on ZooKeeper for KyuubiServer uri: localhost:10009</span><br><span class="line">21/07/13 16:24:41 INFO client.KyuubiServiceDiscovery: Service[ServiceDiscovery] is started.</span><br><span class="line"></span><br><span class="line">21/07/13 16:25:27 INFO server.KyuubiServer: Service[KyuubiServer] is started.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h4><span id="sparksqlengine">SparkSQLEngine</span></h4><p>提交jar到集群，获取资源 -&gt; 初始化服务  -&gt; 启动服务(FrontendService 对外暴露的地址注册到zk)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">SparkSQLEngine -&gt; SparkSQLBackendService + FrontendService + EngineServiceDiscovery</span><br><span class="line">(命令行独立进程里先提交任务， 再启动driver端上述三个服务)</span><br><span class="line"></span><br><span class="line">21/07/13 20:26:15 INFO ThreadUtils: SparkSQLSessionManager-exec-pool: pool size: 100, wait queue size: 100, thread keepalive time: 60000 ms</span><br><span class="line">21/07/13 20:27:22 INFO SparkSQLOperationManager: Service[SparkSQLOperationManager] is initialized.</span><br><span class="line">21/07/13 20:27:24 INFO SparkSQLSessionManager: Service[SparkSQLSessionManager] is initialized.</span><br><span class="line">21/07/13 20:27:25 INFO SparkSQLBackendService: Service[SparkSQLBackendService] is initialized.</span><br><span class="line">21/07/13 20:27:39 INFO FrontendService: Initializing FrontendService on host localhost at port 50764 with [9, 999] worker threads</span><br><span class="line">21/07/13 20:27:59 INFO FrontendService: Service[FrontendService] is initialized.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">21/07/13 20:28:29 INFO EngineServiceDiscovery: Service[ServiceDiscovery] is initialized.</span><br><span class="line">21/07/13 20:28:37 INFO SparkSQLEngine: Service[SparkSQLEngine] is initialized.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">21/07/13 20:34:33 INFO SparkSQLOperationManager: Service[SparkSQLOperationManager] is started.</span><br><span class="line">21/07/13 20:34:33 INFO SparkSQLSessionManager: Service[SparkSQLSessionManager] is started.</span><br><span class="line">21/07/13 20:34:33 INFO SparkSQLBackendService: Service[SparkSQLBackendService] is started.</span><br><span class="line">21/07/13 20:34:36 INFO FrontendService: Service[FrontendService] is started.</span><br><span class="line"></span><br><span class="line">21/07/13 20:35:12 INFO EngineServiceDiscovery: Zookeeper client connection state changed to: RECONNECTED</span><br><span class="line">21/07/13 20:35:12 INFO ServiceDiscovery: Created a /kyuubi_USER/zhouqingfeng/serviceUri=localhost:50764;version=1.2.0;sequence=0000000000 on ZooKeeper for KyuubiServer uri: localhost:50764</span><br><span class="line"></span><br><span class="line">21/07/13 20:35:12 INFO EngineServiceDiscovery: Service[ServiceDiscovery] is started.</span><br><span class="line">21/07/13 20:35:12 INFO SparkSQLEngine: Service[SparkSQLEngine] is started.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SparkProcessBuilder</span><br></pre></td></tr></table></figure>
-
-
-
-<h4><span id="servicediscovery">ServiceDiscovery</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ServiceDiscovery  服务发现</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">KyuubiServiceDiscovery</span><br><span class="line">A service for service discovery used by kyuubi server side. 找到kyuubiserver(默认10009端口)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">EngineServiceDiscovery   找到对应的spark-submit 任务 (地址+端口监听spark服务)</span><br><span class="line">A service for service discovery used by engine side. </span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="debug">Debug</span></h3><p>（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/jpda/conninv.html#Transports">jpda调试工具</a>）</p>
-<h4><span id="server-debug">server debug</span></h4><p>Kyuubi 启动脚本kyuubi添加：</p>
-<p>-Xdebug -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;y,address&#x3D;5006</p>
-<p>cmd&#x3D;”${RUNNER}  -Xdebug -Xrunjdwp:transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;y,address&#x3D;5006 ${KYUUBI_JAVA_OPTS}  -cp ${KYUUBI_CLASSPATH} $CLASS”</p>
-<p>IDEA remote add: -agentlib:jdwp&#x3D;transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5006</p>
-<p>启动server,  debug idea remote, ok!</p>
-<h4><span id="app-debug">App debug</span></h4><p>change kyuubi-defaults.conf.template to  kyuubi-defaults.conf:</p>
-<p>kyuubi-defaults.conf add:</p>
-<p>spark.driver.extraJavaOptions   -agentlib:jdwp&#x3D;transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;y,address&#x3D;5007</p>
-<p>spark.executor.extraJavaOptions   -agentlib:jdwp&#x3D;transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;y,address&#x3D;5007</p>
-<p>IDEA remote add: -agentlib:jdwp&#x3D;transport&#x3D;dt_socket,server&#x3D;y,suspend&#x3D;n,address&#x3D;5007</p>
-<p>正常启动server,</p>
-<p>发起一个jdbc 连接，</p>
-<p>debug idea remote, ok!</p>
-<h2><span id="references">References</span></h2><p><a target="_blank" rel="noopener" href="https://github.com/yaooqinn/kyuubi/tree/master">Github</a></p>
-<p><a target="_blank" rel="noopener" href="http://spark.apache.org/docs/latest/job-scheduling.html#dynamic-resource-allocation">spark docs</a></p>
-<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1440251">如何在CDH5中使用Spark2.4 Thrift</a></p>
-<p><a target="_blank" rel="noopener" href="https://yaooqinn.github.io/kyuubi/docs/authentication.html">kyuubi 文档 适用与0.8版本(包括) 以前</a></p>
-<p><a target="_blank" rel="noopener" href="https://kyuubi.readthedocs.io/en/stable/quick_start/quick_start.html#installation">kyuubi文档 使用于spark3.0 以后</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/354654936">知乎作者总结</a></p>
-<p><a target="_blank" rel="noopener" href="https://kyuubi.readthedocs.io/en/stable/tools/debugging.html">1.* 文档</a></p>
-<p><a target="_blank" rel="noopener" href="http://spark.apache.org/docs/latest/running-on-yarn.html#spark-properties">Spark official doc</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/05/bigdata/spark/sparksql/kyuubi/kyuubi_simple_usage/" data-id="cljp81lem0000239afmc93krp" data-title="kyuubi_simple_usage" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -2158,7 +1895,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -2178,7 +1915,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
     </div>
   </div>
 
@@ -2200,6 +1937,14 @@
       <ul>
         
           <li>
+            <a href="/2023/07/20/java/designpattern/designpattern_pactice1/">designpattern_pactice1</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/20/java/jvm/jvm_basic/">jvm_basic</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/">jiketime_java并发</a>
           </li>
         
@@ -2209,14 +1954,6 @@
         
           <li>
             <a href="/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/">flink_sql_20230713</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/13/bigdata/spark/spark_env/spark_terminal_tips/">spark_terminal_tips</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/13/bigdata/spark/spark3/20230712_spark_delta_lake/">20230713_delta_lake</a>
           </li>
         
       </ul>
