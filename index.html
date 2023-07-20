@@ -207,7 +207,7 @@
 
 
 <h3><span id="heap划分">heap划分</span></h3><p>堆内存划分</p>
-<p>　　Minor GC：新生代的GC。</p>
+<p>　　Minor GC：新生代的GC （eden区满）。</p>
 <p>　　Major GC：老年代的GC。</p>
 <p>　　Full GC：整堆收集，收集整个Java堆和方法区的垃圾收集</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-Xms10m：设置最小堆内存为10M。</span><br><span class="line">-Xmx10m：设置最大堆内存为10M。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
