@@ -6,20 +6,22 @@
   
   <title>jiketime_java并发 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="并发源头 synchronize 案例 解决方法1 解决方法2 解决方法3     wait-notify Usage Others wait 和 sleep 区别     管程 usage Code Test   Others   Thread 状态 调用栈 Others      并发源头可见性：多核cpu缓存导致，  原子性：线程切换导致，解决方法： 有序性：编译优化导致指令重排序，">
+  <meta name="description" content="并发源头 synchronize 案例 解决方法1 解决方法2 解决方法3     wait-notify Usage Others wait 和 sleep 区别     管程 usage Code Test   Others   Thread 状态 调用栈 Others   并发工具类 ReentrantLock 对比synchronized Usage 特点 可重入 公平锁   Oth">
 <meta property="og:type" content="article">
 <meta property="og:title" content="jiketime_java并发">
 <meta property="og:url" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="并发源头 synchronize 案例 解决方法1 解决方法2 解决方法3     wait-notify Usage Others wait 和 sleep 区别     管程 usage Code Test   Others   Thread 状态 调用栈 Others      并发源头可见性：多核cpu缓存导致，  原子性：线程切换导致，解决方法： 有序性：编译优化导致指令重排序，">
+<meta property="og:description" content="并发源头 synchronize 案例 解决方法1 解决方法2 解决方法3     wait-notify Usage Others wait 和 sleep 区别     管程 usage Code Test   Others   Thread 状态 调用栈 Others   并发工具类 ReentrantLock 对比synchronized Usage 特点 可重入 公平锁   Oth">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.32.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.19.40.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-19%2016.57.00.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-20%2009.10.43.png">
 <meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/%E6%88%AA%E5%B1%8F2023-07-20%2009.10.52.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/19_1%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202021-12-11%20%E4%B8%8B%E5%8D%8812.19.30.png">
+<meta property="og:image" content="https://qingfengzhou.github.io/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/23_2%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202021-12-11%20%E4%B8%8B%E5%8D%888.31.30.png">
 <meta property="article:published_time" content="2023-07-19T06:03:10.000Z">
-<meta property="article:modified_time" content="2023-07-20T01:15:15.411Z">
+<meta property="article:modified_time" content="2023-07-20T06:29:35.939Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="java">
 <meta name="twitter:card" content="summary">
@@ -141,6 +143,105 @@
 <li><a href="#%E7%8A%B6%E6%80%81"><strong>状态</strong></a></li>
 <li><a href="#%E8%B0%83%E7%94%A8%E6%A0%88">调用栈</a></li>
 <li><a href="#others-2">Others</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B9%B6%E5%8F%91%E5%B7%A5%E5%85%B7%E7%B1%BB">并发工具类</a><ul>
+<li><a href="#reentrantlock">ReentrantLock</a><ul>
+<li><a href="#%E5%AF%B9%E6%AF%94synchronized"><strong>对比synchronized</strong></a></li>
+<li><a href="#usage-1">Usage</a></li>
+<li><a href="#%E7%89%B9%E7%82%B9">特点</a><ul>
+<li><a href="#%E5%8F%AF%E9%87%8D%E5%85%A5">可重入</a></li>
+<li><a href="#%E5%85%AC%E5%B9%B3%E9%94%81">公平锁</a></li>
+</ul>
+</li>
+<li><a href="#others-3">Others</a><ul>
+<li><a href="#%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5">同步和异步</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#semaphore">Semaphore</a><ul>
+<li><a href="#usage-2">Usage</a><ul>
+<li><a href="#%E4%BA%92%E6%96%A5%E9%94%81">互斥锁</a></li>
+<li><a href="#%E9%99%90%E6%B5%81%E5%99%A8">限流器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#reentrantreadwritelock">ReentrantReadWriteLock</a><ul>
+<li><a href="#usage-3">Usage</a></li>
+</ul>
+</li>
+<li><a href="#stampedlock">StampedLock</a><ul>
+<li><a href="#%E5%86%99%E9%94%81-%E6%82%B2%E8%A7%82%E8%AF%BB%E9%94%81">写锁、悲观读锁</a></li>
+<li><a href="#%E4%B9%90%E8%A7%82%E8%AF%BB">乐观读</a><ul>
+<li><a href="#%E7%BB%8F%E5%85%B8%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F">经典使用方式</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a><ul>
+<li><a href="#stampedlock-%E8%AF%BB%E6%A8%A1%E6%9D%BF">StampedLock 读模板</a></li>
+<li><a href="#%E5%86%99%E6%A8%A1%E7%89%88">写模版</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E7%BA%BF%E7%A8%8B%E5%8D%8F%E8%B0%83">线程协调</a><ul>
+<li><a href="#countdownlatch">CountDownLatch</a><ul>
+<li><a href="#%E5%9C%BA%E6%99%AF">场景</a></li>
+<li><a href="#example">Example</a></li>
+</ul>
+</li>
+<li><a href="#cyclicbarrier">CyclicBarrier</a><ul>
+<li><a href="#%E5%9C%BA%E6%99%AF-1">场景</a></li>
+<li><a href="#example-1">Example</a><ul>
+<li><a href="#%E4%BD%BF%E7%94%A8completablefuture-%E5%BC%82%E6%AD%A5%E6%89%A7%E8%A1%8C">使用CompletableFuture 异步执行</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%AE%B9%E5%99%A8">容器</a><ul>
+<li><a href="#%E5%90%8C%E6%AD%A5%E5%AE%B9%E5%99%A8">同步容器</a><ul>
+<li><a href="#%E8%BF%AD%E4%BB%A3%E5%99%A8">迭代器</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8">并发容器</a><ul>
+<li><a href="#copyonwritearraylist">CopyOnWriteArrayList</a><ul>
+<li><a href="#%E6%B3%A8%E6%84%8F">注意</a></li>
+</ul>
+</li>
+<li><a href="#set">Set</a></li>
+<li><a href="#map">Map</a><ul>
+<li><a href="#hashmap">HashMap</a></li>
+<li><a href="#treemap">TreeMap</a></li>
+<li><a href="#linkedhashmap">LinkedHashMap</a></li>
+<li><a href="#hashtable">HashTable</a></li>
+<li><a href="#concurrenthashmap">ConcurrentHashMap</a></li>
+<li><a href="#concurrentskiplistmap">ConcurrentSkipListMap</a></li>
+</ul>
+</li>
+<li><a href="#queue">Queue</a><ul>
+<li><a href="#%E6%9C%89%E7%95%8C%E9%98%9F%E5%88%97">有界队列</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#cas">CAS</a><ul>
+<li><a href="#usage-4">Usage</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0">线程池</a><ul>
+<li><a href="#%E8%B0%83%E7%94%A8">调用</a></li>
+</ul>
+</li>
+<li><a href="#futuretask">FutureTask</a><ul>
+<li><a href="#usage-5">Usage</a></li>
+<li><a href="#example-2">Example</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -277,6 +378,226 @@
 
 
 <p>3、<a target="_blank" rel="noopener" href="https://arthas.aliyun.com/doc/advanced-use.html#as-sh-%E5%92%8C-arthas-boot-%E6%8A%80%E5%B7%A7">Arthas</a></p>
+<h1><span id="并发工具类">并发工具类</span></h1><h2><span id="reentrantlock">ReentrantLock</span></h2><p>重入锁</p>
+<h3><span id="对比synchronized"><strong>对比synchronized</strong></span></h3><p>1、能够响应中断。synchronized 的问题是，持有锁 A 后，如果尝试获取锁 B 失败，那么线程就进入阻塞状态，一旦发生死锁，就没有任何机会来唤醒阻塞的线程。但如果阻塞状态的线程能够响应中断信号，也就是说当我们给阻塞的线程发送中断信号的时候，能够唤醒它，那它就有机会释放曾经持有的锁 A。这样就破坏了不可抢占条件了。</p>
+<p>2、支持超时。如果线程在一段时间之内没有获取到锁，不是进入阻塞状态，而是返回一个错误，那这个线程也有机会释放曾经持有的锁。这样也能破坏不可抢占条件。</p>
+<p>3、非阻塞地获取锁。如果尝试获取锁失败，并不进入阻塞状态，而是直接返回，那这个线程也有机会释放曾经持有的锁。这样也能破坏不可抢占条件。</p>
+<p>对应下面三个方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 支持中断的API</span><br><span class="line">void lockInterruptibly() </span><br><span class="line">  throws InterruptedException;</span><br><span class="line">// 支持超时的API</span><br><span class="line">boolean tryLock(long time, TimeUnit unit) </span><br><span class="line">  throws InterruptedException;</span><br><span class="line">// 支持非阻塞获取锁的API</span><br><span class="line">boolean tryLock();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3><span id="usage">Usage</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class X &#123;</span><br><span class="line">  private final Lock rtl =</span><br><span class="line">  new ReentrantLock();</span><br><span class="line">  int value;</span><br><span class="line">  public void addOne() &#123;</span><br><span class="line">    // 获取锁</span><br><span class="line">    rtl.lock();  </span><br><span class="line">    try &#123;</span><br><span class="line">      value+=1;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      // 保证锁能释放</span><br><span class="line">      rtl.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="特点">特点</span></h3><h4><span id="可重入">可重入</span></h4><p>线程可以重复获取同一把锁。</p>
+<p>例如下面代码中，当线程 T1 执行到 ① 处时，已经获取到了锁 rtl ，当在 ① 处调用 get() 方法时，会在 ② 再次对锁 rtl 执行加锁操作。此时，如果锁 rtl 是可重入的，那么线程 T1 可以再次加锁成功；如果锁 rtl 是不可重入的，那么线程 T1 此时会被阻塞。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">class X &#123;</span><br><span class="line">  private final Lock rtl =</span><br><span class="line">  new ReentrantLock();</span><br><span class="line">  int value;</span><br><span class="line">  public int get() &#123;</span><br><span class="line">    // 获取锁</span><br><span class="line">    rtl.lock();         ②</span><br><span class="line">    try &#123;</span><br><span class="line">      return value;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      // 保证锁能释放</span><br><span class="line">      rtl.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  public void addOne() &#123;</span><br><span class="line">    // 获取锁</span><br><span class="line">    rtl.lock();  </span><br><span class="line">    try &#123;</span><br><span class="line">      value = 1 + get(); ①</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      // 保证锁能释放</span><br><span class="line">      rtl.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="公平锁">公平锁</span></h4><p>如果一个线程没有获得锁，就会进入等待队列，当有线程释放锁的时候，就需要从等待队列中唤醒一个等待的线程。如果是公平锁，唤醒的策略就是谁等待的时间长，就唤醒谁，很公平；如果是非公平锁，则不提供这个公平保证，有可能等待时间短的线程反而先被唤醒。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">//无参构造函数：默认非公平锁</span><br><span class="line">public ReentrantLock() &#123;</span><br><span class="line">    sync = new NonfairSync();</span><br><span class="line">&#125;</span><br><span class="line">//根据公平策略参数创建锁</span><br><span class="line">public ReentrantLock(boolean fair)&#123;</span><br><span class="line">    sync = fair ? new FairSync() </span><br><span class="line">                : new NonfairSync();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="others">Others</span></h3><h4><span id="同步和异步">同步和异步</span></h4><p>通俗点来讲就是调用方是否需要等待结果，如果需要等待结果，就是同步；如果不需要等待结果，就是异步。</p>
+<p><strong>同步和异步：通常用来形容一次方法调用</strong>，针对的方法调用。同步方法调用一旦开始，调用者必须等到方法调用返回后，才能继续后面的行为；异步方法调用更像是一个消息传递，一旦开始，方法调用就会立即返回，调用者就可以继续后续的操作。再说的通俗一点，假设一段代码有两个方法：方法f1和方法f2，f1调用f2,<br>如果当f1调用f2后，f1必须等待f2完整执行完后，才能继续执行，那么这整个过程就是同步的；<br>如果当f1调用f2后, f2立即返回一个结果给f1(而实际f2内部可能并未执行完), f1收到f2返回的结果后, 继续执行后续操作，这整个过程可以认为是异步的, 和同步的区别在于 f1不需要真正等f2执行完，再去执行后续操作。  </p>
+<p><strong>临界区用来表示一种公共资源或者说是共享数据，可以被多个线程使用，但是每一次</strong>，只能有一个线程使用它，一旦临界区资源被占用, 其他线程要想使用这个资源，就必须等待。<br><strong>阻塞和非阻塞 通常用来形容多线程之间的相互影响</strong>，指的是线程的状态。比如一个线程占用了临界区资源，那么所有需要这个资源的线程就必须等待，等待会导致线程挂起，这种情况就是阻塞。  </p>
+<p><strong>同步阻塞io</strong> 小明去餐馆吃饭，叫了一个服务员，点了一份饭，之后小明一直在餐馆前台等待，在等待期间，小明什么事情也不能干(可能没带手机或者手机没电了，这里只是做了一个假设)，最后饭好了，服务员把饭给到小明，小明才离开餐馆。在这整个过程中，小明点餐可以看成是一个方法f1, 服务员通知后台厨房做饭可以看成是方法f2, f1调用了f2，由于f1必须等f2完整执行完才能继续执行，因此是同步的。同时, 由于f1在等待期间(出于各种各样原因被限制，只能等待)不能做别的任何事情，因此f1对应线程(调用f1的线程)是阻塞的。因此，整体来看，整个过程是同步阻塞的。  </p>
+<p><strong>同步非阻塞nio</strong> 小明去餐馆吃饭，叫了一个服务员，点了一份饭，之后小明离开餐馆去做别的事情了，过了一段时间，小明回到餐馆前台询问饭是否做好了，如果饭好了，服务员把饭给到小明，小明就离开餐馆(如果饭没好，小明可以继续去干别的事情，过一段时间，再过来问一下，最后结果肯定饭会做好的)。在这整个过程中，小明点餐可以看成是一个方法f1, 服务员通知后台厨房做饭可以看成是方法f2, f1调用了f2，但是f1 不必等待 f2完整执行完才能继续执行(在这里，f1调用f2后，f2开始执行，同时f2立即返回一个结果给到f1, f1马上继续执行，基本上没有针对f2做任何等待。这里的例子可以看成是 f1调用f2后，f2执行的操作是后台厨房开始做饭，f2立即返回的结果对应的是一个票据，一个点餐号码，结果给到f1后，f1继续去做别的事情，同时f2也在继续做着自己的事情)。<strong>这里似乎好像是一个异步方法调用</strong>，其实不然，由于f1需要过一段时间，主动查询查询f2的结果(饭是否做好了)，因此仍然是同步的。同时，由于f1在等待期间可以继续去做别的事情(小明离开餐馆去做别的事情了)，因此f1对应线程(调用f1的线程)是非阻塞的，并没有处于阻塞等待的状态。因此，从整体来看，整个过程是同步非阻塞的。 <strong>相比同步阻塞，</strong>同步非阻塞其实也是一种等待，但是这里的等待并不是真的傻等下去，对应调用方线程调用完之后，可以继续执行下去，去干别的事情，过了一段时间，自己再去主动查看被调用方是否真的执行完了；而在同步阻塞中，对应调用方线程调用完之后，是一直在傻傻地等下去，也不去干别的事情，直到被调用方完整执行完， 对应调用方线程才往下继续执行。  </p>
+<p><strong>异步非阻塞aio</strong> 小明去餐馆吃饭，叫了一个服务员，点了一份饭，之后小明离开餐馆去做别的事情了，过了一段时间，饭做好了，服务员通知小明(打电话或者其他各种通讯方式)来拿饭，小明获得通知后，去取饭，最后离开餐馆。和同步非阻塞nio的区别在于, 在同步非阻塞中，调用方f1仍然是主动获取到调用方f2的结果(f1过了一段时间主动查询f1), 对应例子就是 小明是自己主动去获取饭做好这条消息的(离开餐馆一段时间，自己再返回餐馆，主动询问服务员饭是否做好)，而在这里，异步非阻塞，调用方f1是被动获取到调用方f2的结果(f2完整执行完后，主动通知到f1自己的最终执行结果)，对应例子就是 小明是被动获取到饭做好这条消息的(离开餐馆一段时间后，服务员这边会给小明一个通知，饭做好了)。和同步非阻塞nio的相同点在于，对应线程(调用方法f1)都是非阻塞的，调用方对应线程 并不需要等待被调用发完全执行完，才去干别的事情。<br>平时去餐馆吃饭， 大部分情况下对应的是异步非阻塞了，当然了，其他两种情况也是有可能出现的。也有另外一种说法，<a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiexj/p/6874654.html">NIO相当于餐做好了自己去取，AIO相当于送餐上门。</a>这里其实是一致的，前者是主动拉取结果，而后者是被动获得通知，拿到结果。  </p>
+<h2><span id="semaphore">Semaphore</span></h2><p>信号量模型是由 <strong>java.util.concurrent.Semaphore</strong> 实现的</p>
+<p>semaphore 控制最多有多少个线程可以同时访问临界区.  acquire 和release 分别对应 down() - 和up() +</p>
+<h3><span id="usage">Usage</span></h3><h4><span id="互斥锁">互斥锁</span></h4><p>作为互斥锁，保证临界区只有一个线程能够访问</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">static int count;</span><br><span class="line">//初始化信号量</span><br><span class="line">static final Semaphore s </span><br><span class="line">    = new Semaphore(1);</span><br><span class="line">//用信号量保证互斥    </span><br><span class="line">static void addOne() &#123;</span><br><span class="line">  s.acquire();</span><br><span class="line">  try &#123;</span><br><span class="line">    count+=1;</span><br><span class="line">  &#125; finally &#123;</span><br><span class="line">    s.release();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="限流器">限流器</span></h4><p>限制最多有count个线程同时访问临界区</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.Semaphore;</span><br><span class="line"></span><br><span class="line">//控制可以同时访问的线程个数</span><br><span class="line">//https://www.cnblogs.com/dolphin0520/p/3920397.html</span><br><span class="line">public class TestSemaphore &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        int N = 8;            //工人数</span><br><span class="line">        Semaphore semaphore = new Semaphore(3); //机器数目</span><br><span class="line">        for(int i=0;i&lt;N;i++)</span><br><span class="line">            new Worker(i,semaphore).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    static class Worker extends Thread&#123;</span><br><span class="line">        private int num;</span><br><span class="line">        private Semaphore semaphore;</span><br><span class="line">        public Worker(int num,Semaphore semaphore)&#123;</span><br><span class="line">            this.num = num;</span><br><span class="line">            this.semaphore = semaphore;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                semaphore.acquire();</span><br><span class="line">                System.out.println(&quot;工人&quot;+this.num+&quot;占用一个机器在生产...&quot;);</span><br><span class="line">                Thread.sleep(2000);</span><br><span class="line">                System.out.println(&quot;工人&quot;+this.num+&quot;释放出机器&quot;);</span><br><span class="line">                semaphore.release();</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="reentrantreadwritelock">ReentrantReadWriteLock</span></h2><p><strong>针对读多写少这种并发场景</strong>，Java SDK 并发包提供了读写锁——ReadWriteLock（实现类<strong>ReentrantReadWriteLock</strong>），非常容易使用，并且性能很好。</p>
+<p>读写锁都遵守以下三条基本原则：</p>
+<p>允许多个线程同时读共享变量；</p>
+<p>只允许一个线程写共享变量；</p>
+<p>如果一个写线程正在执行写操作，此时禁止读线程读共享变量。</p>
+<p><strong>读写锁与互斥锁</strong>的一个重要区别就是读写锁<strong>允许多个线程同时读共享变</strong>量，而互斥锁是不允许的，这是读写锁在读多写少场景下性能优于互斥锁的关键。但读写锁的写操作是互斥的，当一个线程在写共享变量的时候，是不允许其他线程执行写操作和读操作。</p>
+<h3><span id="usage">Usage</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">class Cache&lt;K,V&gt; &#123;</span><br><span class="line">  final Map&lt;K, V&gt; m =</span><br><span class="line">    new HashMap&lt;&gt;();</span><br><span class="line">  final ReadWriteLock rwl =</span><br><span class="line">    new ReentrantReadWriteLock();</span><br><span class="line">  // 读锁</span><br><span class="line">  final Lock r = rwl.readLock();</span><br><span class="line">  // 写锁</span><br><span class="line">  final Lock w = rwl.writeLock();</span><br><span class="line">  // 读缓存</span><br><span class="line">  V get(K key) &#123;</span><br><span class="line">    r.lock();</span><br><span class="line">    try &#123; return m.get(key); &#125;</span><br><span class="line">    finally &#123; r.unlock(); &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  // 写缓存</span><br><span class="line">  V put(K key, V value) &#123;</span><br><span class="line">    w.lock();</span><br><span class="line">    try &#123; return m.put(key, v); &#125;</span><br><span class="line">    finally &#123; w.unlock(); &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="stampedlock">StampedLock</span></h2><p>支持三种模式：写锁、悲观读锁、乐观读</p>
+<h3><span id="写锁-悲观读锁">写锁、悲观读锁</span></h3><p>写锁、悲观读锁 和ReadWriteLock 功能基本一致，</p>
+<p>不同的是：StampedLock 里的写锁和悲观读锁加锁成功之后，都会返回一个 stamp；然后解锁的时候，需要传入这个 stamp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">final StampedLock sl = </span><br><span class="line">  new StampedLock();</span><br><span class="line">  </span><br><span class="line">// 获取/释放悲观读锁示意代码</span><br><span class="line">long stamp = sl.readLock();</span><br><span class="line">try &#123;</span><br><span class="line">  //省略业务相关代码</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">  sl.unlockRead(stamp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 获取/释放写锁示意代码</span><br><span class="line">long stamp = sl.writeLock();</span><br><span class="line">try &#123;</span><br><span class="line">  //省略业务相关代码</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">  sl.unlockWrite(stamp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="乐观读">乐观读</span></h3><p>乐观读这个操作是无锁的，所以相比较 ReadWriteLock 的读锁，乐观读的性能更好一些。</p>
+<p>乐观读：判断是不是有写操作正在进行，如果正在进行写，就等待写完成，或者升级为 悲观读锁</p>
+<h4><span id="经典使用方式">经典使用方式</span></h4><p>乐观读 升级为悲观读锁：</p>
+<p>首先通过调用 tryOptimisticRead() 获取了一个 stamp，这里的 tryOptimisticRead() 就是我们前面提到的乐观读。之后将共享变量 x 和 y 读入方法的局部变量中，不过需要注意的是，由于 tryOptimisticRead() 是无锁的，所以共享变量 x 和 y 读入方法局部变量时，x 和 y 有可能被其他线程修改了。因此最后读完之后，还需要再次验证一下是否存在写操作，这个验证操作是通过调用 validate(stamp) 来实现的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">class Point &#123;</span><br><span class="line">  private int x, y;</span><br><span class="line">  final StampedLock sl = </span><br><span class="line">    new StampedLock();</span><br><span class="line">  //计算到原点的距离  </span><br><span class="line">  int distanceFromOrigin() &#123;</span><br><span class="line">    // 乐观读</span><br><span class="line">    long stamp = </span><br><span class="line">      sl.tryOptimisticRead();</span><br><span class="line">    // 读入局部变量，</span><br><span class="line">    // 读的过程数据可能被修改</span><br><span class="line">    int curX = x, curY = y;</span><br><span class="line">    //判断执行读操作期间，</span><br><span class="line">    //是否存在写操作，如果存在，</span><br><span class="line">    //则sl.validate返回false</span><br><span class="line">    if (!sl.validate(stamp))&#123;</span><br><span class="line">      // 升级为悲观读锁</span><br><span class="line">      stamp = sl.readLock();</span><br><span class="line">      try &#123;</span><br><span class="line">        curX = x;</span><br><span class="line">        curY = y;</span><br><span class="line">      &#125; finally &#123;</span><br><span class="line">        //释放悲观读锁</span><br><span class="line">        sl.unlockRead(stamp);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return Math.sqrt(</span><br><span class="line">      curX * curX + curY * curY);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="总结">总结</span></h3><h4><span id="stampedlock-读模板">StampedLock 读模板</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">final StampedLock sl = </span><br><span class="line">  new StampedLock();</span><br><span class="line"></span><br><span class="line">// 乐观读</span><br><span class="line">long stamp = </span><br><span class="line">  sl.tryOptimisticRead();</span><br><span class="line">// 读入方法局部变量</span><br><span class="line">......</span><br><span class="line">// 校验stamp</span><br><span class="line">//是否存在写操作，如果存在，</span><br><span class="line">//则sl.validate返回false</span><br><span class="line">if (!sl.validate(stamp))&#123;</span><br><span class="line">  // 升级为悲观读锁</span><br><span class="line">  stamp = sl.readLock();</span><br><span class="line">  try &#123;</span><br><span class="line">    // 读入方法局部变量</span><br><span class="line">    .....</span><br><span class="line">  &#125; finally &#123;</span><br><span class="line">    //释放悲观读锁</span><br><span class="line">    sl.unlockRead(stamp);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">//使用方法局部变量执行业务操作</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+
+
+<h4><span id="写模版">写模版</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">long stamp = sl.writeLock();</span><br><span class="line">try &#123;</span><br><span class="line">  // 写共享变量</span><br><span class="line">  ......</span><br><span class="line">&#125; finally &#123;</span><br><span class="line">  sl.unlockWrite(stamp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="线程协调">线程协调</span></h2><h3><span id="countdownlatch">CountDownLatch</span></h3><p>倒计数器锁</p>
+<h4><span id="场景">场景</span></h4><p>主要用来解决一个线程等待多个线程的场景</p>
+<p>可以类比旅游团团长要等待所有的游客到齐才能去下一个景点；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">* A synchronization aid that allows one or more threads to wait until</span><br><span class="line">* a set of operations being performed in other threads completes.</span><br></pre></td></tr></table></figure>
+
+
+
+<p>一个线程要等待n个线程执行完之后，才继续执行；</p>
+<p>初始化设置计数器的值为n，</p>
+<p>对应执行的每个线程调用countDown()方法，计数器的值-1，</p>
+<p>对应等待的线程调用await()，当计数器的值&#x3D;0，等待线程继续执行后续的代码。</p>
+<p>类似生活中的例子：旅游团团长要等待所有的游客到齐才能去下一个景点</p>
+<h4><span id="example">Example</span></h4><p>前几天老板突然匆匆忙忙过来，说对账系统最近越来越慢了，能不能快速优化一下。我了解了对账系统的业务后，发现还是挺简单的，用户通过在线商城下单，会生成电子订单，保存在订单库；之后物流会生成派送单给用户发货，派送单保存在派送单库。为了防止漏派送或者重复派送，对账系统每天还会校验是否存在异常订单。</p>
+<p>对账系统的处理逻辑很简单，你可以参考下面的对账系统流程图。目前对账系统的处理逻辑是首先查询订单，然后查询派送单，之后对比订单和派送单，将差异写入差异库。</p>
+<img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/19_1屏幕快照 2021-12-11 下午12.19.30.png">
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">while(存在未对账订单)&#123;</span><br><span class="line">  // 查询未对账订单</span><br><span class="line">  pos = getPOrders();</span><br><span class="line">  // 查询派送单</span><br><span class="line">  dos = getDOrders();</span><br><span class="line">  // 执行对账操作</span><br><span class="line">  diff = check(pos, dos);</span><br><span class="line">  // 差异写入差异库</span><br><span class="line">  save(diff);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>并行化提高性能</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">while(存在未对账订单)&#123;</span><br><span class="line">  // 查询未对账订单</span><br><span class="line">  Thread T1 = new Thread(()-&gt;&#123;</span><br><span class="line">    pos = getPOrders();</span><br><span class="line">  &#125;);</span><br><span class="line">  T1.start();</span><br><span class="line">  // 查询派送单</span><br><span class="line">  Thread T2 = new Thread(()-&gt;&#123;</span><br><span class="line">    dos = getDOrders();</span><br><span class="line">  &#125;);</span><br><span class="line">  T2.start();</span><br><span class="line">  // 等待T1、T2结束</span><br><span class="line">  T1.join();</span><br><span class="line">  T2.join();</span><br><span class="line">  // 执行对账操作</span><br><span class="line">  diff = check(pos, dos);</span><br><span class="line">  // 差异写入差异库</span><br><span class="line">  save(diff);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>while 循环里面每次都会创建新的线程，而创建线程可是个耗时的操作。所以最好是创建出来的线程能够循环利用，估计这时你已经想到线程池了，是的，线程池就能解决这个问题。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 创建2个线程的线程池</span><br><span class="line">Executor executor = </span><br><span class="line">  Executors.newFixedThreadPool(2);</span><br><span class="line">while(存在未对账订单)&#123;</span><br><span class="line">  // 查询未对账订单</span><br><span class="line">  executor.execute(()-&gt; &#123;</span><br><span class="line">    pos = getPOrders();</span><br><span class="line">  &#125;);</span><br><span class="line">  // 查询派送单</span><br><span class="line">  executor.execute(()-&gt; &#123;</span><br><span class="line">    dos = getDOrders();</span><br><span class="line">  &#125;);</span><br><span class="line">  </span><br><span class="line">  /* ？？如何实现等待？？*/</span><br><span class="line">  </span><br><span class="line">  // 执行对账操作</span><br><span class="line">  diff = check(pos, dos);</span><br><span class="line">  // 差异写入差异库</span><br><span class="line">  save(diff);</span><br><span class="line">&#125;   </span><br></pre></td></tr></table></figure>
+
+
+
+<p>CountDownLatch 设置主线程等待</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 创建2个线程的线程池</span><br><span class="line">Executor executor = </span><br><span class="line">  Executors.newFixedThreadPool(2);</span><br><span class="line">while(存在未对账订单)&#123;</span><br><span class="line">  // 计数器初始化为2</span><br><span class="line">  CountDownLatch latch = </span><br><span class="line">    new CountDownLatch(2);</span><br><span class="line">  // 查询未对账订单</span><br><span class="line">  executor.execute(()-&gt; &#123;</span><br><span class="line">    pos = getPOrders();</span><br><span class="line">    latch.countDown();</span><br><span class="line">  &#125;);</span><br><span class="line">  // 查询派送单</span><br><span class="line">  executor.execute(()-&gt; &#123;</span><br><span class="line">    dos = getDOrders();</span><br><span class="line">    latch.countDown();</span><br><span class="line">  &#125;);</span><br><span class="line">  </span><br><span class="line">  // 等待两个查询操作结束</span><br><span class="line">  latch.await();</span><br><span class="line">  </span><br><span class="line">  // 执行对账操作</span><br><span class="line">  diff = check(pos, dos);</span><br><span class="line">  // 差异写入差异库</span><br><span class="line">  save(diff);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3><span id="cyclicbarrier">CyclicBarrier</span></h3><h4><span id="场景">场景</span></h4><p>是一组线程之间互相等待，更像是几个驴友之间不离不弃。</p>
+<p>CyclicBarrier 的计数器是可以循环利用的，而且具备自动重置的功能，一旦计数器减到 0 会自动重置到你设置的初始值。除此之外，CyclicBarrier 还可以设置回调函数</p>
+<p>循环栅栏</p>
+<p>n个线程之间互相等待，每个线程调用await()方法之后，计数器值-1，进入阻塞(休眠状态)，直到最后一个线程调用await()，计数器的值为0，所有线程结束等待，之后计数器的值被重置为n；</p>
+<p>此外，如何构造方法里含有回调函数，在一个 回合(如果是循环执行) 里最后执行await()的线程上 会继续执行回调函数，执行完回调函数，所有线程不再阻塞等待，之后计数器的值被重置为n；</p>
+<h4><span id="example">Example</span></h4><p>CyclicBarrier 进一步并行化，实现 查询未对账订单|查询派送单  和对账操作并行化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 订单队列</span><br><span class="line">Vector&lt;P&gt; pos;</span><br><span class="line">// 派送单队列</span><br><span class="line">Vector&lt;D&gt; dos;</span><br><span class="line">// 执行回调的线程池 </span><br><span class="line">Executor executor = </span><br><span class="line">  Executors.newFixedThreadPool(1);</span><br><span class="line">  </span><br><span class="line">  //注意回调函数是异步的，不需要真实的线程执行</span><br><span class="line">final CyclicBarrier barrier =</span><br><span class="line">  new CyclicBarrier(2, ()-&gt;&#123;</span><br><span class="line">    executor.execute(()-&gt;check());</span><br><span class="line">  &#125;);</span><br><span class="line">  </span><br><span class="line">void check()&#123;</span><br><span class="line">  P p = pos.remove(0);</span><br><span class="line">  D d = dos.remove(0);</span><br><span class="line">  // 执行对账操作</span><br><span class="line">  diff = check(p, d);</span><br><span class="line">  // 差异写入差异库</span><br><span class="line">  save(diff);</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">void checkAll()&#123;</span><br><span class="line">  // 循环查询订单库</span><br><span class="line">  Thread T1 = new Thread(()-&gt;&#123;</span><br><span class="line">    while(存在未对账订单)&#123;</span><br><span class="line">      // 查询订单库</span><br><span class="line">      pos.add(getPOrders());</span><br><span class="line">      // 等待</span><br><span class="line">      barrier.await();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  T1.start();  </span><br><span class="line">  // 循环查询运单库</span><br><span class="line">  Thread T2 = new Thread(()-&gt;&#123;</span><br><span class="line">    while(存在未对账订单)&#123;</span><br><span class="line">      // 查询运单库</span><br><span class="line">      dos.add(getDOrders());</span><br><span class="line">      // 等待</span><br><span class="line">      barrier.await();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  T2.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ol>
+<li>回调函数使用线程池是为了异步操作，否则回掉函数是同步调用的，也就是本次对账操作执行完才能进行下一轮的检查。</li>
+<li>线程数量固定为1，防止了多线程并发导致的数据不一致，因为订单和派送单是两个队列，只有单线程去两个队列中取消息才不会出现消息不匹配的问题。</li>
+</ol>
+<p>进一步简化：</p>
+<h5><span id="使用completablefuture-异步执行">使用CompletableFuture 异步执行</span></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;List&gt; pOrderFuture = CompletableFuture.supplyAsync(this::getPOrders);</span><br><span class="line">CompletableFuture&lt;List&gt; dOrderFuture = CompletableFuture.supplyAsync(this::getDOrders);</span><br><span class="line">pOrderFuture.thenCombine(dOrderFuture, this::check)</span><br><span class="line">            .thenAccept(this::save);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="容器">容器</span></h2><h3><span id="同步容器">同步容器</span></h3><p>ArrayList、HashSet、HashMap 都不是线程安全的</p>
+<p>基于synchronized 同步关键字实现，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">List list = Collections.</span><br><span class="line">  synchronizedList(new ArrayList());</span><br><span class="line">Set set = Collections.</span><br><span class="line">  synchronizedSet(new HashSet());</span><br><span class="line">Map map = Collections.</span><br><span class="line">  synchronizedMap(new HashMap());</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>其他基于 synchronized 实现的容器：</p>
+<p>Vector、Stack、HashTable</p>
+<h4><span id="迭代器">迭代器</span></h4><p>迭代器遍历容器存在线程安全问题</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">List list = Collections.</span><br><span class="line">  synchronizedList(new ArrayList());</span><br><span class="line">Iterator i = list.iterator(); </span><br><span class="line">while (i.hasNext())</span><br><span class="line">  foo(i.next());</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  =》 正确的做法</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">List list = Collections.</span><br><span class="line">  synchronizedList(new ArrayList());</span><br><span class="line">synchronized (list) &#123;  </span><br><span class="line">  Iterator i = list.iterator(); </span><br><span class="line">  while (i.hasNext())</span><br><span class="line">    foo(i.next());</span><br><span class="line">&#125;    </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>Java 在 1.5 版本之前所谓的线程安全的容器，主要指的就是同步容器；</p>
+<p>不过同步容器有个最大的问题，那就是性能差，所有方法都用 synchronized 来保证互斥，串行度太高了。因此 Java 在 1.5 及之后版本提供了性能更高的容器，我们一般称为并发容器。</p>
+<h3><span id="并发容器">并发容器</span></h3><h4><span id="copyonwritearraylist">CopyOnWriteArrayList</span></h4><p>每次写入新的元素都会copy 原数组，读写可以并行，</p>
+<p>遍历操作一直都是基于原 array 执行，而写操作则是基于新 array 进行。</p>
+<h5><span id="注意">注意</span></h5><p>使用 CopyOnWriteArrayList 需要注意的“坑”主要有两个方面。</p>
+<p>一个是应用场景，CopyOnWriteArrayList 仅适用于写操作非常少的场景，而且能够容忍读写的短暂不一致。例如上面的例子中，写入的新元素并不能立刻被遍历到。</p>
+<p>另一个需要注意的是，CopyOnWriteArrayList 迭代器是只读的，不支持增删改。因为迭代器遍历的仅仅是一个快照，而对快照进行增删改是没有意义的。</p>
+<h4><span id="set">Set</span></h4><p>CopyOnWriteArraySet 和 ConcurrentSkipListSet</p>
+<h4><span id="map">Map</span></h4><h5><span id="hashmap">HashMap</span></h5><p>线程不安全，1.8版本的hashmap 底层基于数组 + 链表 + 红黑树 的实现方式，当相同hashcode 的key对应链表很大时，链表自动转为红黑树，相对1.7版本，性能有了一定提高；</p>
+<h5><span id="treemap">TreeMap</span></h5><p>不安全，底层基于红黑树，实现了SortedMap。是一个有序map, 元素插入map时，会按照key的字典序 或者 用户定义的key 比较器Comparator 进行排序。</p>
+<h5><span id="linkedhashmap">LinkedHashMap</span></h5><p>不安全，有序。 在hashmap 基础上，维护了一个双向链表， 保持插入元素的顺序性。</p>
+<p>链表维护了元素插入map的顺序，也就是说，</p>
+<p><strong>该map是有序的，其顺序等于元素插入map的顺序</strong>，通常可以用来实现一个LRU(Least Recently Used)缓存。</p>
+<p>LRU缓存：当缓存里存放的数据个数超过规定个数后，就把最不常用的移除掉. [LRU缓存的实现](</p>
+<h5><span id="hashtable">HashTable</span></h5><p>安全</p>
+<p>Hashtable在hashMap基础上，每个method前面都加上了synchronized方法，因此是线程安全的，但是进行多线程读写时，所有读写操作串行化，因此性能不高；</p>
+<h5><span id="concurrenthashmap">ConcurrentHashMap</span></h5><p>安全</p>
+<p>1.7版本通过分段锁segment Reentrantlock，将数据划分为多个segment，每个segment对应一个Reentrantlock，这样就实现并发地读写操作；1.8版本不再使用分段锁，通过使用CAS和Synchronized同步锁，实现并发操作。</p>
+<h5><span id="concurrentskiplistmap">ConcurrentSkipListMap</span></h5><p>安全</p>
+<p>基于skiplist 跳表实现，</p>
+<p>跳表：SkipList 本身就是一种数据结构，插入、删除、查询操作平均的时间复杂度是 O(log n)，理论上和并发线程数没有关系，所以在并发度非常高的情况下，若你对 ConcurrentHashMap 的性能还不满意，可以尝试一下 ConcurrentSkipListMap。</p>
+<h4><span id="queue">Queue</span></h4><p>Java 并发包里面 Queue 这类并发容器是最复杂的，你可以从以下两个维度来分类。一个维度是阻塞与非阻塞，所谓阻塞指的是当队列已满时，入队操作阻塞；当队列已空时，出队操作阻塞。另一个维度是单端与双端，单端指的是只能队尾入队，队首出队；而双端指的是队首队尾皆可入队出队。Java 并发包里阻塞队列都用 Blocking 关键字标识，单端队列使用 Queue 标识，双端队列使用 Deque 标识。</p>
+<p>单端阻塞队列: ArrayBlockingQueue、LinkedBlockingQueue</p>
+<p>双端阻塞队列: LinkedBlockingDeque</p>
+<p>单端非阻塞队列: ConcurrentLinkedQueue</p>
+<p>双端非阻塞队列: ConcurrentLinkedDeque</p>
+<h5><span id="有界队列">有界队列</span></h5><p>使用队列时，需要格外注意队列是否支持有界（所谓有界指的是内部的队列是否有容量限制）。实际工作中，一般都不建议使用无界的队列，因为数据量大了之后很容易导致 OOM。上面我们提到的这些 Queue 中，只有 ArrayBlockingQueue 和 LinkedBlockingQueue 是支持有界的，所以在使用其他无界队列时，一定要充分考虑是否存在导致 OOM 的隐患。</p>
+<h2><span id="cas">CAS</span></h2><p>无锁，使用原子类</p>
+<p>java.util.concurrent.atomic 包</p>
+<h3><span id="usage">Usage</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public class Test &#123;</span><br><span class="line">  AtomicLong count = </span><br><span class="line">    new AtomicLong(0);</span><br><span class="line">  void add10K() &#123;</span><br><span class="line">    int idx = 0;</span><br><span class="line">    while(idx++ &lt; 10000) &#123;</span><br><span class="line">      count.getAndIncrement();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="线程池">线程池</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ThreadPoolExecutor(</span><br><span class="line">  int corePoolSize,</span><br><span class="line">  int maximumPoolSize,</span><br><span class="line">  long keepAliveTime,</span><br><span class="line">  TimeUnit unit,</span><br><span class="line">  BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">  ThreadFactory threadFactory,</span><br><span class="line">  RejectedExecutionHandler handler) </span><br></pre></td></tr></table></figure>
+
+<p>参数解析： 7个参数</p>
+<p>corePoolSize ：核心线程池数量，表示线程池保有的最小线程数</p>
+<p>maximumPoolSize： 表示线程池创建的最大线程数</p>
+<p>keepAliveTime + unit:   空闲状态的线程允许存活的时间</p>
+<p>workQueue：工作队列，用户提交的任务会先放置在该队列中</p>
+<p>threadFactory：通过这个参数你可以自定义如何创建线程，例如可以给线程指定一个有意义的名字。</p>
+<p>handler：自定义任务的拒绝策略。如果线程池中所有的线程都在忙碌，并且工作队列也满了（前提是工作队列是有界队列），那么此时提交任务，线程池就会拒绝接收。</p>
+<p><strong>ThreadPoolExecutor 已经提供了以下 4 种策略</strong>：</p>
+<p>CallerRunsPolicy：提交任务的线程自己去执行该任务。</p>
+<p>AbortPolicy：默认的拒绝策略，会 throws RejectedExecutionException。</p>
+<p>DiscardPolicy：直接丢弃任务，没有任何异常抛出。</p>
+<p>DiscardOldestPolicy：丢弃最老的任务，其实就是把最早进入工作队列的任务丢弃，然后把新任务加入到工作队列。</p>
+<h3><span id="调用">调用</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">// 无返回结果</span><br><span class="line">void execute(Runnable command) </span><br><span class="line"></span><br><span class="line">// 提交Runnable任务</span><br><span class="line">Future&lt;?&gt; </span><br><span class="line">  submit(Runnable task);</span><br><span class="line">  </span><br><span class="line">// 提交Callable任务</span><br><span class="line">&lt;T&gt; Future&lt;T&gt; </span><br><span class="line">  submit(Callable&lt;T&gt; task);</span><br><span class="line">  </span><br><span class="line">// 提交Runnable任务及结果引用  </span><br><span class="line">&lt;T&gt; Future&lt;T&gt; </span><br><span class="line">  submit(Runnable task, T result);</span><br></pre></td></tr></table></figure>
+
+<p><strong>submit 三个方法的区别：</strong></p>
+<p>1、提交 Runnable 任务 submit(Runnable task) ：这个方法的参数是一个 Runnable 接口，Runnable 接口的 run() 方法是没有返回值的，所以 submit(Runnable task) 这个方法返回的 Future 仅可以用来断言任务已经结束了，类似于 Thread.join()。</p>
+<p>2、提交 Callable 任务 submit(Callable task)：这个方法的参数是一个 Callable 接口，它只有一个 call() 方法，并且这个方法是有返回值的，所以这个方法返回的 Future 对象可以通过调用其 get() 方法来获取任务的执行结果。</p>
+<p>3、提交 Runnable 任务及结果引用 submit(Runnable task, T result)：这个方法很有意思，假设这个方法返回的 Future 对象是 f，f.get() 的返回值就是传给 submit() 方法的参数 result。 </p>
+<p>（在实现Runnable 接口的类对应的构造函数里 传入变量T，在run方法中对变量进行操作）</p>
+<p>需要你注意的是 Runnable 接口的实现类 Task 声明了一个有参构造函数 Task(Result r) ，创建 Task 对象的时候传入了 result 对象，这样就能在类 Task 的 run() 方法中对 result 进行各种操作了。result 相当于主线程和子线程之间的桥梁，通过它主子线程可以共享数据。</p>
+<p>方法三使用测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">import java.util.concurrent.ExecutorService;</span><br><span class="line">import java.util.concurrent.Executors;</span><br><span class="line">import java.util.concurrent.Future;</span><br><span class="line"></span><br><span class="line">public class ThreadPoolTestReturn &#123;</span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        ExecutorService executor</span><br><span class="line">                = Executors.newFixedThreadPool(1);</span><br><span class="line">// 创建Result对象r</span><br><span class="line">        Result r = new Result();</span><br><span class="line">        r.setAaa(&quot;aaa&quot;);</span><br><span class="line"></span><br><span class="line">        System.out.println(r.getXxx());</span><br><span class="line"></span><br><span class="line">// 提交任务</span><br><span class="line">        Future&lt;Result&gt; future =</span><br><span class="line">                executor.submit(new Task(r), r);</span><br><span class="line">        Result fr = future.get();</span><br><span class="line"></span><br><span class="line">        System.out.println(fr.getXxx());</span><br><span class="line"></span><br><span class="line">        executor.shutdown();</span><br><span class="line"></span><br><span class="line">// 下面等式成立</span><br><span class="line">//        fr === r;</span><br><span class="line">//        fr.getAAA() === a;</span><br><span class="line">//        fr.getXXX() === x</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Task implements Runnable&#123;</span><br><span class="line">    Result r;</span><br><span class="line">    //通过构造函数传入result</span><br><span class="line">    Task(Result r)&#123;</span><br><span class="line">        this.r = r;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        String a = r.getAaa();</span><br><span class="line">        r.setXxx(a);</span><br><span class="line">    &#125;</span><br><span class="line">//    public void run() &#123;</span><br><span class="line">//        //可以操作result</span><br><span class="line">//        String a = r.getAaa();</span><br><span class="line">//        r.setXxx(a);</span><br><span class="line">//    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class Result &#123;</span><br><span class="line">    private String aaa;</span><br><span class="line">    private String xxx;</span><br><span class="line"></span><br><span class="line">    public void setAaa(String aaa) &#123;</span><br><span class="line">        this.aaa =aaa;</span><br><span class="line">    &#125;</span><br><span class="line">    public void setXxx(String xxx) &#123;</span><br><span class="line">        this.xxx =xxx;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getAaa() &#123;</span><br><span class="line">        return aaa;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getXxx() &#123;</span><br><span class="line">        return xxx;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="futuretask">FutureTask</span></h2><h3><span id="usage">Usage</span></h3><p>FutureTask 实现了 Runnable 和 Future 接口，由于实现了 Runnable 接口，</p>
+<p>所以可以将 FutureTask 对象作为任务提交给 ThreadPoolExecutor 去执行，也可以直接被 Thread 执行；</p>
+<p>又因为实现了 Future 接口，所以也能用来获得任务的执行结果。</p>
+<p>（1）示例代码是将 FutureTask 对象提交给 ThreadPoolExecutor 去执行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 创建FutureTask</span><br><span class="line">FutureTask&lt;Integer&gt; futureTask</span><br><span class="line">  = new FutureTask&lt;&gt;(()-&gt; 1+2);</span><br><span class="line">// 创建线程池</span><br><span class="line">ExecutorService es = </span><br><span class="line">  Executors.newCachedThreadPool();</span><br><span class="line">// 提交FutureTask </span><br><span class="line">es.submit(futureTask);</span><br><span class="line">// 获取计算结果</span><br><span class="line">Integer result = futureTask.get();</span><br></pre></td></tr></table></figure>
+
+<p>（2）FutureTask 对象直接被 Thread 执行的示例代码，利用 FutureTask 对象可以很容易获取子线程的执行结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 创建FutureTask</span><br><span class="line">FutureTask&lt;Integer&gt; futureTask</span><br><span class="line">  = new FutureTask&lt;&gt;(()-&gt; 1+2);</span><br><span class="line">// 创建并启动线程</span><br><span class="line">Thread T1 = new Thread(futureTask);</span><br><span class="line">T1.start();</span><br><span class="line">// 获取计算结果</span><br><span class="line">Integer result = futureTask.get();</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="example">Example</span></h3><img src="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/23_2屏幕快照 2021-12-11 下午8.31.30.png">
+
+
+
+<p>我们创建了两个 FutureTask——ft1 和 ft2，ft1 完成洗水壶、烧开水、泡茶的任务，ft2 完成洗茶壶、洗茶杯、拿茶叶的任务；这里需要注意的是 ft1 这个任务在执行泡茶任务前，需要等待 ft2 把茶叶拿来，所以 ft1 内部需要引用 ft2，并在执行泡茶之前，调用 ft2 的 get() 方法实现等待。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// 创建任务T2的FutureTask</span><br><span class="line">FutureTask&lt;String&gt; ft2</span><br><span class="line">  = new FutureTask&lt;&gt;(new T2Task());</span><br><span class="line">// 创建任务T1的FutureTask</span><br><span class="line">FutureTask&lt;String&gt; ft1</span><br><span class="line">  = new FutureTask&lt;&gt;(new T1Task(ft2));</span><br><span class="line">// 线程T1执行任务ft1</span><br><span class="line">Thread T1 = new Thread(ft1);</span><br><span class="line">T1.start();</span><br><span class="line">// 线程T2执行任务ft2</span><br><span class="line">Thread T2 = new Thread(ft2);</span><br><span class="line">T2.start();</span><br><span class="line">// 等待线程T1执行结果</span><br><span class="line">System.out.println(ft1.get());</span><br><span class="line"></span><br><span class="line">// T1Task需要执行的任务：</span><br><span class="line">// 洗水壶、烧开水、泡茶</span><br><span class="line">class T1Task implements Callable&lt;String&gt;&#123;</span><br><span class="line">  FutureTask&lt;String&gt; ft2;</span><br><span class="line">  // T1任务需要T2任务的FutureTask</span><br><span class="line">  T1Task(FutureTask&lt;String&gt; ft2)&#123;</span><br><span class="line">    this.ft2 = ft2;</span><br><span class="line">  &#125;</span><br><span class="line">  @Override</span><br><span class="line">  String call() throws Exception &#123;</span><br><span class="line">    System.out.println(&quot;T1:洗水壶...&quot;);</span><br><span class="line">    TimeUnit.SECONDS.sleep(1);</span><br><span class="line">    </span><br><span class="line">    System.out.println(&quot;T1:烧开水...&quot;);</span><br><span class="line">    TimeUnit.SECONDS.sleep(15);</span><br><span class="line">    // 获取T2线程的茶叶  </span><br><span class="line">    String tf = ft2.get();</span><br><span class="line">    System.out.println(&quot;T1:拿到茶叶:&quot;+tf);</span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;T1:泡茶...&quot;);</span><br><span class="line">    return &quot;上茶:&quot; + tf;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">// T2Task需要执行的任务:</span><br><span class="line">// 洗茶壶、洗茶杯、拿茶叶</span><br><span class="line">class T2Task implements Callable&lt;String&gt; &#123;</span><br><span class="line">  @Override</span><br><span class="line">  String call() throws Exception &#123;</span><br><span class="line">    System.out.println(&quot;T2:洗茶壶...&quot;);</span><br><span class="line">    TimeUnit.SECONDS.sleep(1);</span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;T2:洗茶杯...&quot;);</span><br><span class="line">    TimeUnit.SECONDS.sleep(2);</span><br><span class="line"></span><br><span class="line">    System.out.println(&quot;T2:拿茶叶...&quot;);</span><br><span class="line">    TimeUnit.SECONDS.sleep(1);</span><br><span class="line">    return &quot;龙井&quot;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">// 一次执行结果：</span><br><span class="line">T1:洗水壶...</span><br><span class="line">T2:洗茶壶...</span><br><span class="line">T1:烧开水...</span><br><span class="line">T2:洗茶杯...</span><br><span class="line">T2:拿茶叶...</span><br><span class="line">T1:拿到茶叶:龙井</span><br><span class="line">T1:泡茶...</span><br><span class="line">上茶:龙井</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 
       
     </div>
