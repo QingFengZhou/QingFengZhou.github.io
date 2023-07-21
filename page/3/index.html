@@ -73,6 +73,534 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-system/linux/ansible/ansible使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T15:58:16.000Z" itemprop="datePublished">2023-07-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/system-linux-ansible/">system/linux/ansible</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/">ansible使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA">环境搭建</a><ul>
+<li><a href="#%E5%9F%BA%E4%BA%8Ealpine-%E9%95%9C%E5%83%8F%E6%90%AD%E5%BB%BA">基于alpine 镜像搭建</a><ul>
+<li><a href="#%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4">安装步骤</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">参考资料</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9F%BA%E4%BA%8Ecentos-7-%E9%95%9C%E5%83%8F%E6%90%AD%E5%BB%BA">基于centos 7 镜像搭建</a><ul>
+<li><a href="#%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4-1">安装步骤</a></li>
+</ul>
+</li>
+<li><a href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%A4%9A%E7%BB%93%E7%82%B9">虚拟机多结点</a><ul>
+<li><a href="#virturebox%E7%BD%91%E5%8D%A1%E9%85%8D%E7%BD%AE">virturebox网卡配置</a></li>
+<li><a href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE">虚拟机网络配置</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99-1">参考资料</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%85%A5%E9%97%A8%E4%BD%BF%E7%94%A8">入门使用</a><ul>
+<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
+<li><a href="#%E5%B8%B8%E7%94%A8%E6%A8%A1%E5%9D%97">常用模块</a><ul>
+<li><a href="#shell-%E6%A8%A1%E5%9D%97">shell 模块</a></li>
+<li><a href="#script-%E6%A8%A1%E5%9D%97">script 模块</a></li>
+</ul>
+</li>
+<li><a href="#playbook">Playbook</a><ul>
+<li><a href="#%E6%89%A7%E8%A1%8Cshell">执行shell</a></li>
+<li><a href="#%E6%89%A7%E8%A1%8Cscript">执行script</a></li>
+</ul>
+</li>
+<li><a href="#become_user%E7%94%A8%E6%B3%95">Become_user用法</a><ul>
+<li><a href="#%E7%94%A8%E6%B3%95">用法</a></li>
+<li><a href="#%E6%80%BB%E4%BD%93%E6%93%8D%E4%BD%9C%E6%B5%81%E7%A8%8B">总体操作流程</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE">参考文献</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="环境搭建">环境搭建</span></h2><h3><span id="基于alpine-镜像搭建">基于alpine 镜像搭建</span></h3><p>alpine:3.17.3 版本，启动多个docker容器，模拟练习使用ansible</p>
+<h4><span id="安装步骤">安装步骤</span></h4><p>1、按如下目录结构创建文件</p>
+<img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.08.18.png">
+
+<p>&#x2F;etc&#x2F;ansible&#x2F;ansible.cfg</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[defaults]</span><br><span class="line">; 是否启用主机密钥检查: https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#managing-host-key-checking</span><br><span class="line">; 初期使用密码连接分发公钥时先设置为False</span><br><span class="line">; 对应的环境变量设置: export ANSIBLE_HOST_KEY_CHECKING=False</span><br><span class="line">host_key_checking = False</span><br><span class="line">interpreter_python = /usr/bin/python</span><br></pre></td></tr></table></figure>
+
+<p>&#x2F;etc&#x2F;ansible&#x2F;hosts</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[myvirtualmachines]</span><br><span class="line">192.0.2.50</span><br><span class="line">192.0.2.51</span><br><span class="line">192.0.2.52</span><br></pre></td></tr></table></figure>
+
+<p>Dockerfile:  构造生成 example-ansible-master 容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">FROM example-ansible-node:latest</span><br><span class="line"></span><br><span class="line">RUN apk add --no-cache ansible openssh sshpass</span><br><span class="line"></span><br><span class="line">RUN mkdir -p /etc/ansible &amp;&amp; \</span><br><span class="line">    ssh-keygen -t rsa -P &quot;&quot; -f ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>Dockerfile.node：生成 镜像example-ansible-node</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">FROM alpine:3.17.3</span><br><span class="line"></span><br><span class="line">RUN echo &quot;http://mirrors.aliyun.com/alpine/latest-stable/main/&quot; &gt; /etc/apk/repositories &amp;&amp; \</span><br><span class="line">    echo &quot;http://mirrors.aliyun.com/alpine/latest-stable/community/&quot; &gt;&gt; /etc/apk/repositories</span><br><span class="line"></span><br><span class="line">RUN apk update &amp;&amp; \</span><br><span class="line">    apk add --no-cache openssh-server tzdata python3 &amp;&amp; \</span><br><span class="line">    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;&amp; \</span><br><span class="line">    sed -i &quot;s/#PermitRootLogin.*/PermitRootLogin yes/g&quot; /etc/ssh/sshd_config &amp;&amp; \</span><br><span class="line">    ssh-keygen -A &amp;&amp; \</span><br><span class="line">    echo &quot;root:123456&quot; | chpasswd</span><br><span class="line"></span><br><span class="line">EXPOSE 22</span><br><span class="line"></span><br><span class="line">CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span><br></pre></td></tr></table></figure>
+
+
+
+<p>docker-compose.yml：启动四个容器：</p>
+<p>example-ansible-master，example-ansible-node1，example-ansible-node2，example-ansible-node3</p>
+<p>master安装ansible，运行ansible命令，控制操作其他三个结点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">version: &quot;3&quot;</span><br><span class="line"></span><br><span class="line">networks:</span><br><span class="line">  net-ansible:</span><br><span class="line">    ipam:</span><br><span class="line">      driver: default</span><br><span class="line">      config:</span><br><span class="line">        - subnet: 192.0.2.0/24</span><br><span class="line"></span><br><span class="line">services:</span><br><span class="line">  master:</span><br><span class="line">    build:</span><br><span class="line">      dockerfile: Dockerfile</span><br><span class="line">      context: .</span><br><span class="line">    container_name: example-ansible-master</span><br><span class="line">    hostname: ansible</span><br><span class="line">    volumes:</span><br><span class="line">      - ./etc/ansible:/etc/ansible</span><br><span class="line">      - ./ansible:/server/scripts/ansible</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.49</span><br><span class="line"></span><br><span class="line">  node1:</span><br><span class="line">    image: example-ansible-node</span><br><span class="line">    hostname: host1</span><br><span class="line">    container_name: example-ansible-node1</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.50</span><br><span class="line">  node2:</span><br><span class="line">    image: example-ansible-node</span><br><span class="line">    hostname: host2</span><br><span class="line">    container_name: example-ansible-node2</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.51</span><br><span class="line">  node3:</span><br><span class="line">    image: example-ansible-node</span><br><span class="line">    hostname: host3</span><br><span class="line">    container_name: example-ansible-node3</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.52</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2、启动容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 构建host1、host2、host3的镜像</span><br><span class="line">docker build -t example-ansible-node -f ./Dockerfile.node .</span><br><span class="line"></span><br><span class="line"># 启动四个容器</span><br><span class="line">docker-compose up -d</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3、登录ansible容器，分发ssh公钥</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#进入ansible容器 (master)</span><br><span class="line">docker exec -it example-ansible-master ash</span><br><span class="line"></span><br><span class="line"># 执行下面命令分发ssh公钥</span><br><span class="line">ansible myvirtualmachines -k -m authorized_key -a &quot;user=root key=&#x27;&#123;&#123; lookup(&#x27;file&#x27;, &#x27;~/.ssh/id_rsa.pub&#x27;) &#125;&#125;&#x27;&quot;</span><br><span class="line">输入密码123456</span><br></pre></td></tr></table></figure>
+
+<p>4、测试连通性</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">; 测试连接</span><br><span class="line">ansible all -m ping</span><br><span class="line">ansible myvirtualmachines -m ping</span><br></pre></td></tr></table></figure>
+
+<h4><span id="参考资料">参考资料</span></h4><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624172594">用Docker搭建Ansible练习环境</a></p>
+<p>如何使用容器模拟物理机学习使用ansible?<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/goloving/p/15032636.html">https://www.cnblogs.com/goloving/p/15032636.html</a><br><a target="_blank" rel="noopener" href="http://mactech.sheridanc.on.ca/team/mark-galaszkiewicz/getting-started-docker-ansible/">http://mactech.sheridanc.on.ca/team/mark-galaszkiewicz/getting-started-docker-ansible/</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/shgh_2004/article/details/80599515">https://blog.csdn.net/shgh_2004/article/details/80599515</a><br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1632980">https://cloud.tencent.com/developer/article/1632980</a></p>
+<h3><span id="基于centos-7-镜像搭建">基于centos 7 镜像搭建</span></h3><p>Centos 7.9，启动多个docker容器，模拟练习使用ansible</p>
+<p>&#x2F;Users&#x2F;****&#x2F;Desktop&#x2F;mydirect&#x2F;github&#x2F;ansible&#x2F;env_build2</p>
+<h4><span id="安装步骤">安装步骤</span></h4><p>1、按如下目录结构创建文件</p>
+<img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.08.18.png">
+
+<p>&#x2F;etc&#x2F;ansible&#x2F;ansible.cfg</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[defaults]</span><br><span class="line">; 是否启用主机密钥检查: https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html#managing-host-key-checking</span><br><span class="line">; 初期使用密码连接分发公钥时先设置为False</span><br><span class="line">; 对应的环境变量设置: export ANSIBLE_HOST_KEY_CHECKING=False</span><br><span class="line">host_key_checking = False</span><br><span class="line">interpreter_python = /usr/bin/python</span><br></pre></td></tr></table></figure>
+
+<p>&#x2F;etc&#x2F;ansible&#x2F;hosts</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[myvirtualmachines]</span><br><span class="line">192.0.2.50</span><br><span class="line">192.0.2.51</span><br><span class="line">192.0.2.52</span><br></pre></td></tr></table></figure>
+
+<p>Dockerfile:  构造生成 example-ansible-cent-master 容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">FROM example-ansible-cent-node:latest</span><br><span class="line"></span><br><span class="line">RUN yum install  -y ansible openssh sshpass</span><br><span class="line"></span><br><span class="line">RUN mkdir -p /etc/ansible &amp;&amp; \</span><br><span class="line">    ssh-keygen -t rsa -P &quot;&quot; -f ~/.ssh/id_rsa</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Dockerfile.node：生成 镜像example-ansible-cent-node</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">FROM centos:centos7</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RUN yum install -y openssh-server tzdata python3 &amp;&amp; \</span><br><span class="line">    cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;&amp; \</span><br><span class="line">    sed -i &quot;s/#PermitRootLogin.*/PermitRootLogin yes/g&quot; /etc/ssh/sshd_config &amp;&amp; \</span><br><span class="line">    ssh-keygen -A &amp;&amp; \</span><br><span class="line">    echo &quot;root:123456&quot; | chpasswd</span><br><span class="line"></span><br><span class="line">EXPOSE 22</span><br><span class="line"></span><br><span class="line">CMD [&quot;/usr/sbin/sshd&quot;, &quot;-D&quot;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>docker-compose.yml：启动四个容器：</p>
+<p>example-ansible-cent-master，example-ansible-cent-node1，</p>
+<p>example-ansible-cent-node2，example-ansible-cent-node3</p>
+<p>master安装ansible，运行ansible命令，控制操作其他三个结点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">version: &quot;3&quot;</span><br><span class="line"></span><br><span class="line">networks:</span><br><span class="line">  net-ansible:</span><br><span class="line">    ipam:</span><br><span class="line">      driver: default</span><br><span class="line">      config:</span><br><span class="line">        - subnet: 192.0.2.0/24</span><br><span class="line"></span><br><span class="line">services:</span><br><span class="line">  master:</span><br><span class="line">    build:</span><br><span class="line">      dockerfile: Dockerfile</span><br><span class="line">      context: .</span><br><span class="line">    container_name: example-ansible-cent-master</span><br><span class="line">    hostname: ansible</span><br><span class="line">    volumes:</span><br><span class="line">      - ./etc/ansible:/etc/ansible</span><br><span class="line">      - ./ansible:/server/scripts/ansible</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.49</span><br><span class="line"></span><br><span class="line">  node1:</span><br><span class="line">    image: example-ansible-cent-node</span><br><span class="line">    hostname: host1</span><br><span class="line">    container_name: example-ansible-cent-node1</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.50</span><br><span class="line">  node2:</span><br><span class="line">    image: example-ansible-cent-node</span><br><span class="line">    hostname: host2</span><br><span class="line">    container_name: example-ansible-cent-node2</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.51</span><br><span class="line">  node3:</span><br><span class="line">    image: example-ansible-cent-node</span><br><span class="line">    hostname: host3</span><br><span class="line">    container_name: example-ansible-cent-node3</span><br><span class="line">    networks:</span><br><span class="line">      net-ansible:</span><br><span class="line">        ipv4_address: 192.0.2.52</span><br></pre></td></tr></table></figure>
+
+<p>2、启动容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 构建host1、host2、host3的镜像</span><br><span class="line">docker build -t example-ansible-cent-node -f ./Dockerfile.node .</span><br><span class="line"></span><br><span class="line"># 启动四个容器</span><br><span class="line">docker-compose up -d</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3、登录ansible容器，修改yum源，安装依赖，分发ssh公钥</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#进入ansible容器 (master)</span><br><span class="line">docker exec -it example-ansible-cent-master bash</span><br><span class="line"></span><br><span class="line">#安装依赖</span><br><span class="line">yum install -y net-tools openssh-clients wget</span><br><span class="line">#修改yum源</span><br><span class="line">wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo</span><br><span class="line">wget -O /etc/yum.repos.d/epel-7.repo http://mirrors.aliyun.com/repo/epel-7.repo</span><br><span class="line">yum makecache</span><br><span class="line">#安装ansible和ssh</span><br><span class="line">yum install -y ansible openssh sshpass</span><br><span class="line"></span><br><span class="line"># 执行下面命令分发ssh公钥</span><br><span class="line">ansible myvirtualmachines -k -m authorized_key -a &quot;user=root key=&#x27;&#123;&#123; lookup(&#x27;file&#x27;, &#x27;~/.ssh/id_rsa.pub&#x27;) &#125;&#125;&#x27;&quot;</span><br><span class="line">输入密码123456</span><br></pre></td></tr></table></figure>
+
+<p>4、测试连通性</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">; 测试连接</span><br><span class="line">ansible all -m ping</span><br><span class="line">ansible myvirtualmachines -m ping</span><br></pre></td></tr></table></figure>
+
+<p>5、所有结点关闭和启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker-compose stop</span><br><span class="line">docker-compose start</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="虚拟机多结点">虚拟机多结点</span></h3><p>使用virturebox和centos7搭建多台虚拟机</p>
+<p>网络配置需要配置两块网卡：其一保证可访问外网；其二分配固定ip，虚拟机之间互相访问</p>
+<h4><span id="virturebox网卡配置">virturebox网卡配置</span></h4><img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.41.12.png">
+
+
+
+
+
+<img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.41.19.png">
+
+
+
+<img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.42.09.png">
+
+
+
+<img src="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/截屏2023-07-04 00.42.24.png">
+
+
+
+
+
+<h4><span id="虚拟机网络配置">虚拟机网络配置</span></h4><p>cat  &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-enp0s3 (动态ip:dhcp)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">TYPE=static</span><br><span class="line">PROXY_METHOD=none</span><br><span class="line">BROWSER_ONLY=no</span><br><span class="line">BOOTPROTO=dhcp</span><br><span class="line">DEFROUTE=yes</span><br><span class="line">IPV4_FAILURE_FATAL=no</span><br><span class="line">IPV6INIT=yes</span><br><span class="line">IPV6_AUTOCONF=yes</span><br><span class="line">IPV6_DEFROUTE=yes</span><br><span class="line">IPV6_FAILURE_FATAL=no</span><br><span class="line">IPV6_ADDR_GEN_MODE=stable-privacy</span><br><span class="line">NAME=enp0s3</span><br><span class="line">UUID=55fa0f47-7b70-40c7-a4c1-59e912cf5cc9</span><br><span class="line">DEVICE=enp0s3</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure>
+
+<p>cat  &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-enp0s8 （静态：固定IP）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">TYPE=static</span><br><span class="line">PROXY_METHOD=none</span><br><span class="line">BROWSER_ONLY=no</span><br><span class="line">BOOTPROTO=static</span><br><span class="line">DEFROUTE=yes</span><br><span class="line">IPV4_FAILURE_FATAL=no</span><br><span class="line">IPV6INIT=yes</span><br><span class="line">IPV6_AUTOCONF=yes</span><br><span class="line">IPV6_DEFROUTE=yes</span><br><span class="line">IPV6_FAILURE_FATAL=no</span><br><span class="line">IPV6_ADDR_GEN_MODE=stable-privacy</span><br><span class="line">NAME=enp0s8</span><br><span class="line">#UUID=55fa0f47-7b70-40c7-a4c1-59e912cf5cc9</span><br><span class="line">DEVICE=enp0s8</span><br><span class="line">ONBOOT=yes</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">IPADDR=192.168.56.101</span><br><span class="line">#NETMASK=255.255.255.0</span><br><span class="line">#GATEWAY=192.168.56.1</span><br></pre></td></tr></table></figure>
+
+<h4><span id="参考资料">参考资料</span></h4><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/341328334">VirtualBox虚拟机配置双网卡同时连接内外网</a></p>
+<h2><span id="入门使用">入门使用</span></h2><p>ansible是一个配置管理工具，通过ssh(或密码)管理多台主机，不是类似mysql的服务，底层基于python实现</p>
+<h3><span id="配置文件">配置文件</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ansible主要文件：</span><br><span class="line"></span><br><span class="line">/etc/ansible/hosts 主机清单文件</span><br><span class="line">/etc/ansible/ansible.cfg 主配置文件</span><br><span class="line"></span><br><span class="line">ansible-doc -l 模块文档查看</span><br><span class="line">ansible-doc ping 模块用法</span><br><span class="line">ansible-doc -s ping  模块用法</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="常用模块">常用模块</span></h3><h4><span id="shell-模块">shell 模块</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ansible myvirtualmachines -m shell -a &#x27;echo $HOSTNAME&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="script-模块">script 模块</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF &gt;&gt; /tmp/test1.sh </span><br><span class="line">#!/bin/bash</span><br><span class="line">echo  `date`</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ansible myvirtualmachines -m script -a /tmp/test1.sh</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="playbook">Playbook</span></h3><p>cat &#x2F;etc&#x2F;ansible&#x2F;hosts</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[myvirtualmachines]</span><br><span class="line">192.0.2.50</span><br><span class="line">192.0.2.51</span><br><span class="line">192.0.2.52</span><br><span class="line"></span><br><span class="line">[test1]</span><br><span class="line">host1 ansible_ssh_host=192.0.2.50 ansible_ssh_user=&quot;tom&quot; ansible_ssh_pass=&quot;tom&quot; ansible_ssh_port=22</span><br><span class="line">host2 ansible_ssh_host=192.0.2.51 ansible_ssh_user=&quot;tom&quot; ansible_ssh_pass=&quot;tom&quot; ansible_ssh_port=22</span><br><span class="line">host3 ansible_ssh_host=192.0.2.52 ansible_ssh_user=&quot;tom&quot; ansible_ssh_pass=&quot;tom&quot; ansible_ssh_port=22</span><br></pre></td></tr></table></figure>
+
+<h4><span id="执行shell">执行shell</span></h4><p>ansible-playbook hello.yml</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cat hello.yml</span><br><span class="line"></span><br><span class="line">- hosts: test1</span><br><span class="line">  gather_facts: no</span><br><span class="line">  remote_user: tom</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: &#x27;echo 123\|&#x27;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4><span id="执行script">执行script</span></h4><p>ansible-playbook test1.yml</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cat /tmp/test1.sh   </span><br><span class="line">#!/bin/bash</span><br><span class="line">echo 12333</span><br><span class="line"></span><br><span class="line">vi test1.yml</span><br><span class="line">- hosts: test1</span><br><span class="line">  gather_facts: no</span><br><span class="line">  remote_user: root</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      script: /tmp/test1.sh    </span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="become_user用法">Become_user用法</span></h3><p>以非root用户执行playbook</p>
+<h4><span id="用法">用法</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#命令行用法：适用于全局 (-u remote-user覆盖playbook定义的remote-user)</span><br><span class="line">ansible-playbook  -u tom -b --become-method sudo   hello2.yml </span><br><span class="line"></span><br><span class="line">cat hello2.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  remote_user: root</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      script: /tmp/ansible/test1.sh</span><br><span class="line"></span><br><span class="line">cat test1.sh </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">cat &lt;&lt; EOF &gt;&gt; /etc/hosts</span><br><span class="line">#123</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">#作用与play下的单个task</span><br><span class="line">ansible-playbook     hello4_2.yml </span><br><span class="line"></span><br><span class="line">cat hello4_2.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      script: /tmp/ansible/test1.sh</span><br><span class="line">      become_method: sudo</span><br><span class="line">      become: yes</span><br><span class="line">      </span><br><span class="line">cat test1.sh </span><br><span class="line"></span><br><span class="line">#!/bin/bash</span><br><span class="line">cat &lt;&lt; EOF &gt;&gt; /etc/hosts</span><br><span class="line">#123</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#作用与单个play，应用到play下的每个task</span><br><span class="line">ansible-playbook     hello3.yml </span><br><span class="line"></span><br><span class="line">cat hello3.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  remote_user: tom</span><br><span class="line">  become_method: sudo</span><br><span class="line">  become: yes</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: /usr/sbin/shutdown -h 23:50  </span><br><span class="line"></span><br><span class="line">#作用与单个play，应用到play下的每个task, 比hello3更精简</span><br><span class="line">cat hello4.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  become_method: sudo</span><br><span class="line">  become: yes</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: /usr/sbin/shutdown -h 23:50  </span><br><span class="line">      </span><br><span class="line"></span><br><span class="line">#作用与单个play，应用到play下的每个task, 比hello4 多了sudo</span><br><span class="line">cat hello5.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  become_method: sudo</span><br><span class="line">  become: yes</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: sudo /usr/sbin/shutdown -h 23:50 </span><br><span class="line">      </span><br><span class="line">      </span><br><span class="line">总体来说，hello4最精简，不需要sudo, 不需要设置remote_user， hello4_2控制精度最高，become_user对应的是单个task</span><br><span class="line"></span><br><span class="line">become_method 默认值sudo，因此可以继续精简，如下是最简洁的写法 (hello3_3.yml)</span><br><span class="line">cat hello3_3.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  become: yes</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: /usr/sbin/shutdown -h 23:50</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">其他用法：</span><br><span class="line">第一种：</span><br><span class="line">ansible-playbook -u tom hello4_3.yml </span><br><span class="line"></span><br><span class="line">cat hello4_3.yml </span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  remote_user: root</span><br><span class="line">  gather_facts: no</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      script: /tmp/ansible/test1.sh</span><br><span class="line">      become_method: sudo</span><br><span class="line">      become: yes</span><br><span class="line"></span><br><span class="line">第二种：</span><br><span class="line">ansible-playbook hello3_2.yml </span><br><span class="line"></span><br><span class="line">cat hello3_2.yml </span><br><span class="line"> </span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  remote_user: tom</span><br><span class="line">  become_method: sudo</span><br><span class="line">  become_user: root</span><br><span class="line">  become: yes</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: /usr/sbin/shutdown -h 23:50 </span><br><span class="line"></span><br><span class="line">第三种是错误的：如下所示</span><br><span class="line">####如下是错误的写法，要避免</span><br><span class="line">ansible-playbook -u tom hello4_4.yml</span><br><span class="line">ansible-playbook  hello4_4.yml</span><br><span class="line">- hosts: test2</span><br><span class="line">  remote_user: root</span><br><span class="line">  gather_facts: no</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      script: /tmp/ansible/test1.sh</span><br><span class="line">      become_user: tom</span><br><span class="line">      become_method: sudo</span><br><span class="line">      become: yes</span><br></pre></td></tr></table></figure>
+
+
+
+<h4><span id="总体操作流程">总体操作流程</span></h4><p>1、首先新建用户（比如tom），加入&#x2F;etc&#x2F;sudoers文件，确保新用户（tom）可以执行sudo su -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#visudo 添加一行</span><br><span class="line">tom     ALL=(ALL)       ALL</span><br></pre></td></tr></table></figure>
+
+<p>2、编辑 ansible的hosts文件信息，将服务器地址、用户等信息加入hosts文件中,</p>
+<p>ansible_become_pass 等价于用户手动执行sudo command要输入的pwd</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[test2]</span><br><span class="line">cent2 ansible_ssh_host=192.168.56.102 ansible_ssh_user=&quot;tom&quot; ansible_ssh_pass=&quot;tom&quot; ansible_ssh_port=22 ansible_become_pass=&quot;tom&quot;</span><br><span class="line">cent3 ansible_ssh_host=192.168.56.103 ansible_ssh_user=&quot;tom&quot; ansible_ssh_pass=&quot;tom&quot; ansible_ssh_port=22 ansible_become_pass=&quot;tom&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3、修改 playbook yml文件，可以针对单个task， 单个play，或者所有play，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">--单个task</span><br><span class="line"></span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      script: /tmp/ansible/test1.sh</span><br><span class="line">      become_method: sudo</span><br><span class="line">      become: yes</span><br><span class="line">      </span><br><span class="line">      </span><br><span class="line">--单个play</span><br><span class="line">- hosts: test2</span><br><span class="line">  gather_facts: no</span><br><span class="line">  become_method: sudo</span><br><span class="line">  become: yes</span><br><span class="line">  tasks:</span><br><span class="line">    - name: hello world</span><br><span class="line">      shell: /usr/sbin/shutdown -h 23:50  </span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">--所有task</span><br><span class="line">ansible-playbook  -u tom -b --become-method sudo   hello2.yml </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4><span id="参考文献">参考文献</span></h4><p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_15735145/5547297">play-book 普通用户提权</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html">Understanding privilege escalation: become</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/" data-id="cljn4kj610000rx9adxvgh8tg" data-title="ansible使用" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-tools/java/maven/maven远程仓库配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T14:01:21.000Z" itemprop="datePublished">2023-07-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools-java-maven/">tools/java/maven</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+
+
+<!-- tocstop -->
+
+<p>修改 MAVEN_HOME&#x2F;conf&#x2F;settings.xml文件，</p>
+<p>1、本地仓库位置 修改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;localRepository&gt;$&#123;user.home&#125;/.m2/repository&lt;/localRepository&gt;</span><br><span class="line">默认位置 ~/.m2/repository </span><br></pre></td></tr></table></figure>
+
+
+
+<p>2、远程仓库地址 配置</p>
+<p>当本地仓库找不到对应依赖包时，从配置的远程仓库中拉取依赖包、下载到本地。</p>
+<p>如下示例在profiles  配置了两个远程仓库，id分别为repo、alimaven，id必须是唯一的，不能重复。</p>
+<p>activeProfiles 指明两个仓库都是激活状态，都可用于项目构建</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">&lt;profiles&gt;</span><br><span class="line">    &lt;!--</span><br><span class="line">     | Specifies a set of introductions to the build process, to be activated using one or more of the</span><br><span class="line">     | mechanisms described above. For inheritance purposes, and to activate profiles via &lt;activatedProfiles/&gt;</span><br><span class="line">     | or the command line, profiles have to have an ID that is unique.</span><br><span class="line">     |</span><br><span class="line">     | An encouraged best practice for profile identification is to use a consistent naming convention</span><br><span class="line">     | for profiles, such as &#x27;env-dev&#x27;, &#x27;env-test&#x27;, &#x27;env-production&#x27;, &#x27;user-jdcasey&#x27;, &#x27;user-brett&#x27;, etc.</span><br><span class="line">     | This will make it more intuitive to understand what the set of introduced profiles is attempting</span><br><span class="line">     | to accomplish, particularly when you only have a list of profile id&#x27;s for debug.</span><br><span class="line">   --&gt;</span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">              &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">              &lt;name&gt;Central Repository&lt;/name&gt;</span><br><span class="line">              &lt;url&gt;https://repo.maven.apache.org/maven2&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">           &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">           &lt;name&gt;alimaven&lt;/name&gt;</span><br><span class="line">           &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">&lt;/profiles&gt;</span><br><span class="line"></span><br><span class="line">  &lt;!-- activeProfiles</span><br><span class="line">   | List of profiles that are active for all builds.</span><br><span class="line">  &lt;/activeProfiles&gt;</span><br><span class="line">  --&gt;</span><br><span class="line"></span><br><span class="line">&lt;activeProfiles&gt;</span><br><span class="line">    &lt;activeProfile&gt;repo&lt;/activeProfile&gt;</span><br><span class="line">    &lt;activeProfile&gt;alimaven&lt;/activeProfile&gt;</span><br><span class="line">&lt;/activeProfiles&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" data-id="cljmy0mmf0000v29a26p20mk6" data-title="maven远程仓库配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-system/linux/command/linux常用命令" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T13:55:00.000Z" itemprop="datePublished">2023-07-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/system-linux-command/">system/linux/command</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">linux常用命令</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#%E7%8E%AF%E5%A2%83">环境：</a></li>
+<li><a href="#%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C">文件操作</a><ul>
+<li><a href="#find">Find</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8E%8B%E7%BC%A9%E5%92%8C%E8%A7%A3%E5%8E%8B%E7%BC%A9">压缩和解压缩</a></li>
+<li><a href="#vim">VIM</a></li>
+<li><a href="#%E7%AE%A1%E7%90%86%E7%94%A8%E6%88%B7%E7%BB%84">管理用户组</a></li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE">网络配置</a></li>
+<li><a href="#%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86">软件包管理</a></li>
+<li><a href="#%E5%86%85%E6%A0%B8">内核</a><ul>
+<li><a href="#grub">GRUB</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BF%9B%E7%A8%8B">进程</a></li>
+<li><a href="#%E5%88%86%E5%8C%BA">分区</a></li>
+<li><a href="#%E8%B5%84%E6%96%99">资料</a></li>
+</ul>
+<!-- tocstop -->
+
+<h3><span id="环境">环境：</span></h3><p>linux版本：</p>
+<p>内核：<a target="_blank" rel="noopener" href="https://kernel.org/">https://kernel.org/</a></p>
+<p>发行版：Redhat\centos\federa\  ubuntu\debian  后两种有界面</p>
+<p>init 3  进入登录</p>
+<p>Init 0 关机</p>
+<p>虚拟机安装：<a target="_blank" rel="noopener" href="https://www.virtualbox.org/wiki/Downloads">virtualbox</a></p>
+<p>os:  <a target="_blank" rel="noopener" href="http://isoredirect.centos.org/centos/7/isos/x86_64/">centos</a></p>
+<h3><span id="文件操作">文件操作</span></h3><p>Mv  :  重命名 或移动 文件（目录）</p>
+<p>Ctrl + l  &#x3D;  clear</p>
+<p>cd - 返回上一级目录</p>
+<h4><span id="find">Find</span></h4><p>find &#x2F;etc  -name init</p>
+<p>find &#x2F; -size +204800  # 在根目录查找&gt;100m的文件，100MB &#x3D;&#x3D; 102400KB&#x3D;&#x3D;204800数据快</p>
+<h3><span id="压缩和解压缩">压缩和解压缩</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">c 打tar包 打包</span><br><span class="line">x解tar包 解包</span><br><span class="line">f 文件</span><br><span class="line">j bzip2解压缩</span><br><span class="line">z gzip压缩</span><br></pre></td></tr></table></figure>
+
+<p>tar jxf  &#x2F;tmp&#x2F;etc-backup.tar.bz2  -C &#x2F;tmp&#x2F;test1</p>
+<p>tar jcf  &#x2F;tmp&#x2F;etc-backup.tar.bz2  &#x2F;etc</p>
+<p>tar zxf  &#x2F;tmp&#x2F;etc-backup.tar.gz  -C  &#x2F;tmp&#x2F;test2</p>
+<p>tar zcf  &#x2F;tmp&#x2F;etc-backup.tar.gz  &#x2F;etc</p>
+<p>tar cf   &#x2F;tmp&#x2F;etc.tar  &#x2F;etc     &#x2F;&#x2F;打tar包</p>
+<p>gzip  etc.tar         &#x2F;&#x2F;.tar.gz</p>
+<p>gzip -d  etc.tar.gz   &#x2F;&#x2F;.tar.gz -&gt; .tar</p>
+<p>zip -r etc.zip &#x2F;etc   zip压缩</p>
+<p>unzip  etc.zip  -d    &#x2F;tmp&#x2F;test1</p>
+<h3><span id="vim">VIM</span></h3><p>配置文件 vi &#x2F;etc&#x2F;virc</p>
+<p>正常编辑模式： -i -I -a -A -o -O   hjkl （上下左右） </p>
+<p>yy 3yy  y$(光标到行的末尾) 复制</p>
+<p>dd 3dd d$ 剪切</p>
+<p>u（撤销） ctrl+r 恢复动作</p>
+<p>输入set nu 显示行号</p>
+<p>x   3x 删除多个字符</p>
+<p>r + 新字符 替换</p>
+<p>11 + G  移动到指定第11行  g + g移动到首行  G移动到最后一行</p>
+<p>shift+^ 行首  shift + $ 行尾</p>
+<p>命令模式： </p>
+<p>输入set nu 显示行号</p>
+<p>输入set nonu 不显示行号</p>
+<p>wq 保存 退出</p>
+<p>!command 执行linux命令</p>
+<p>&#x2F;x  查找字符串 x, n向下查找，shift + n 向上查找</p>
+<p>%s&#x2F;old&#x2F;new  所有行第一个替换    s&#x2F;old&#x2F;new 当前行第一个替换</p>
+<p>%s&#x2F;old&#x2F;new&#x2F;g  所有行替换 (&#x2F;g全局所有行)</p>
+<p>3,5s&#x2F;old&#x2F;new&#x2F;g (第三到第五行替换)</p>
+<p>可视模式：</p>
+<p>v</p>
+<p>shift +v</p>
+<p>ctrl + v</p>
+<h3><span id="管理用户组">管理用户组</span></h3><p>&#x2F;etc&#x2F;passwd  用户</p>
+<p>&#x2F;etc&#x2F;shadow  密码</p>
+<p> &#x2F;etc&#x2F;group 用户组</p>
+<p>useradd  useradd -g group1 user1</p>
+<p>userdel</p>
+<p>passwd user1 修改密码</p>
+<p>usermod 修改用户属性   usermod -g group1 user1</p>
+<p>chage</p>
+<p>groupadd</p>
+<p>groupdel</p>
+<p>su - tom 切换到用户tom</p>
+<p>sudo   以普通用户身份登录的状态下，执行某些只有root才能执行的命令，比如sudo shutdown</p>
+<p>实现方式，直接执行visudo命令 对文件&#x2F;etc&#x2F;sudoers修改、授权</p>
+<p>visudo    为用户添加执行某些root命令的权限，实质是修改 &#x2F;etc&#x2F;sudoers文件 </p>
+<p>chown</p>
+<p>chgrp</p>
+<p>chmod  u g o a  u+x u-x</p>
+<p>目录权限：x 进入目录</p>
+<p>  rx 进入目录，查看文件</p>
+<p> wx 进入目录，删除文件，修改文件名</p>
+<h3><span id="网络配置">网络配置</span></h3><p>修改网卡显示名字</p>
+<p>vi  &#x2F;etc&#x2F;default&#x2F;grub, 在GRUB_CMDLINE_LINUX 增加 biosdevname&#x3D;0 net.ifnames&#x3D;1</p>
+<p>grub2-mkconfig  -o  &#x2F;boot&#x2F;grub2&#x2F;grub.cfg    &#x2F;&#x2F;重新生成grub配置文件</p>
+<p>reboot</p>
+<p>mii-tool etho  查看网卡物理网络连接情况</p>
+<p>route  -n 查看路由 网关</p>
+<p>修改ip:  ifconfig  eth0  10.0.2.4  netmask 255.255.255.0</p>
+<p>ifup  启动网卡</p>
+<p>route add  增加路由</p>
+<p>route del   减少一条路由</p>
+<p>ping </p>
+<p>traceroute -w 1  <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>   </p>
+<p>mtr</p>
+<p>nslookup  域名查看  nslookup   <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a></p>
+<p>telnet   telnet  ww.baidu.com   80</p>
+<p>tcpdump     查看网络数据包  tcpdump  -i any  -n port   80</p>
+<p>​                     tcpdump -i any  -n host 10.0.0.1</p>
+<p>​                     tcpdump -i any  -n host 10.0.0.1 and port  80</p>
+<p>​                     tcpdump -i any  -n host 10.0.0.1 and port  80  -w  &#x2F;tmp&#x2F;file1</p>
+<p>netstat  netstat   -tlunp</p>
+<p>ss</p>
+<p> service network restart  (systemctl   restart  NetworkManager.service)</p>
+<p>&#x2F;etc&#x2F;sysconfig&#x2F;netwok-scripts&#x2F;ifcfg-eth0   </p>
+<p>​     BOOTPROTO(dhcp|none)  IPADDR  GATEWAY   NETMASK  DNS1  DNS2  DNS3</p>
+<p>​	</p>
+<p>hostnamectl  set-hostname c7.test11</p>
+<p>vi  &#x2F;etc&#x2F;hosts</p>
+<p>Selinux  强制访问控制 </p>
+<p>​     getenforce</p>
+<p>​     setenforce  0</p>
+<p>​     &#x2F;etc&#x2F;selinux&#x2F;sysconfig</p>
+<p>​    </p>
+<h3><span id="软件包管理">软件包管理</span></h3><p>rpm  -qa  查看</p>
+<p>rpm  -i   安装</p>
+<p>rpm  -e 卸载</p>
+<p>yum 简化rpm包的下载、安装、依赖</p>
+<p>配置yum 源  &#x2F;etc&#x2F;yum.repos.d&#x2F;CentOS-Base.repo,   <a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/centos?spm=a2c6h.13651102.0.0.39491b11mLBS4h">国内aliyun yum源</a></p>
+<p>yum -y install</p>
+<p>yum remove</p>
+<p>yum list</p>
+<p>yum update  ***   更新软件包</p>
+<p>源代码编译安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">wget  https://openresty.org/download/openresty-1.21.4.1.tar.gz</span><br><span class="line">tar -zxvf openresty-1.21.4.1.tar.gz</span><br><span class="line">cd openresty-1.21.4.1</span><br><span class="line">./configure  --prefix=/usr/local/openresty  (prefix 指定安装目录)</span><br><span class="line">make -j2  (-j2 使用2个核进行编译)</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">perl: https://www.cpan.org/src/5.0/perl-5.36.1.tar.gz</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>epel    扩展包  yum install  epel-release  -y</p>
+<h3><span id="内核">内核</span></h3><p>uname -r 查看内核版本</p>
+<p>lscpu  查看cpu</p>
+<h4><span id="grub">GRUB</span></h4><p>（GRand Unified Bootloader，大一统启动加载器），是一个<a target="_blank" rel="noopener" href="https://wiki.archlinuxcn.org/wiki/Arch_%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B#%E5%BC%95%E5%AF%BC%E5%8A%A0%E8%BD%BD%E7%A8%8B%E5%BA%8F">引导加载程序</a></p>
+<p>vi  &#x2F;etc&#x2F;default&#x2F;grub</p>
+<p>ls &#x2F;etc&#x2F;grub.d&#x2F;</p>
+<p>vi  &#x2F;boot&#x2F;grub2&#x2F;grub.cfg</p>
+<p>grub2-mkconfig  -o  &#x2F;boot&#x2F;grub2&#x2F;grub.cfg    &#x2F;&#x2F;重新生成grub配置文件</p>
+<h3><span id="进程">进程</span></h3><p>ps</p>
+<p>ps -eLf</p>
+<p>pstree 进程树</p>
+<p>top</p>
+<p>top -p pid    只查某一个进程</p>
+<p>nice  启动时指定进程优先级</p>
+<p>renice  运行中指定进程优先级</p>
+<p>.&#x2F;a.sh &amp;    加&amp;表示后端运行，进程放入后端</p>
+<p>jobs  查看正在运行的后端进程</p>
+<p>fg+ 数字(jobs显示的)  进程调回前端</p>
+<p>bg+ 数字(jobs显示的)  进程调入后端</p>
+<p>ctrl + z 正在前端运行的进程调入后端，并进行stop状态，通过jobs  fg后续继续执行</p>
+<p>kill -l</p>
+<p>ctrl+c</p>
+<p>kill -9  pid</p>
+<p>nohup  + cmd + &amp; </p>
+<p>守护进程 daemon</p>
+<p>screen   </p>
+<p>​         screen 进入screen环境</p>
+<p>​         screen  -ls    查看后端有哪些screen环境下的进程</p>
+<p>​         ctrl + a  d   进程调入后端</p>
+<p>​          screen -r id  进程调回前端</p>
+<p>进程日志   </p>
+<p>​     &#x2F;var&#x2F;log&#x2F;messages  </p>
+<p>​     &#x2F;var&#x2F;log&#x2F;dmesg   内核</p>
+<p>​     &#x2F;var&#x2F;log&#x2F;secure</p>
+<p>​     &#x2F;var&#x2F;log&#x2F;cron</p>
+<p>systemctl   start&#x2F;stop&#x2F;enable&#x2F;disable  </p>
+<p>Systemctl    </p>
+<p>top</p>
+<p>free</p>
+<p>fdisk -l  磁盘分区</p>
+<p>parted -l</p>
+<p>df -h</p>
+<p>du -sh 实际占用空间</p>
+<p>ls -lh</p>
+<p>dd  if&#x3D;&#x2F;dev&#x2F;zero  bs&#x3D;4M  count&#x3D;10 of&#x3D;bfile    复制产生一个文件</p>
+<p>文件系统  ext4  xfs ntfs</p>
+<p>ls -i  查看i节点</p>
+<p>ln   硬链接   i节点相同，不能跨分区</p>
+<p>ln -s  软链接  i节点不同，</p>
+<p>getfacl   文件访问权限控制</p>
+<p>setfacl  -m u:user1:r  afile   赋读权</p>
+<h3><span id="分区">分区</span></h3><p>fdisk  分区, 大于2T 要使用parted 进行分区</p>
+<p>mkfs.ext4   文件系统格式化</p>
+<p>mkdir  &#x2F;mnt&#x2F;sdc1  mount  &#x2F;dev&#x2F;sdc1  &#x2F;mnt&#x2F;sdc1    挂载文件系统</p>
+<p>vi  &#x2F;etc&#x2F;fstab   文件里修改，对挂载固化，重启自动挂载</p>
+<p>磁盘配额 quota  限制用户对磁盘的使用</p>
+<h3><span id="资料">资料</span></h3><p><a target="_blank" rel="noopener" href="https://time.geekbang.org/course/detail/100029601-101469">极客时间 linux实战技能 100讲</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" data-id="cljmxdm1q00001h9a94fi72lf" data-title="linux常用命令" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-system/linux/host/monitor/linux主机监控" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/03/system/linux/host/monitor/linux%E4%B8%BB%E6%9C%BA%E7%9B%91%E6%8E%A7/" class="article-date">
@@ -876,102 +1404,11 @@ cache
 
 
   
-    <article id="post-life/thought/20230629" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/06/30/life/thought/20230629/" class="article-date">
-  <time class="dt-published" datetime="2023-06-30T11:58:06.000Z" itemprop="datePublished">2023-06-30</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/life-thought/">life/thought</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/06/30/life/thought/20230629/">20230629</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="One"><a href="#One" class="headerlink" title="One"></a>One</h1><p>What is important ?</p>
-<h1 id="Two"><a href="#Two" class="headerlink" title="Two"></a>Two</h1><p>Time flies</p>
-<h1 id="Three"><a href="#Three" class="headerlink" title="Three"></a>Three</h1><p>Do the right thing</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/06/30/life/thought/20230629/" data-id="cljiiyeep00029o9ah0lc6tm1" data-title="20230629" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-life/daily/20230630" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/06/30/life/daily/20230630/" class="article-date">
-  <time class="dt-published" datetime="2023-06-30T09:39:44.000Z" itemprop="datePublished">2023-06-30</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/life-daily/">life/daily</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/06/30/life/daily/20230630/">20230630</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="Morning"><a href="#Morning" class="headerlink" title="Morning"></a>Morning</h2><p>8:10 - 8:35</p>
-<p>8:40 - 11:30</p>
-<h2 id="loon"><a href="#loon" class="headerlink" title="loon"></a>loon</h2><p>11:30 - 13:30</p>
-<h2 id="Afternoon"><a href="#Afternoon" class="headerlink" title="Afternoon"></a>Afternoon</h2><p>13:30 - 18:00<br>18:00 - 18:40</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/06/30/life/daily/20230630/" data-id="cljieq5zk0001bt9a4yle9w6t" data-title="20230630" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+    <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -982,7 +1419,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -1024,23 +1461,23 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_conf/">spark_conf</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_shuffle_usage/">spark_shuffle_usage</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_memory_usage/">spark_memory_usage</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/20/java/designpattern/designpattern_pactice1/">designpattern_pactice1</a>
           </li>
         
           <li>
             <a href="/2023/07/20/java/jvm/jvm_basic/">jvm_basic</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/19/java/concurrent/jiketime_java%E5%B9%B6%E5%8F%91/">jiketime_java并发</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/17/bigdata/sql/doc_sql/">doc_sql</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/13/bigdata/flink/flink_doc/flink_sql_20230713/">flink_sql_20230713</a>
           </li>
         
       </ul>
