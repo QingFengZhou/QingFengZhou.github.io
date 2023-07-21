@@ -73,6 +73,86 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-system/linux/prometheus/prometheus使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time class="dt-published" datetime="2023-07-03T17:43:13.000Z" itemprop="datePublished">2023-07-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/">prometheus使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#prometheus">prometheus</a></li>
+<li><a href="#grafana">Grafana</a><ul>
+<li><a href="#dashboard">Dashboard</a></li>
+</ul>
+</li>
+<li><a href="#%E9%87%87%E9%9B%86%E5%99%A8">采集器</a><ul>
+<li><a href="#node_exporter">node_exporter</a></li>
+<li><a href="#cadvisor">cadvisor</a></li>
+<li><a href="#elasticsearch_exporter">elasticsearch_exporter</a></li>
+<li><a href="#blackbox_exporter">blackbox_exporter</a><ul>
+<li><a href="#refrerences">Refrerences</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="prometheus">prometheus</span></h2><p>.&#x2F;prometheus –config.file&#x3D;prometheus.yml</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:9090/">http://localhost:9090</a></p>
+<h2><span id="grafana">Grafana</span></h2><h3><span id="dashboard">Dashboard</span></h3><p><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/">Grafana 各种dashboard</a>:<a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/">https://grafana.com/grafana/dashboards/</a></p>
+<p>bin&#x2F;grafana-server</p>
+<p><a target="_blank" rel="noopener" href="http://localhost:3000/">http://localhost:3000/</a></p>
+<h2><span id="采集器">采集器</span></h2><h3><span id="node_exporter">node_exporter</span></h3><p>curl  <a target="_blank" rel="noopener" href="http://localhost:9100/metrics">http://localhost:9100/metrics</a></p>
+<h3><span id="cadvisor">cadvisor</span></h3><p><a target="_blank" rel="noopener" href="https://github.com/google/cadvisor">容器监控</a>：cAdvisor (Container Advisor) provides container users an understanding of the resource usage and performance characteristics of their running containers.</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md">Monitoring cAdvisor with Prometheus</a></p>
+<p><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/14282-cadvisor-exporter/">cadvisor Grafana dashboard</a></p>
+<h3><span id="elasticsearch_exporter">elasticsearch_exporter</span></h3><p><a target="_blank" rel="noopener" href="https://github.com/prometheus-community/elasticsearch_exporter">Exporter</a></p>
+<p><a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/14191-elasticsearch-overview/">Grafana</a></p>
+<h3><span id="blackbox_exporter">blackbox_exporter</span></h3><p><a target="_blank" rel="noopener" href="https://yunlzheng.gitbook.io/prometheus-book/part-ii-prometheus-jin-jie/exporter/commonly-eporter-usage/install_blackbox_exporter#zi-ding-yi-http-qing-qiu">黑盒探测和使用，文档写的太好了，通俗易懂</a></p>
+<p><strong>目的</strong>：一句话总结：通过http探测或tcp探测 手段 检测远程服务站点是不是可用的</p>
+<p>白盒监控：过对监控指标的观察能够预判可能出现的问题，从而对潜在的不确定因素进行优化。</p>
+<p>黑盒监控即以用户的身份测试服务的外部可见性，常见的黑盒监控包括HTTP探针、TCP探针等用于检测站点或者服务的可访问性，以及访问效率等。</p>
+<p>区别：黑盒监控相较于白盒监控最大的不同在于黑盒监控是以故障为导向当故障发生时，黑盒监控能快速发现故障，而白盒监控则侧重于主动发现或者预测潜在的问题。一个完善的监控目标是要能够从白盒的角度发现潜在问题，能够在黑盒的角度快速发现已经发生的问题。</p>
+<h4><span id="refrerences">Refrerences</span></h4><p><a target="_blank" rel="noopener" href="https://yunlzheng.gitbook.io/prometheus-book/part-ii-prometheus-jin-jie/exporter/commonly-eporter-usage/install_blackbox_exporter#zi-ding-yi-http-qing-qiu">prometheus-book</a> <strong>重点推荐prometheus学习</strong></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/04/system/linux/prometheus/prometheus%E4%BD%BF%E7%94%A8/" data-id="cljn5iqgg00007j9a6mcm3wwz" data-title="prometheus使用" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-system/linux/ansible/ansible使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/03/system/linux/ansible/ansible%E4%BD%BF%E7%94%A8/" class="article-date">
@@ -1347,63 +1427,6 @@ cache
 
 
   
-    <article id="post-bigdata/spark/spark_connect" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/02/bigdata/spark/spark_connect/" class="article-date">
-  <time class="dt-published" datetime="2023-07-02T15:28:37.000Z" itemprop="datePublished">2023-07-02</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/bigdata-spark/">bigdata/spark</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/02/bigdata/spark/spark_connect/">spark_connect</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h2 id="Spark-Connect"><a href="#Spark-Connect" class="headerlink" title="Spark Connect"></a>Spark Connect</h2><p>Env: spark3.4.1 hadoop2.7.7</p>
-<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><p>Server: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./sbin/start-connect-server.sh --packages org.apache.spark:spark-connect_2.12:3.4.1 --master yarn  --conf spark.sql.catalogImplementation=hive</span><br><span class="line"></span><br><span class="line">./sbin/stop-connect-server.sh </span><br></pre></td></tr></table></figure>
-
-<p>Client：</p>
-<p>1、Pyspark:</p>
-<p>python最低版本3.9, 需要安装多个依赖包</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/pyspark --remote <span class="string">&quot;sc://localhost&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>2、maven Scala： 注：目前scala client不太稳定，还没正式对外release，使用方式来自stackoverflow</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- https://mvnrepository.com/artifact/org.apache.spark/spark-connect-client-jvm --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-connect-client-jvm_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-catalyst_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-core_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-
-<p>Test code:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">object SparkConnectTest &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line">    val ip = &quot;192.168.43.65&quot;</span><br><span class="line">    val spark = SparkSession.builder().remote(s&quot;sc://$ip&quot;).build()</span><br><span class="line">//    spark.sql(&quot;show databases&quot;).show()</span><br><span class="line">//    spark.sql(&quot;use test_zhou&quot;)</span><br><span class="line">//    spark.sql(&quot;select addr, count(1) cnt from users group by addr&quot;).show()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    val ds1 = spark.read.text(&quot;/tmp/output.txt&quot;)</span><br><span class="line">    val cnt = ds1.count()</span><br><span class="line"></span><br><span class="line">    println(cnt)</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id=""><a href="#" class="headerlink" title=""></a></h2>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/02/bigdata/spark/spark_connect/" data-id="cljllibbx0000029aavti3wcr" data-title="spark_connect" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1419,7 +1442,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-kafka/">bigdata/kafka</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -1429,7 +1452,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/" rel="tag">kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
     </div>
   </div>
 
@@ -1439,7 +1462,7 @@ cache
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
     </div>
   </div>
 
@@ -1461,6 +1484,10 @@ cache
       <ul>
         
           <li>
+            <a href="/2023/07/21/bigdata/kafka/kafka_basic/">kafka_basic</a>
+          </li>
+        
+          <li>
             <a href="/2023/07/21/bigdata/spark/spark_tune/spark_conf/">spark_conf</a>
           </li>
         
@@ -1474,10 +1501,6 @@ cache
         
           <li>
             <a href="/2023/07/20/java/designpattern/designpattern_pactice1/">designpattern_pactice1</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/20/java/jvm/jvm_basic/">jvm_basic</a>
           </li>
         
       </ul>

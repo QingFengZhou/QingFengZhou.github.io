@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>kafka_basic | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Concepts Consumer consumer group Rebalance   Coordinator   Replica Controller   Usage Test   Client 消息无丢失配置 消息幂等 幂等型producer Feature   事务型producer 特点 Usage   对比        ConceptsProducer Consumer Bro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kafka_basic">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/21/bigdata/kafka/kafka_basic/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Concepts Consumer consumer group Rebalance   Coordinator   Replica Controller   Usage Test   Client 消息无丢失配置 消息幂等 幂等型producer Feature   事务型producer 特点 Usage   对比        ConceptsProducer Consumer Bro">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-07-21T02:45:53.000Z">
+<meta property="article:modified_time" content="2023-07-21T04:35:48.688Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="kafka">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-bigdata/kafka/kafka_basic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/21/bigdata/kafka/kafka_basic/" class="article-date">
+  <time class="dt-published" datetime="2023-07-21T02:45:53.000Z" itemprop="datePublished">2023-07-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-kafka/">bigdata/kafka</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      kafka_basic
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#concepts">Concepts</a><ul>
+<li><a href="#consumer">Consumer</a><ul>
+<li><a href="#consumer-group">consumer group</a><ul>
+<li><a href="#rebalance">Rebalance</a></li>
+</ul>
+</li>
+<li><a href="#coordinator">Coordinator</a></li>
+</ul>
+</li>
+<li><a href="#replica">Replica</a></li>
+<li><a href="#controller">Controller</a></li>
+</ul>
+</li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#test">Test</a></li>
+</ul>
+</li>
+<li><a href="#client">Client</a><ul>
+<li><a href="#%E6%B6%88%E6%81%AF%E6%97%A0%E4%B8%A2%E5%A4%B1%E9%85%8D%E7%BD%AE">消息无丢失配置</a></li>
+<li><a href="#%E6%B6%88%E6%81%AF%E5%B9%82%E7%AD%89">消息幂等</a><ul>
+<li><a href="#%E5%B9%82%E7%AD%89%E5%9E%8Bproducer">幂等型producer</a><ul>
+<li><a href="#feature">Feature</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%8B%E5%8A%A1%E5%9E%8Bproducer">事务型producer</a><ul>
+<li><a href="#%E7%89%B9%E7%82%B9">特点</a></li>
+<li><a href="#usage-1">Usage</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AF%B9%E6%AF%94">对比</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="concepts">Concepts</span></h2><p>Producer</p>
+<p>Consumer</p>
+<p>Broker</p>
+<p>Topic  -&gt; partition -&gt; 1 leader + N flollower</p>
+<p>（副本的工作机制也很简单：生产者总是向领导者副本写消息；而消费者总是从领导者副本读消息。至于追随者副本，它只做一件事：向领导者副本发送请求，请求领导者把最新生产的消息发给它，这样它能保持与领导者的同步。）</p>
+<h3><span id="consumer">Consumer</span></h3><h4><span id="consumer-group">consumer group</span></h4><h5><span id="rebalance">Rebalance</span></h5><p>消费组重平衡，</p>
+<p>Rebalance 本质上是一种协议，规定了一个 Consumer Group 下的所有 Consumer 如何达成一致，来分配订阅 Topic 的每个分区。</p>
+<p>Rebalance触发条件：</p>
+<p>1、消费组成员数发生变化</p>
+<p>2、订阅主题数发生变更</p>
+<p>3、订阅主题的分区数发生变更</p>
+<p>Rebalance 过程中，所有 Consumer 实例都会停止消费，等待 Rebalance 完成</p>
+<h4><span id="coordinator">Coordinator</span></h4><p>Coordinator，它专门为 Consumer Group 服务，负责为 consumer Group 执行 Rebalance 以及提供位移管理和组成员管理等</p>
+<p>具体来讲，Consumer 端应用程序在提交位移时，其实是向 Coordinator 所在的 Broker 提交位移。同样地，当 Consumer 应用启动时，也是向 Coordinator 所在的 Broker 发送各种请求，然后由 Coordinator 负责执行消费者组的注册、成员管理记录等元数据管理操作。</p>
+<p>所有 Broker 在启动时，都会创建和开启相应的 Coordinator 组件。也就是说，<strong>所有 Broker 都有各自的 Coordinator 组件</strong>。那么，Consumer Group 如何确定为它服务的 Coordinator 在哪台 Broker 上呢？</p>
+<p>Kafka 为某个 Consumer Group 确定 Coordinator 所在的 Broker 的算法有 2 个步骤。</p>
+<p>第 1 步：确定由位移主题的哪个分区来保存该 Group 数据：partitionId&#x3D;Math.abs(groupId.hashCode() % offsetsTopicPartitionCount)。</p>
+<p>第 2 步：找出该分区 Leader 副本所在的 Broker，该 Broker 即为对应的 Coordinator。</p>
+<h3><span id="replica">Replica</span></h3><p>leader</p>
+<p>follower</p>
+<p>LEO log-end-offset  </p>
+<p>hw  high watermark</p>
+<p>一个分区有3个副本，一个leader，2个follower。producer向leader写了10条消息，</p>
+<p>follower1从leader处拷贝了5条消息，</p>
+<p>follower2从leader处拷贝了3条消息，那么leader副本的LEO就是10，HW&#x3D;3；follower1副本的LEO是5。</p>
+<p>请问一下，producer生产消息ack&#x3D;all的时候，消息是怎么保证到follower的，因为看到follower是异步拉取数据的，难道是看leader和follower上面的offset吗？</p>
+<p>作者回复: 通过HW机制。leader处的HW要等所有follower LEO都越过了才会前移</p>
+<h3><span id="controller">Controller</span></h3><p>控制器组件（Controller），是 Apache Kafka 的核心组件。它的主要作用是在 Apache ZooKeeper 的帮助下管理和协调整个 Kafka 集群。</p>
+<p>集群中任意一台 Broker 都能充当控制器的角色，但是，在运行过程中，只能有一个 Broker 成为控制器，行使其管理和协调的职责。</p>
+<p>Broker 在启动时，会尝试去 ZooKeeper 中创建 &#x2F;controller 节点。Kafka 当前选举控制器的规则是：第一个成功创建 &#x2F;controller 节点的 Broker 会被指定为控制器。</p>
+<p>1、主题创建、删除；增加主题分区</p>
+<p>2、分区重分配。分区重分配主要是指，kafka-reassign-partitions 脚本</p>
+<p>3、Preferred leader选举。主要是 Kafka 为了避免部分 Broker 负载过重而提供的一种换 Leader 的方案</p>
+<p>4、集群成员broker管理</p>
+<p>5、数据服务。控制器上保存了最全的集群元数据信息，定期同步集群元数据信息到其他broker</p>
+<h2><span id="usage">Usage</span></h2><h3><span id="test">Test</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">cd /Users/***/Desktop/mydirect/github/software/apache-zookeeper-3.6.3-bin</span><br><span class="line">bin/zkServer.sh  start</span><br><span class="line">cd /Users/**/Desktop/mydirect/github/software/kafka_2.12-2.3.0</span><br><span class="line">bin/kafka-server-start.sh   config/server.properties </span><br><span class="line"></span><br><span class="line">bin/kafka-topics.sh --list --bootstrap-server localhost:9092</span><br><span class="line"></span><br><span class="line">bin/kafka-topics.sh  --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic testzq1</span><br><span class="line"></span><br><span class="line">bin/kafka-console-producer.sh  --broker-list localhost:9092  --topic testzq1</span><br><span class="line"></span><br><span class="line">bin/kafka-console-consumer.sh --bootstrap-server  localhost:9092 --topic testzq1 --from-beginning</span><br><span class="line"></span><br><span class="line">&#123;&quot;id&quot;:1, &quot;name&quot;:&quot;lii&quot;, &quot;cod&quot;:13&#125;</span><br><span class="line">&#123;&quot;id&quot;:6, &quot;name&quot;:&quot;fs&quot;, &quot;cod&quot;:13&#125;</span><br><span class="line">&#123;&quot;id&quot;:2, &quot;name&quot;:&quot;hz&quot;, &quot;cod&quot;:13&#125;</span><br><span class="line"></span><br><span class="line">&#123;&quot;id&quot;:1, &quot;userid&quot;:&quot;42322&quot;, &quot;name&quot;:&quot;lisa&quot;, &quot;ts&quot;:1631172057&#125;</span><br><span class="line">&#123;&quot;id&quot;:2, &quot;userid&quot;:&quot;42322&quot;, &quot;name&quot;:&quot;bob&quot;, &quot;ts&quot;:1631172058&#125;</span><br><span class="line">&#123;&quot;id&quot;:3, &quot;userid&quot;:&quot;42322&quot;, &quot;name&quot;:&quot;lisa&quot;, &quot;ts&quot;:1631172057&#125;</span><br><span class="line">&#123;&quot;id&quot;:4, &quot;userid&quot;:&quot;42323&quot;, &quot;name&quot;:&quot;lisa&quot;, &quot;ts&quot;:1631172057&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="client">Client</span></h2><h3><span id="消息无丢失配置">消息无丢失配置</span></h3><p>1、producer 使用带callback回调的send api发送消息，producer.send(msg, callback)</p>
+<p>2、producer acks 设置 all，确保所有ISR 副本收到消息 (This means the leader will wait for the full set of in-sync replicas to acknowledge the record.)</p>
+<p>3、producer设置 retries 为一个较大的值 </p>
+<p>4、broker端 unclean.leader.election.enable &#x3D; false，某个broker 副本如何落后leader太多，无资格选择为新的leader （determine whether a replica that is not insync with the lead replica can itself become a leader in a failure scenario. <a target="_blank" rel="noopener" href="https://kafka.apache.org/documentation/#brokerconfigs">不在insync 状态的副本不能被选举为leader</a>）</p>
+<p>5、broker端 replication.factor &gt;&#x3D; 3  副本因子设置，一条消息被保存 3份</p>
+<p>6、broker端 min.insync.replicas &gt; 1 ，处于同步状态的副本数 &gt; 1，保证消息至少要被写入到多少个副本才算是“已提交”。设置成大于 1 可以提升消息持久性。在实际环境中千万不要使用默认值 1。</p>
+<p>确保replication.factor &gt;  min.insync.replicas</p>
+<p>7、确保消息消费完再提交。Consumer 端参数 enable.auto.commit 设置为false， 手动提交位移。</p>
+<h3><span id="消息幂等">消息幂等</span></h3><h4><span id="幂等型producer">幂等型producer</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">props.put(“enable.idempotence”, ture) </span><br><span class="line">或 props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG， true)</span><br></pre></td></tr></table></figure>
+
+<h5><span id="feature">Feature</span></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、它只能保证单分区上的幂等性，即一个幂等性 Producer 能够保证某个主题的一个分区上不出现重复消息，它无法实现多个分区的幂等性。</span><br><span class="line"></span><br><span class="line">2、其次，它只能实现单会话上的幂等性，不能实现跨会话的幂等性。这里的会话，你可以理解为 Producer 进程的一次运行。当你重启了 Producer 进程之后，这种幂等性保证就丧失了。</span><br></pre></td></tr></table></figure>
+
+<h4><span id="事务型producer">事务型producer</span></h4><h5><span id="特点">特点</span></h5><p>1、事务型 Producer 能够保证将消息原子性地写入到多个分区中。这批消息要么全部写入成功，要么全部失败。</p>
+<p>2、另外，事务型 Producer 也不惧进程的重启。Producer 重启回来后，Kafka 依然保证它们发送消息的精确一次处理。</p>
+<h5><span id="usage">Usage</span></h5><p>和幂等性 Producer 一样，开启 enable.idempotence &#x3D; true。</p>
+<p>设置 Producer 端参数 transactional. id。最好为其设置一个有意义的名字。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">producer.initTransactions();</span><br><span class="line">try &#123;</span><br><span class="line">            producer.beginTransaction();</span><br><span class="line">            producer.send(record1);</span><br><span class="line">            producer.send(record2);</span><br><span class="line">            producer.commitTransaction();</span><br><span class="line">&#125; catch (KafkaException e) &#123;</span><br><span class="line">            producer.abortTransaction();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 Consumer 端，读取事务型 Producer发送的消息，设置 isolation.level &#x3D; read_committed</p>
+<h4><span id="对比">对比</span></h4><p>幂等型 Producer 和事务型 Producer 都是 Kafka 社区力图为 Kafka 实现精确一次处理语义所提供的工具，只是它们的作用范围是不同的。</p>
+<p>幂等型 Producer 只能保证单分区、单会话上的消息幂等性；</p>
+<p>而事务型 Producer 能够保证跨分区、跨会话间的幂等性。从交付语义上来看，自然是事务型 Producer 能做的更多。</p>
+<p>比起幂等性 Producer，事务型 Producer 的性能要更差，在实际使用过程中，我们需要仔细评估引入事务的开销，切不可无脑地启用事务。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/21/bigdata/kafka/kafka_basic/" data-id="clkc3990000002x9aa1t866ra" data-title="kafka_basic" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kafka/" rel="tag">kafka</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/07/21/bigdata/spark/spark_tune/spark_conf/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">spark_conf</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-kafka/">bigdata/kafka</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/" rel="tag">kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/kafka/kafka_basic/">kafka_basic</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_conf/">spark_conf</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_shuffle_usage/">spark_shuffle_usage</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_memory_usage/">spark_memory_usage</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/20/java/designpattern/designpattern_pactice1/">designpattern_pactice1</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
