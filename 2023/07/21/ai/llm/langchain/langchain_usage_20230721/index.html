@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>langchain_usage_20230721 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Basic Purpose Install Example Chain Agent Example   Memory     Model IO Models   Data Connection Embeddings   Chain Test Example1        BasicPurpose一句话总结 langchain， 一个开发框架，开发者可以使用该框架 整合大语言模型 开发各种应">
+<meta property="og:type" content="article">
+<meta property="og:title" content="langchain_usage_20230721">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/07/21/ai/llm/langchain/langchain_usage_20230721/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Basic Purpose Install Example Chain Agent Example   Memory     Model IO Models   Data Connection Embeddings   Chain Test Example1        BasicPurpose一句话总结 langchain， 一个开发框架，开发者可以使用该框架 整合大语言模型 开发各种应">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-07-21T06:23:09.000Z">
+<meta property="article:modified_time" content="2023-07-26T01:20:22.457Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="llm">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-ai/llm/langchain/langchain_usage_20230721" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/21/ai/llm/langchain/langchain_usage_20230721/" class="article-date">
+  <time class="dt-published" datetime="2023-07-21T06:23:09.000Z" itemprop="datePublished">2023-07-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ai-llm-langchain/">ai/llm/langchain</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      langchain_usage_20230721
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#basic">Basic</a><ul>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#install">Install</a></li>
+<li><a href="#example">Example</a><ul>
+<li><a href="#chain">Chain</a></li>
+<li><a href="#agent">Agent</a><ul>
+<li><a href="#example-1">Example</a></li>
+</ul>
+</li>
+<li><a href="#memory">Memory</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#model-io">Model IO</a><ul>
+<li><a href="#models">Models</a></li>
+</ul>
+</li>
+<li><a href="#data-connection">Data Connection</a><ul>
+<li><a href="#embeddings">Embeddings</a></li>
+</ul>
+</li>
+<li><a href="#chain-1">Chain</a><ul>
+<li><a href="#test">Test</a><ul>
+<li><a href="#example1">Example1</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h1><span id="basic">Basic</span></h1><h2><span id="purpose">Purpose</span></h2><p><strong>一句话总结 langchain， 一个开发框架，开发者可以使用该框架 整合大语言模型 开发各种应用。</strong></p>
+<p>通过langchain可以扩展大模型的能力，实现诸如实时搜索、自动拆解任务进行调度的功能。</p>
+<p>官方解释：</p>
+<p><strong>LangChain</strong> is a framework for developing applications powered by language models. </p>
+<h2><span id="install">Install</span></h2><p>本地环境python 3.9</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/Library/Frameworks/Python.framework/Versions/3.9</span><br><span class="line">/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/</span><br></pre></td></tr></table></figure>
+
+<p><strong>install langchain</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 最小化安装</span><br><span class="line">pip install langchain</span><br><span class="line"></span><br><span class="line"># install modules needed for the common LLM providers</span><br><span class="line">pip install langchain[llms]</span><br><span class="line"></span><br><span class="line"># 附加安装各种依赖, 所需时间可能较长</span><br><span class="line">pip install langchain[all]</span><br></pre></td></tr></table></figure>
+
+<p>如果使用的是zsh, </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install &#x27;langchain[all]&#x27;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="example">Example</span></h2><p>pip install langchain</p>
+<p>pip install openai</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">OPENAI_API_KEY=&quot;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&quot;</span><br><span class="line"></span><br><span class="line">from langchain.llms import OpenAI</span><br><span class="line">llm = OpenAI(openai_api_key=OPENAI_API_KEY, temperature=0.9)</span><br><span class="line">llm.predict(&quot;What would be a good company name for a company that makes colorful socks?&quot;)</span><br><span class="line"># &gt;&gt; Feetful of Fun</span><br></pre></td></tr></table></figure>
+
+<h3><span id="chain">Chain</span></h3><p>Chain 将模型、prompt 和其他 chain链接在一起，(用于执行完成各种任务)</p>
+<p> Chains give us a way to link (or chain) together multiple primitives, like models, prompts, and other chains.</p>
+<p><strong>示例中 基于 llm 和prompt  生成了一条chain</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">OPENAI_API_KEY = &quot;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&quot;</span><br><span class="line"></span><br><span class="line">from langchain.llms import OpenAI</span><br><span class="line"># llm = OpenAI(openai_api_key=OPENAI_API_KEY, temperature=0.9)</span><br><span class="line">llm = OpenAI(temperature=0.9)</span><br><span class="line"># resp = llm.predict(&quot;What would be a good company name for a company that makes colorful socks?&quot;)</span><br><span class="line"># print(resp)</span><br><span class="line"></span><br><span class="line">from langchain.prompts import PromptTemplate</span><br><span class="line">prompt = PromptTemplate.from_template(&quot;What is a good name for a company that makes &#123;product&#125;?&quot;)</span><br><span class="line">from langchain.chains import LLMChain</span><br><span class="line">chain = LLMChain(llm=llm, prompt=prompt)</span><br><span class="line">res = chain.run(&quot;colorful socks&quot;)</span><br><span class="line">print (res)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="agent">Agent</span></h3><p>基于模型 对复杂任务自动拆解， 自动判断各个子任务执行的顺序步骤，</p>
+<p>通过被授权使用各种工具(包括google 搜索、数据库查询等) 顺序执行各个子任务，最后给出 任务最终执行结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">To handle complex workflows, we need to be able to dynamically choose actions based on inputs.</span><br><span class="line">Agents do just this: they use a language model to determine which actions to take and in what order. Agents are given access to tools, and they repeatedly choose a tool, run the tool, and observe the output until they come up with a final answer.</span><br></pre></td></tr></table></figure>
+
+
+
+<h4><span id="example">Example</span></h4><p>1、install the python package: pip install google-search-results</p>
+<p>2、log in the site to get SERPER_API_KEY: <a target="_blank" rel="noopener" href="https://serper.dev/">https://serper.dev/</a>  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">from langchain.llms import OpenAI</span><br><span class="line">os.environ[&quot;SERPER_API_KEY&quot;] = &quot;**&quot;</span><br><span class="line">os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;***&quot;</span><br><span class="line"></span><br><span class="line">from langchain.agents import AgentType, initialize_agent, load_tools</span><br><span class="line">from langchain.llms import OpenAI</span><br><span class="line"></span><br><span class="line">from langchain.agents import AgentType, initialize_agent, load_tools</span><br><span class="line">from langchain.llms import OpenAI</span><br><span class="line"></span><br><span class="line"># The language model we&#x27;re going to use to control the agent.</span><br><span class="line">llm = OpenAI(temperature=0)</span><br><span class="line"></span><br><span class="line"># The tools we&#x27;ll give the Agent access to. Note that the &#x27;llm-math&#x27; tool uses an LLM, so we need to pass that in.</span><br><span class="line">tools = load_tools([&quot;google-serper&quot;, &quot;llm-math&quot;], llm=llm)</span><br><span class="line"></span><br><span class="line"># Finally, let&#x27;s initialize an agent with the tools, the language model, and the type of agent we want to use.</span><br><span class="line">agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)</span><br><span class="line"></span><br><span class="line"># Let&#x27;s test it out!</span><br><span class="line">#res = agent.run(&quot;What was the high temperature in SF yesterday in Fahrenheit? What is that number raised to the .023 power?&quot;)</span><br><span class="line">res = agent.run(&quot;What was the newest version of apache spark ? What is that next version? Imaging they are two floats, give me the diff of them &quot;)</span><br><span class="line"></span><br><span class="line">print(res)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3><span id="memory">Memory</span></h3><p>构建有状态应用，基于上下文(之前的输入输出和当前的输入)信息 进行当前输出</p>
+<h1><span id="model-io">Model IO</span></h1><p>IO 输入输出 模块</p>
+<h2><span id="models">Models</span></h2><p>支持两类模型： llms 和chat models.</p>
+<p>前者输入输出都是文本，后者输入输出都是 chat messages</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Chat models are a variation on language models. While chat models use language models under the hood, the interface they expose is a bit different. Rather than expose a &quot;text in, text out&quot; API, they expose an interface where &quot;chat messages&quot; are the inputs and outputs.</span><br></pre></td></tr></table></figure>
+
+
+
+<h1><span id="data-connection">Data Connection</span></h1><p>如何加载外部数据</p>
+<h2><span id="embeddings">Embeddings</span></h2><p>文本向量化</p>
+<p>Embeddings create a vector representation of a piece of text. This is useful because it means we can think about text in the vector space, and do things like semantic search where we look for pieces of text that are most similar in the vector space.</p>
+<h1><span id="chain">Chain</span></h1><p>Chain 将模型、prompt 和其他 chain链接在一起，(用于执行完成各种任务)</p>
+<h2><span id="test">Test</span></h2><h3><span id="example1">Example1</span></h3><p>查询mysql，返回结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line"></span><br><span class="line">import langchain</span><br><span class="line">from langchain.llms import OpenAI</span><br><span class="line">os.environ[&quot;SERPER_API_KEY&quot;] = &quot;83d594fc4d44fd5cc4a0c80e5a3d57fca447938b&quot;</span><br><span class="line">os.environ[&quot;OPENAI_API_KEY&quot;] = &quot;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&quot;</span><br><span class="line"></span><br><span class="line"># pip install pymysql</span><br><span class="line">from langchain import OpenAI, SQLDatabase, SQLDatabaseChain</span><br><span class="line"></span><br><span class="line"># 密码含有特殊字符处理</span><br><span class="line">from urllib import parse</span><br><span class="line">pwd = parse.quote_plus(&quot;Zoom@123&quot;)</span><br><span class="line"></span><br><span class="line">db = SQLDatabase.from_uri(f&quot;mysql+pymysql://root:&#123;pwd&#125;@localhost:3306/test_zhou&quot;, include_tables=[&#x27;users&#x27;,&#x27;users2&#x27;])</span><br><span class="line">llm = OpenAI(temperature=0, verbose=True)</span><br><span class="line">db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)</span><br><span class="line">#query = &quot;how many users in the users table&quot;</span><br><span class="line">query = &quot;how many users in the users table  have the same id as the users2 in the users2 table &quot;</span><br><span class="line">query = &quot;please give me a image that describes the addr distribution of users in the users table &quot;</span><br><span class="line">res = db_chain.run(query)</span><br><span class="line">print(res)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/21/ai/llm/langchain/langchain_usage_20230721/" data-id="clkj1iymy0000xu9a10lyerln" data-title="langchain_usage_20230721" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/llm/" rel="tag">llm</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/07/21/bigdata/kafka/kafka_basic/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">kafka_basic</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-langchain/">ai/llm/langchain</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-kafka/">bigdata/kafka</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/" rel="tag">kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llm/" rel="tag">llm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/java/" style="font-size: 15px;">java</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/llm/" style="font-size: 10px;">llm</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/07/21/ai/llm/langchain/langchain_usage_20230721/">langchain_usage_20230721</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/kafka/kafka_basic/">kafka_basic</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_conf/">spark_conf</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_shuffle_usage/">spark_shuffle_usage</a>
+          </li>
+        
+          <li>
+            <a href="/2023/07/21/bigdata/spark/spark_tune/spark_memory_usage/">spark_memory_usage</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
