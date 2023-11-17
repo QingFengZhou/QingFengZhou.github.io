@@ -73,6 +73,551 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-bigdata/spark/spark3/20230711_structStreaming" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/" class="article-date">
+  <time class="dt-published" datetime="2023-07-11T08:52:34.000Z" itemprop="datePublished">2023-07-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/">20230711_structStreaming</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E">执行引擎</a><ul>
+<li><a href="#example">Example</a><ul>
+<li><a href="#structstreaming">StructStreaming</a></li>
+<li><a href="#batchprocessing">BatchProcessing</a></li>
+</ul>
+</li>
+<li><a href="#basics">Basics</a><ul>
+<li><a href="#outputmode"><strong>outputmode</strong></a></li>
+<li><a href="#event-time">Event time</a></li>
+<li><a href="#time-window">Time Window</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#fault-tolerance-semantics">Fault Tolerance Semantics</a></li>
+<li><a href="#source">Source</a><ul>
+<li><a href="#socket">Socket</a></li>
+<li><a href="#file">File</a></li>
+<li><a href="#rate">Rate</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BB%B6%E6%97%B6%E4%B9%B1%E5%BA%8F%E6%95%B0%E6%8D%AE">延时乱序数据</a><ul>
+<li><a href="#%E5%AE%9A%E4%B9%89">定义</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95">测试</a></li>
+<li><a href="#%E7%BB%93%E8%AE%BA">结论</a></li>
+</ul>
+</li>
+<li><a href="#%E7%8A%B6%E6%80%81%E5%AD%98%E5%82%A8">状态存储</a><ul>
+<li><a href="#hdfs-state-store-provider">HDFS state store provider</a></li>
+<li><a href="#rocksdb-state-store-implementation">RocksDB state store implementation</a></li>
+</ul>
+</li>
+<li><a href="#sink">Sink</a></li>
+<li><a href="#trigger">Trigger</a></li>
+<li><a href="#checkpoint">checkpoint</a></li>
+<li><a href="#kafka%E9%9B%86%E6%88%90">Kafka集成</a><ul>
+<li><a href="#%E8%AF%BB%E5%8F%96kafka%E5%86%99%E5%85%A5console">读取kafka写入console</a></li>
+<li><a href="#%E8%AF%BB%E5%8F%96kafka-%E6%99%AE%E9%80%9A%E8%81%9A%E5%90%88%E4%B8%8D%E5%90%AB%E7%AA%97%E5%8F%A3">读取kafka 普通聚合(不含窗口)</a></li>
+<li><a href="#%E8%AF%BB%E5%8F%96kafka-%E7%AA%97%E5%8F%A3%E8%81%9A%E5%90%88%E5%90%AB%E6%B0%B4%E5%8D%B0">读取kafka 窗口聚合(含水印)</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="执行引擎">执行引擎</span></h2><p>Spark SQL engine</p>
+<p>两种处理模式：</p>
+<p>默认 <em>micro-batch processing</em> engine,  最低延时 100ms，exactly-once fault-tolerance guarantees</p>
+<p>可配置模式<strong>Continuous Processing</strong>，最低延时 1ms，at-least-once guarantees</p>
+<p>Internally, by default, Structured Streaming queries are processed using a <em>micro-batch processing</em> engine, which processes data streams as a series of small batch jobs thereby achieving end-to-end latencies as low as 100 milliseconds and exactly-once fault-tolerance guarantees. However, since Spark 2.3, we have introduced a new low-latency processing mode called <strong>Continuous Processing</strong>, which can achieve end-to-end latencies as low as 1 millisecond with at-least-once guarantees. Without changing the Dataset&#x2F;DataFrame operations in your queries, you will be able to choose the mode based on your application requirements.</p>
+<h3><span id="example">Example</span></h3><h4><span id="structstreaming">StructStreaming</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * start server: nc -lk 9999</span><br><span class="line"> * 可以看到这里 的api写法基本跟batch processing 批处理的api保持一致，</span><br><span class="line"> * 不同的地方是：</span><br><span class="line"> * (1) spark.readStream | wordCounts.writeStream，batch api的写法 spark.read | wordCounts.write</span><br><span class="line"> * (2) 流处理触发运行，调用方法wordCounts.writeStream.start()，而批处理调用方法 wordCounts.write.save()</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">object ExampleStructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCount&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to localhost:9999</span><br><span class="line">    val lines = spark.readStream</span><br><span class="line">      .format(&quot;socket&quot;)</span><br><span class="line">      .option(&quot;host&quot;, &quot;localhost&quot;)</span><br><span class="line">      .option(&quot;port&quot;, 9999)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">    // dataframe to dataset; then Split the lines into words</span><br><span class="line">    val words = lines.as[String].flatMap(_.split(&quot; &quot;))</span><br><span class="line"></span><br><span class="line">    // Generate running word count</span><br><span class="line">    val wordCounts = words.groupBy(&quot;value&quot;).count()</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the running counts to the console</span><br><span class="line">    //console outputMode支持 update和complete, 有聚合计算的情况不支持append模式</span><br><span class="line">    val query = wordCounts.writeStream</span><br><span class="line">      .outputMode(&quot;update&quot;)</span><br><span class="line">      .format(&quot;console&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="batchprocessing">BatchProcessing</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line"></span><br><span class="line">object DatasetWordCountExample &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCount&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    val lines = spark.read.format(&quot;text&quot;).load(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/README.md&quot;)</span><br><span class="line"></span><br><span class="line">    // dataframe to dataset; then Split the lines into words</span><br><span class="line">    val words = lines.as[String].flatMap(_.split(&quot; &quot;))</span><br><span class="line"></span><br><span class="line">    // Generate running word count</span><br><span class="line">    val wordCounts = words.groupBy(&quot;value&quot;).count()</span><br><span class="line"></span><br><span class="line">    wordCounts.write.mode(&quot;overwrite&quot;).format(&quot;parquet&quot;).save(&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/tmp1&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="basics">Basics</span></h3><h4><span id="outputmode"><strong>outputmode</strong></span></h4><p><em>Complete Mode</em> -   结果集 每次输出所有数据</p>
+<p><em>Append Mode</em> -  结果集 每次只输出新增的数据（只包括新增，不包括变更的）</p>
+<p><em>Update Mode</em> -  结果集 每次只输出更新的数据（包括新增 和 变更的  new|update）</p>
+<h4><span id="event-time">Event time</span></h4><p>事件时间，只与事件本身有关</p>
+<h4><span id="time-window">Time Window</span></h4><p>滚动窗口：Tumbling windows are a series of fixed-sized, non-overlapping and contiguous time intervals</p>
+<p>滑动窗口：Sliding windows are similar to the tumbling windows from the point of being “fixed-sized”, but windows can overlap if the duration of slide is smaller than the duration of window, and in this case an input can be bound to the multiple windows.</p>
+<p>会话窗口： 窗口在一定间隔内没有接收到新的数据，进行关闭，窗口大小不固定</p>
+<p>a session window closes when there’s no input received within gap duration after receiving the latest input.</p>
+<h2><span id="fault-tolerance-semantics">Fault Tolerance Semantics</span></h2><p>如何实现容错 和 exactly-once  端到端一致性保证：</p>
+<p>Delivering end-to-end exactly-once semantics was one of key goals behind the design of Structured Streaming. To achieve that, we have designed the Structured Streaming sources, the sinks and the execution engine to reliably track the exact progress of the processing so that it can handle any kind of failure by restarting and&#x2F;or reprocessing. Every streaming source is assumed to have offsets (similar to Kafka offsets, or Kinesis sequence numbers) to track the read position in the stream. The engine uses checkpointing and write-ahead logs to record the offset range of the data being processed in each trigger. The streaming sinks are designed to be idempotent for handling reprocessing. Together, using replayable sources and idempotent sinks, Structured Streaming can ensure <strong>end-to-end exactly-once semantics</strong> under any failure.</p>
+<p>Source:  replayable </p>
+<p>Sink: idempotent</p>
+<p>Engine: checkpointing and write-ahead logs </p>
+<h2><span id="source">Source</span></h2><h3><span id="socket">Socket</span></h3><p>对应example</p>
+<h3><span id="file">File</span></h3><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Read all the csv files written atomically in a directory</span></span><br><span class="line"><span class="keyword">val</span> userSchema = <span class="keyword">new</span> <span class="type">StructType</span>().add(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;string&quot;</span>).add(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;integer&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> csvDF = spark</span><br><span class="line">  .readStream</span><br><span class="line">  .option(<span class="string">&quot;sep&quot;</span>, <span class="string">&quot;;&quot;</span>)</span><br><span class="line">  .schema(userSchema)      <span class="comment">// Specify schema of the csv files</span></span><br><span class="line">  .csv(<span class="string">&quot;/path/to/directory&quot;</span>)    <span class="comment">// Equivalent to format(&quot;csv&quot;).load(&quot;/path/to/directory&quot;)</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="rate">Rate</span></h3><p>Generates data at the specified number of rows per second, each output row contains a <code>timestamp</code> and <code>value</code>. Where <code>timestamp</code> is a <code>Timestamp</code> type containing the time of message dispatch, and <code>value</code> is of <code>Long</code> type containing the message count, starting from 0 as the first row. </p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create a streaming DataFrame</span></span><br><span class="line"><span class="keyword">val</span> df = spark.readStream</span><br><span class="line">  .format(<span class="string">&quot;rate&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;rowsPerSecond&quot;</span>, <span class="number">10</span>)</span><br><span class="line">  .load()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> query = df.writeStream</span><br><span class="line">  .option(<span class="string">&quot;checkpointLocation&quot;</span>, <span class="string">&quot;file:/Users/zhouqingfeng/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/out/rate/&quot;</span>)</span><br><span class="line">  .outputMode(<span class="string">&quot;update&quot;</span>)</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;numRows&quot;</span>, <span class="number">20</span>)</span><br><span class="line">  .option(<span class="string">&quot;truncate&quot;</span>, <span class="literal">false</span>)</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"> query.awaitTermination()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="延时乱序数据">延时乱序数据</span></h2><h3><span id="定义">定义</span></h3><p><strong>Watermark</strong>: 水位线</p>
+<p>Watemark &#x3D; the current max  event time - late threshold</p>
+<p>基于事件时间产生，本质是一个时间戳，和时间窗口结合，用于处理延时晚到的乱序时间。随着事件的不断流入(到计算逻辑flink或spark代码)，水位线不断上涨，当水位线 &gt;&#x3D; 窗口结束时间，流入到这个窗口的新的延时数据将不再被该窗口计算处理。</p>
+<p>水位线作用和定义：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">用来处理数据延迟，数据乱序。</span><br><span class="line"></span><br><span class="line">水印（更准确的说法是水位线，随着接收事件时间的不断增长而不断上涨）本质上是一个时间戳，代表事件时间比这个时间戳更小的数据已全部到达，（所有比这时间戳更早的数据视为延迟数据）当水印watermark&gt;=窗口对应的结束时间，对应窗口会触发计算并进行关闭</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>水印只与事件时间有关</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Spark 水印 和flink的水印 均是来自google的dataflow model,  其核心思想是在无边界、乱序的数据流中，在数据准确性、数据延迟性和计算性能开销之间 追求一个平衡。</span><br><span class="line">水位线本质是事件时间戳，仅仅只与 事件本身对应的时间属性event_time 和用户定义的允许数据延迟的时间（late threshold）有关，与系统本身的处理时间processing time 没有关系。 「之前一直理解不了，将processing time 和event time混淆到一块，误以为event time 和processing time时钟是同步的，其实两者是没有关系的，一个是事件本身决定的，一个是计算系统处理时间，我们通常讲窗口、水印是针对事件而言的，而现实中事件时间和处理时间可能中间间隔了好几个小时，水印本质解决的问题是有关在事件中多条数据乱序到达的问题，只能依赖与事件本身的时间去想办法解决，通过引入水位线的概念（由事件时间生成，随着数据的不断流入水位线不断上涨），当水位线&gt;=某个窗口结束时间（当然，这里窗口也是完全依据流入的数据事件时间划分的） 意味着在这之后流入到这个窗口的新的数据将不再被该窗口计算处理 」</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="测试">测试</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">import java.sql.Timestamp</span><br><span class="line"></span><br><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line">import org.apache.spark.sql.functions.window</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 测试水位线 watermark =  the current max  event time - late threshold</span><br><span class="line"> *</span><br><span class="line"> * 1、start server: nc -lk 9999</span><br><span class="line"> * 2、params: localhost 9999 10 (设置滚动窗口 10s间隔)</span><br><span class="line"> *</span><br><span class="line"> * 3、late threshold = 10s</span><br><span class="line"> */</span><br><span class="line">object ExampleWatermark_StructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    if (args.length &lt; 3) &#123;</span><br><span class="line">      System.err.println(&quot;Usage: StructuredNetworkWordCountWindowed &lt;hostname&gt; &lt;port&gt;&quot; +</span><br><span class="line">        &quot; &lt;window duration in seconds&gt; [&lt;slide duration in seconds&gt;]&quot;)</span><br><span class="line">      System.exit(1)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    val host = args(0)</span><br><span class="line">    val port = args(1).toInt</span><br><span class="line">    val windowSize = args(2).toInt</span><br><span class="line">    val slideSize = if (args.length == 3) windowSize else args(3).toInt</span><br><span class="line">    if (slideSize &gt; windowSize) &#123;</span><br><span class="line">      System.err.println(&quot;&lt;slide duration&gt; must be less than or equal to &lt;window duration&gt;&quot;)</span><br><span class="line">    &#125;</span><br><span class="line">    val windowDuration = s&quot;$windowSize seconds&quot;</span><br><span class="line">    val slideDuration = s&quot;$slideSize seconds&quot;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;StructuredNetworkWordCountWindowed&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.setLogLevel(&quot;warn&quot;)</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to host:port</span><br><span class="line">    val lines = spark.readStream</span><br><span class="line">      .format(&quot;socket&quot;)</span><br><span class="line">      .option(&quot;host&quot;, host)</span><br><span class="line">      .option(&quot;port&quot;, port)</span><br><span class="line">      //      .option(&quot;includeTimestamp&quot;, true)</span><br><span class="line">      .load()</span><br><span class="line"></span><br><span class="line">    // Split the lines into words, retaining timestamps</span><br><span class="line">    //    val words = lines.as[(String, Timestamp)].flatMap(line =&gt;</span><br><span class="line">    //      line._1.split(&quot; &quot;).map(word =&gt; (word, line._2))</span><br><span class="line">    //    ).toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line"></span><br><span class="line">    val words = lines</span><br><span class="line">      .as[String]</span><br><span class="line">      .map(x =&gt; &#123;</span><br><span class="line">        val cont =x.split(&quot;,&quot;)</span><br><span class="line">        (cont(0), cont(1))</span><br><span class="line">      &#125; )</span><br><span class="line">      .toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line">      .selectExpr(&quot;CAST(word AS STRING)&quot;, &quot;CAST(timestamp AS TIMESTAMP)&quot; )</span><br><span class="line">      .as[(String,Timestamp)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Group the data by window and word and compute the count of each group</span><br><span class="line">    val windowedCounts =</span><br><span class="line">      words</span><br><span class="line">        .withWatermark(&quot;timestamp&quot;, &quot;10 seconds&quot;)</span><br><span class="line">        .groupBy(</span><br><span class="line">          window($&quot;timestamp&quot;, windowDuration, slideDuration), $&quot;word&quot;</span><br><span class="line">        ).count()</span><br><span class="line">    //.orderBy(&quot;window&quot;)</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the windowed word counts to the console</span><br><span class="line">    val query = windowedCounts.writeStream</span><br><span class="line">      .outputMode(&quot;update&quot;)  //if you want to use watermark, you must choose append or update mode</span><br><span class="line">      .format(&quot;console&quot;)</span><br><span class="line">      .option(&quot;truncate&quot;, &quot;false&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>注意</strong>：spark 水印只在append 模式和update模式下有作用，在complete模式下没有任何作用，所有数据都会输出。</p>
+<p>在上述example中，</p>
+<p>Terminal 开启端口本地测试 （nc -lk 9000 10），窗口为10s, 最大延迟时间也是10s,</p>
+<p>依次每行输入数据，</p>
+<p>spark,2020-09-04 10:02:41<br>spark,2020-09-04 10:02:42<br>spark,2020-09-04 10:02:49<br>spark,2020-09-04 10:02:48<br>spark,2020-09-04 10:02:21<br>spark,2020-09-04 10:02:31<br>spark,2020-09-04 10:02:32<br>spark,2020-09-04 10:02:49<br>spark,2020-09-04 10:02:51<br>spark,2020-09-04 10:02:59<br>spark,2020-09-04 10:02:53<br>spark,2020-09-04 10:03:06</p>
+<p>spark,2020-09-04 10:02:45</p>
+<p>spark,2020-09-04 10:03:07<br>spark,2020-09-04 10:02:53<br>spark,2020-09-04 10:03:08<br>spark,2020-09-04 10:03:13<br>spark,2020-09-04 10:03:13<br>spark,2020-09-04 10:03:33<br>spark,2020-09-04 10:03:36</p>
+<p>前四条数据依次输入，</p>
+<p>spark,2020-09-04 10:02:41<br>spark,2020-09-04 10:02:42<br>spark,2020-09-04 10:02:49<br>spark,2020-09-04 10:02:48</p>
+<p>输出结果为：</p>
+<p>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]|spark|4    |</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（可以看到窗口是[2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]，当时大概是11点30分测试的，这里划定的窗口完全是由事件时间决定的，与其他没有关系，这里水位线watermark=2020-09-04 10:02:49 - 10s = 2020-09-04 10:02:39， 意味着窗口结束时间T                                      2020-09-04 10:02:39 &gt;=T, 对应的流入该窗口内的新数据不再被处理，最接近水位线的窗口是                                                                     [2020-09-04 10:02:20.0,2020-09-04 10:02:30.0] ,  因此后面接着输入了一条位于该窗口内的新的数据，spark,2020-09-04 10:02:21，但是没有结果输出，因为水位线高过了窗口结束时间T = 2020-09-04 10:02:30.0）</span><br></pre></td></tr></table></figure>
+
+<p>输入spark,2020-09-04 10:02:21，</p>
+<p>没有结果输出</p>
+<p>输入spark,2020-09-04 10:02:31，</p>
+<p>输出结果为：</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]|spark|1    |<br>+———————————————+—–+—–+</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:39 &gt;= 2020-09-04 10:02:40.0 不成立， 老的窗口 [2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]  流入的新数据继续被处理）</span><br></pre></td></tr></table></figure>
+
+<p>输入spark,2020-09-04 10:02:32，</p>
+<p>输出结果为：</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]|spark|2    |<br>+———————————————+—–+—–+    </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:39 &gt;= 2020-09-04 10:02:40.0 不成立，老的窗口 [2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]  流入的新数据继续被处理 ）</span><br></pre></td></tr></table></figure>
+
+<p>输入spark,2020-09-04 10:02:49，</p>
+<p>输出：</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]|spark|5    |    </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:39 ）</span><br></pre></td></tr></table></figure>
+
+<p>输入 </p>
+<p>spark,2020-09-04 10:02:51<br>spark,2020-09-04 10:02:59<br>spark,2020-09-04 10:02:53</p>
+<p>输出</p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:02:50.0,2020-09-04 10:03:00.0]|spark|3    |<br>+———————————————+—–+—–+       </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线上涨2020-09-04 10:02:49 &gt;= 2020-09-04 10:02:40.0 成立 ，有新窗口出现，老的窗口 [2020-09-04 10:02:30.0,2020-09-04 10:02:40.0]  流入的新数据不再处理）</span><br></pre></td></tr></table></figure>
+
+<p>输入 spark,2020-09-04 10:03:06 </p>
+<p>输出 </p>
+<p>+———————————————+—–+—–+<br>|window                                       |word |count|<br>+———————————————+—–+—–+<br>|[2020-09-04 10:03:00.0,2020-09-04 10:03:10.0]|spark|1    |</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线上涨 2020-09-04 10:02:56 &gt;= 2020-09-04 10:02:50.0 成立 ，有新窗口出现，老的窗口 [2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]  流入的新数据不再处理）</span><br></pre></td></tr></table></figure>
+
+<p>输入 spark,2020-09-04 10:02:45 </p>
+<p>输出为，没有结果输出</p>
+<p>+——+—-+—–+<br>|window|word|count|<br>+——+—-+—–+<br>+——+—-+—–+</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（水位线2020-09-04 10:02:56 保持不变，老的窗口 [2020-09-04 10:02:40.0,2020-09-04 10:02:50.0]  流入的新数据不再处理，因此流入 位于老窗口的 新数据spark,2020-09-04 10:02:45后，老窗口结果没更新）</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="结论">结论</span></h3><p>Flink&#x2F;spark  用事件时间 + 窗口 + 水印来解决实际生产中的数据乱序问题，有如下的触发条件：</p>
+<p>watermark 时间 &gt;&#x3D; window_end_time (后续到达的落入之前窗口的数据被丢弃掉)；</p>
+<p>在 [window_start_time,window_end_time) 中有数据存在，这个窗口是左闭右开的。</p>
+<p>此外，WaterMark 的生成是以对象的形式发送到下游，同样会消耗内存，因此水印的生成时间和频率都要进行严格控制，否则会影响我们的正常作业。</p>
+<h2><span id="状态存储">状态存储</span></h2><h3><span id="hdfs-state-store-provider">HDFS state store provider</span></h3><p>The HDFS backend state store provider is the default implementation of [[StateStoreProvider]] and [[StateStore]] in which all the data is stored in memory map in the first stage, and then backed by files in an HDFS-compatible file system. 占用executor内存</p>
+<h3><span id="rocksdb-state-store-implementation">RocksDB state store implementation</span></h3><p>(嵌入式key-value数据库，不需要额外安装）不消耗executor内存，适用于大状态存储</p>
+<p>3.2 以及之后提供支持。</p>
+<p>As of Spark 3.2, we add a new built-in state store implementation, RocksDB state store provider.</p>
+<p>Rather than keeping the state in the JVM memory, this solution uses RocksDB to efficiently manage the state in the native memory and the local disk.</p>
+<p>目前理解是：rocksdb存储状态，替代之前状态存储占用executor 内存，</p>
+<p>checkpoint两者都需要配置，checkpoint是在任务故障恢复或重启时用到。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.config(&quot;spark.sql.streaming.stateStore.providerClass&quot;, &quot;org.apache.spark.sql.execution.streaming.state.RocksDBStateStoreProvider&quot;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="sink">Sink</span></h2><p>There are a few types of built-in output sinks.</p>
+<p>官方目前只有file 支持exactly-one, kafka支持at-least once</p>
+<ul>
+<li><strong>File sink</strong> - Stores the output to a directory.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;parquet&quot;)        // can be &quot;orc&quot;, &quot;json&quot;, &quot;csv&quot;, etc.</span><br><span class="line">    .option(&quot;path&quot;, &quot;path/to/destination/dir&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Kafka sink</strong> - Stores the output to one or more topics in Kafka.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;kafka&quot;)</span><br><span class="line">    .option(&quot;kafka.bootstrap.servers&quot;, &quot;host1:port1,host2:port2&quot;)</span><br><span class="line">    .option(&quot;topic&quot;, &quot;updates&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Foreach sink</strong> - Runs arbitrary computation on the records in the output. See later in the section for more details.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .foreach(...)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Console sink (for debugging)</strong> - Prints the output to the console&#x2F;stdout every time there is a trigger. Both, Append and Complete output modes, are supported. This should be used for debugging purposes on low data volumes as the entire output is collected and stored in the driver’s memory after every trigger.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;console&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>Memory sink (for debugging)</strong> - The output is stored in memory as an in-memory table. Both, Append and Complete output modes, are supported. This should be used for debugging purposes on low data volumes as the entire output is collected and stored in the driver’s memory. Hence, use it with caution.</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">writeStream</span><br><span class="line">    .format(&quot;memory&quot;)</span><br><span class="line">    .queryName(&quot;tableName&quot;)</span><br><span class="line">    .start()</span><br></pre></td></tr></table></figure>
+
+<p><strong>ForeachBatch</strong></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">streamingDF.writeStream.foreachBatch &#123; (batchDF: <span class="type">DataFrame</span>, batchId: <span class="type">Long</span>) =&gt;</span><br><span class="line">  batchDF.persist()</span><br><span class="line">  batchDF.write.format(...).save(...)  <span class="comment">// location 1</span></span><br><span class="line">  batchDF.write.format(...).save(...)  <span class="comment">// location 2</span></span><br><span class="line">  batchDF.unpersist()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="trigger">Trigger</span></h2><p>触发器，多长时间执行一次</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.sql.streaming.<span class="type">Trigger</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Default trigger (runs micro-batch as soon as it can)</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// ProcessingTime trigger with two-seconds micro-batch interval</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">ProcessingTime</span>(<span class="string">&quot;2 seconds&quot;</span>))</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// One-time trigger (Deprecated, encouraged to use Available-now trigger)</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">Once</span>())</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Available-now trigger</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">AvailableNow</span>())</span><br><span class="line">  .start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Continuous trigger with one-second checkpointing interval</span></span><br><span class="line">df.writeStream</span><br><span class="line">  .format(<span class="string">&quot;console&quot;</span>)</span><br><span class="line">  .trigger(<span class="type">Trigger</span>.<span class="type">Continuous</span>(<span class="string">&quot;1 second&quot;</span>))</span><br><span class="line">  .start()</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="checkpoint">checkpoint</span></h2><p>任务失败恢复、重启  （Recovering from Failures with Checkpointing）</p>
+<p>In case of a failure or intentional shutdown, you can recover the previous progress and state of a previous query, and continue where it left off. This is done using checkpointing and write-ahead logs. You can configure a query with a checkpoint location, and the query will save all the progress information (i.e. range of offsets processed in each trigger) and the running aggregates (e.g. word counts in the <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/3.4.1/structured-streaming-programming-guide.html#quick-example">quick example</a>) to the checkpoint location. This checkpoint location has to be a path in an HDFS compatible file system, and can be set as an option in the DataStreamWriter when <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/3.4.1/structured-streaming-programming-guide.html#starting-streaming-queries">starting a query</a>.</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">aggDF</span><br><span class="line">  .writeStream</span><br><span class="line">  .outputMode(<span class="string">&quot;complete&quot;</span>)</span><br><span class="line">  .option(<span class="string">&quot;checkpointLocation&quot;</span>, <span class="string">&quot;path/to/HDFS/dir&quot;</span>)</span><br><span class="line">  .format(<span class="string">&quot;memory&quot;</span>)</span><br><span class="line">  .start()</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2><span id="kafka集成">Kafka集成</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.spark&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spark-sql-kafka-0-10_2.12&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;3.4.1&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="读取kafka写入console">读取kafka写入console</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">import java.sql.Timestamp</span><br><span class="line"></span><br><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line">import org.apache.spark.sql.functions.window</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 水位线 watermark =  the current max  event time - late threshold</span><br><span class="line"> *</span><br><span class="line"> *</span><br><span class="line"> * late threshold = 10s</span><br><span class="line"> *</span><br><span class="line"> * kafka -&gt; console （watermark + window）</span><br><span class="line"> *</span><br><span class="line"> * 输入： spark,2020-09-04 10:02:49</span><br><span class="line"> * 输出：</span><br><span class="line"> * +------------------------------------------+-----+-----+</span><br><span class="line"> * |window                                    |word |count|</span><br><span class="line"> * +------------------------------------------+-----+-----+</span><br><span class="line"> * |&#123;2020-09-04 10:02:40, 2020-09-04 10:02:50&#125;|spark|1    |</span><br><span class="line"> *</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line"></span><br><span class="line">object ExampleKafka_StructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val windowDuration = &quot;10 seconds&quot;</span><br><span class="line">    val slideDuration = &quot;10 seconds&quot;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;ExampleKafka_StructStream&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.setLogLevel(&quot;warn&quot;)</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to host:port</span><br><span class="line"></span><br><span class="line">    val df = spark</span><br><span class="line">      .readStream</span><br><span class="line">      .format(&quot;kafka&quot;)</span><br><span class="line">      .option(&quot;kafka.bootstrap.servers&quot;, &quot;localhost:9092&quot;)</span><br><span class="line">      .option(&quot;subscribe&quot;, &quot;testzq1&quot;)</span><br><span class="line">      .option(&quot;includeHeaders&quot;, &quot;true&quot;)</span><br><span class="line">      .load()</span><br><span class="line">    //df.selectExpr(&quot;CAST(key AS STRING)&quot;, &quot;CAST(value AS STRING)&quot;, &quot;headers&quot;)</span><br><span class="line">    val lines = df.selectExpr(&quot;CAST(value AS STRING)&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val words = lines</span><br><span class="line">      .as[String]</span><br><span class="line">      .map(x =&gt; &#123;</span><br><span class="line">        val cont =x.split(&quot;,&quot;)</span><br><span class="line">        (cont(0), cont(1))</span><br><span class="line">      &#125; )</span><br><span class="line">      .toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line">      .selectExpr(&quot;CAST(word AS STRING)&quot;, &quot;CAST(timestamp AS TIMESTAMP)&quot; )</span><br><span class="line">      .as[(String,Timestamp)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Group the data by window and word and compute the count of each group</span><br><span class="line">    val windowedCounts =</span><br><span class="line">      words</span><br><span class="line">        .withWatermark(&quot;timestamp&quot;, &quot;10 seconds&quot;)</span><br><span class="line">        .groupBy(</span><br><span class="line">          window($&quot;timestamp&quot;, windowDuration, slideDuration), $&quot;word&quot;</span><br><span class="line">        ).count()</span><br><span class="line">    //.orderBy(&quot;window&quot;)</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the windowed word counts to the console</span><br><span class="line">    val query = windowedCounts.writeStream</span><br><span class="line">      .outputMode(&quot;update&quot;)  //if you want to use watermark, you must choose append or update mode</span><br><span class="line">      .format(&quot;console&quot;)</span><br><span class="line">      .option(&quot;truncate&quot;, &quot;false&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="读取kafka-普通聚合不含窗口">读取kafka 普通聚合(不含窗口)</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line">import java.sql.Timestamp</span><br><span class="line"></span><br><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line">import org.apache.spark.sql.functions.window</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *</span><br><span class="line"> * kafka -&gt; kafka （no window）</span><br><span class="line"> *</span><br><span class="line"> * 常规聚合计算   group by -&gt; count</span><br><span class="line"> * 累加统计 wordcount</span><br><span class="line"> *</span><br><span class="line"> * 输入： hadoop,2020-09-04 10:02:49</span><br><span class="line"> * 输出： hadoop,1</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">object ExampleKafka3_StructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val windowDuration = &quot;10 seconds&quot;</span><br><span class="line">    val slideDuration = &quot;10 seconds&quot;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;ExampleKafka_StructStream&quot;)</span><br><span class="line">      //配置RocksDBStateStore, 默认HdfsStateStore</span><br><span class="line">      .config(&quot;spark.sql.streaming.stateStore.providerClass&quot;, &quot;org.apache.spark.sql.execution.streaming.state.RocksDBStateStoreProvider&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.setLogLevel(&quot;warn&quot;)</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to host:port</span><br><span class="line"></span><br><span class="line">    val df = spark</span><br><span class="line">      .readStream</span><br><span class="line">      .format(&quot;kafka&quot;)</span><br><span class="line">      .option(&quot;kafka.bootstrap.servers&quot;, &quot;localhost:9092&quot;)</span><br><span class="line">      .option(&quot;subscribe&quot;, &quot;testzq1&quot;)</span><br><span class="line">      .option(&quot;includeHeaders&quot;, &quot;true&quot;)</span><br><span class="line">      .load()</span><br><span class="line">    //df.selectExpr(&quot;CAST(key AS STRING)&quot;, &quot;CAST(value AS STRING)&quot;, &quot;headers&quot;)</span><br><span class="line">    val lines = df.selectExpr(&quot;CAST(value AS STRING)&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val words = lines</span><br><span class="line">      .as[String]</span><br><span class="line">      .map(x =&gt; &#123;</span><br><span class="line">        val cont =x.split(&quot;,&quot;)</span><br><span class="line">        (cont(0), cont(1))</span><br><span class="line">      &#125; )</span><br><span class="line">      .toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line">      .selectExpr(&quot;CAST(word AS STRING)&quot;, &quot;CAST(timestamp AS TIMESTAMP)&quot; )</span><br><span class="line">      .as[(String,Timestamp)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Group the data by window and word and compute the count of each group</span><br><span class="line">    val windowedCounts =</span><br><span class="line">      words</span><br><span class="line">        .groupBy(</span><br><span class="line">          $&quot;word&quot;</span><br><span class="line">        ).count()</span><br><span class="line">    //.orderBy(&quot;window&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">    *</span><br><span class="line">+------------------------------------------+-----+-----+</span><br><span class="line">|window                                    |word |count|</span><br><span class="line">+------------------------------------------+-----+-----+</span><br><span class="line">|&#123;2020-09-04 10:02:40, 2020-09-04 10:02:50&#125;|spark|1    |</span><br><span class="line">    *</span><br><span class="line">    * */</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the windowed word counts to the console</span><br><span class="line">//    val query = windowedCounts</span><br><span class="line">//      .selectExpr(&quot;cast(window as string) as key&quot;, &quot;concat_ws(&#x27;,&#x27;, cast(window as string), word, cast(count as string)) as value&quot;)</span><br><span class="line">//      .writeStream</span><br><span class="line">//      .outputMode(&quot;update&quot;)  //if you want to use watermark, you must choose append or update mode</span><br><span class="line">//      .format(&quot;console&quot;)</span><br><span class="line">//      .option(&quot;truncate&quot;, &quot;false&quot;)</span><br><span class="line">//      .start()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Write key-value data from a DataFrame to a specific Kafka topic specified in an option</span><br><span class="line">    val query = windowedCounts</span><br><span class="line">      .selectExpr(&quot;concat_ws(&#x27;,&#x27;, word, cast(count as string)) as value&quot;)</span><br><span class="line">      .writeStream</span><br><span class="line">      .outputMode(&quot;update&quot;)</span><br><span class="line">      .option(&quot;checkpointLocation&quot;, &quot;file:/Users/**/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/tmp1/out1&quot;)</span><br><span class="line">      .format(&quot;kafka&quot;)</span><br><span class="line">      .option(&quot;kafka.bootstrap.servers&quot;,  &quot;localhost:9092&quot;)</span><br><span class="line">      .option(&quot;topic&quot;, &quot;testzq2&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="读取kafka-窗口聚合含水印">读取kafka 窗口聚合(含水印)</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line">import java.sql.Timestamp</span><br><span class="line"></span><br><span class="line">import org.apache.spark.sql.SparkSession</span><br><span class="line">import org.apache.spark.sql.functions.window</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 水位线 watermark =  the current max  event time - late threshold</span><br><span class="line"> *</span><br><span class="line"> * late threshold = 10s</span><br><span class="line"> *</span><br><span class="line"> * kafka -&gt; kafka （watermark + window）</span><br><span class="line"> *</span><br><span class="line"> * 输入： spark,2020-09-04 10:02:49</span><br><span class="line"> * 输出： &#123;2020-09-04 10:02:40, 2020-09-04 10:02:50&#125;,spark,1</span><br><span class="line"> *</span><br><span class="line"> */</span><br><span class="line">object ExampleKafka2_StructStream &#123;</span><br><span class="line"></span><br><span class="line">  def main(args: Array[String]): Unit = &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val windowDuration = &quot;10 seconds&quot;</span><br><span class="line">    val slideDuration = &quot;10 seconds&quot;</span><br><span class="line"></span><br><span class="line">    val spark = SparkSession</span><br><span class="line">      .builder</span><br><span class="line">      .appName(&quot;ExampleKafka_StructStream&quot;)</span><br><span class="line">      .master(&quot;local[2]&quot;)</span><br><span class="line">      .getOrCreate()</span><br><span class="line"></span><br><span class="line">    spark.sparkContext.setLogLevel(&quot;warn&quot;)</span><br><span class="line"></span><br><span class="line">    import spark.implicits._</span><br><span class="line"></span><br><span class="line">    // Create DataFrame representing the stream of input lines from connection to host:port</span><br><span class="line"></span><br><span class="line">    val df = spark</span><br><span class="line">      .readStream</span><br><span class="line">      .format(&quot;kafka&quot;)</span><br><span class="line">      .option(&quot;kafka.bootstrap.servers&quot;, &quot;localhost:9092&quot;)</span><br><span class="line">      .option(&quot;subscribe&quot;, &quot;testzq1&quot;)</span><br><span class="line">      .option(&quot;includeHeaders&quot;, &quot;true&quot;)</span><br><span class="line">      .load()</span><br><span class="line">    //df.selectExpr(&quot;CAST(key AS STRING)&quot;, &quot;CAST(value AS STRING)&quot;, &quot;headers&quot;)</span><br><span class="line">    val lines = df.selectExpr(&quot;CAST(value AS STRING)&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    val words = lines</span><br><span class="line">      .as[String]</span><br><span class="line">      .map(x =&gt; &#123;</span><br><span class="line">        val cont =x.split(&quot;,&quot;)</span><br><span class="line">        (cont(0), cont(1))</span><br><span class="line">      &#125; )</span><br><span class="line">      .toDF(&quot;word&quot;, &quot;timestamp&quot;)</span><br><span class="line">      .selectExpr(&quot;CAST(word AS STRING)&quot;, &quot;CAST(timestamp AS TIMESTAMP)&quot; )</span><br><span class="line">      .as[(String,Timestamp)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Group the data by window and word and compute the count of each group</span><br><span class="line">    val windowedCounts =</span><br><span class="line">      words</span><br><span class="line">        .withWatermark(&quot;timestamp&quot;, &quot;10 seconds&quot;)</span><br><span class="line">        .groupBy(</span><br><span class="line">          window($&quot;timestamp&quot;, windowDuration, slideDuration), $&quot;word&quot;</span><br><span class="line">        ).count()</span><br><span class="line">    //.orderBy(&quot;window&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">    *</span><br><span class="line">+------------------------------------------+-----+-----+</span><br><span class="line">|window                                    |word |count|</span><br><span class="line">+------------------------------------------+-----+-----+</span><br><span class="line">|&#123;2020-09-04 10:02:40, 2020-09-04 10:02:50&#125;|spark|1    |</span><br><span class="line">    *</span><br><span class="line">    * */</span><br><span class="line"></span><br><span class="line">    // Start running the query that prints the windowed word counts to the console</span><br><span class="line">//    val query = windowedCounts</span><br><span class="line">//      .selectExpr(&quot;cast(window as string) as key&quot;, &quot;concat_ws(&#x27;,&#x27;, cast(window as string), word, cast(count as string)) as value&quot;)</span><br><span class="line">//      .writeStream</span><br><span class="line">//      .outputMode(&quot;update&quot;)  //if you want to use watermark, you must choose append or update mode</span><br><span class="line">//      .format(&quot;console&quot;)</span><br><span class="line">//      .option(&quot;truncate&quot;, &quot;false&quot;)</span><br><span class="line">//      .start()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    // Write key-value data from a DataFrame to a specific Kafka topic specified in an option</span><br><span class="line">    val query = windowedCounts</span><br><span class="line">      .selectExpr(&quot;cast(window as string) as key&quot;, &quot;concat_ws(&#x27;,&#x27;, cast(window as string), word, cast(count as string)) as value&quot;)</span><br><span class="line">      .writeStream</span><br><span class="line">      .outputMode(&quot;update&quot;)</span><br><span class="line">      .option(&quot;checkpointLocation&quot;, &quot;file:/Users/**/Desktop/software/spark3/spark-3.4.1-bin-hadoop3/tmp1/out&quot;)</span><br><span class="line">      .format(&quot;kafka&quot;)</span><br><span class="line">      .option(&quot;kafka.bootstrap.servers&quot;,  &quot;localhost:9092&quot;)</span><br><span class="line">      .option(&quot;topic&quot;, &quot;testzq2&quot;)</span><br><span class="line">      .start()</span><br><span class="line"></span><br><span class="line">    query.awaitTermination()</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/11/bigdata/spark/spark3/20230711_structStreaming/" data-id="cljy55ft700000n9a3c2vb7n4" data-title="20230711_structStreaming" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-bigdata/spark/spark3/20230707_sparksql" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/" class="article-date">
+  <time class="dt-published" datetime="2023-07-09T14:59:37.000Z" itemprop="datePublished">2023-07-09</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/07/09/bigdata/spark/spark3/20230707_sparksql/">20230707_sparksql</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#table-cache">Table Cache</a></li>
+<li><a href="#config">Config</a></li>
+<li><a href="#join-strategy-hint">Join Strategy Hint</a></li>
+<li><a href="#coalesce-hints">Coalesce hints</a></li>
+<li><a href="#operator">Operator</a></li>
+<li><a href="#aqe">AQE</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C">数据倾斜</a></li>
+<li><a href="#ddl">DDL</a><ul>
+<li><a href="#cte">CTE</a></li>
+<li><a href="#analyze">Analyze</a></li>
+<li><a href="#cache-table">Cache table</a></li>
+<li><a href="#refresh-table">REFRESH TABLE</a></li>
+<li><a href="#msck-repair">msck repair</a></li>
+<li><a href="#distribute-by">distribute by</a></li>
+<li><a href="#cluster-by">cluster by</a></li>
+<li><a href="#explain">explain</a></li>
+<li><a href="#inline">Inline</a></li>
+<li><a href="#file">File</a></li>
+<li><a href="#join">Join</a><ul>
+<li><a href="#semi-join"><strong>Semi Join</strong></a></li>
+<li><a href="#anti-join"><strong>Anti Join</strong></a></li>
+</ul>
+</li>
+<li><a href="#limit">limit</a></li>
+<li><a href="#%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C">集合操作</a></li>
+<li><a href="#tablesample">TABLESAMPLE</a></li>
+<li><a href="#tvf">TVF</a></li>
+<li><a href="#%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0">聚合函数</a><ul>
+<li><a href="#ordered-set-aggregate-functions">Ordered-Set Aggregate Functions</a></li>
+</ul>
+</li>
+<li><a href="#%E7%AA%97%E5%8F%A3%E5%87%BD%E6%95%B0">窗口函数</a></li>
+<li><a href="#pivot">PIVOT</a></li>
+<li><a href="#unpivot">UNPIVOT</a></li>
+<li><a href="#lateral">Lateral</a></li>
+</ul>
+</li>
+<li><a href="#dml">DML</a><ul>
+<li><a href="#insert-into">Insert into</a></li>
+<li><a href="#insert-overwrite-directory">Insert overwrite directory</a><ul>
+<li><a href="#spark-format">Spark format</a></li>
+<li><a href="#hive-format">Hive format</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="table-cache">Table Cache</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">spark.catalog.cacheTable(&quot;tableName&quot;)</span><br><span class="line">spark.catalog.uncacheTable(&quot;tableName&quot;)</span><br><span class="line"></span><br><span class="line">dataFrame.cache()</span><br><span class="line">dataFrame.unpersist()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="config">Config</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">spark.sql.autoBroadcastJoinThreshold  	10485760 (10m)</span><br><span class="line">Configures the maximum size in bytes for a table that will be broadcast</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="join-strategy-hint">Join Strategy Hint</span></h2><p>The join strategy hints, namely <code>BROADCAST</code>, <code>MERGE</code>, <code>SHUFFLE_HASH</code> and <code>SHUFFLE_REPLICATE_NL</code>, instruct Spark to use the hinted strategy.</p>
+<p><code>BROADCAST</code> 细分为两种：broadcast hash join or broadcast nested loop join </p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">spark.table(<span class="string">&quot;src&quot;</span>).join(spark.table(<span class="string">&quot;records&quot;</span>).hint(<span class="string">&quot;broadcast&quot;</span>), <span class="string">&quot;key&quot;</span>).show()</span><br><span class="line"></span><br><span class="line">-- <span class="type">We</span> accept <span class="type">BROADCAST</span>, <span class="type">BROADCASTJOIN</span> and <span class="type">MAPJOIN</span> <span class="keyword">for</span> broadcast hint</span><br><span class="line"><span class="type">SELECT</span> <span class="comment">/*+ BROADCAST(r) */</span> * <span class="type">FROM</span> records r <span class="type">JOIN</span> src s <span class="type">ON</span> r.key = s.key</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="coalesce-hints">Coalesce hints</span></h2><p>Coalesce hints allow Spark SQL users to control the number of output files just like <code>coalesce</code>, <code>repartition</code> and <code>repartitionByRange</code> in the Dataset API, they can be used for performance tuning and reducing the number of output files.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SELECT /*+ COALESCE(3) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION(3) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION(c) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION(3, c) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION_BY_RANGE(c) */ * FROM t;</span><br><span class="line">SELECT /*+ REPARTITION_BY_RANGE(3, c) */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE(3) */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE(c) */ * FROM t;</span><br><span class="line">SELECT /*+ REBALANCE(3, c) */ * FROM t;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="operator">Operator</span></h2><p>A Dataset is a strongly typed collection of domain-specific objects that can be transformed in parallel using functional or relational operations.</p>
+<p>支持 函数型算子 和  关系型算子 </p>
+<p>Spark SQL 执行引擎：catalyst优化器和</p>
+<p>tungsten优化(数据结构设计(基于unsaferow存储、内存页管理)和全阶段代码生成)</p>
+<h2><span id="aqe">AQE</span></h2><p>AQE 是 Spark SQL 的一种动态优化机制，在运行时，每当 Shuffle Map 阶段执行完毕，AQE 都会结合这个阶段的统计信息，基于既定的规则动态地调整、修正尚未执行的逻辑计划和物理计划，来完成对原始查询语句的运行时优化。</p>
+<p>Spark 3.2.0 以及之后的版本默认是开启状态。</p>
+<p>Adaptive Query Execution (AQE) is an optimization technique in Spark SQL that makes use of the runtime statistics to choose the most efficient query execution plan, which is enabled by default since Apache Spark 3.2.0.  </p>
+<p>Spark SQL can turn on and off AQE by <code>spark.sql.adaptive.enabled</code> as an umbrella configuration。</p>
+<p>As of Spark 3.0, there are three major features in AQE: including coalescing post-shuffle partitions, converting sort-merge join to broadcast join, and skew join optimization.</p>
+<p>（AQE 赖以优化的统计信息与 CBO 不同，这些统计信息并不是关于某张表或是哪个列，而是 Shuffle Map 阶段输出的中间文件。）</p>
+<p>自动分区合并(拆分) : reduce  合并数据量小的分区，减少小文件数量</p>
+<p>Join 策略调整：sort-merge join to broadcast join</p>
+<p>Join倾斜优化：倾斜分区会被拆分成多个分区 (倾斜分区拆分为多个数据分区、对另外一张表对应的数据分区进行复制)</p>
+<h2><span id="数据倾斜">数据倾斜</span></h2><p>单表引起的倾斜：</p>
+<p>1、map端聚合</p>
+<p>2、单次聚合改为分两次聚合完成 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select count(distinct uid) from t1 group by day</span><br><span class="line">select count(1) from ( select day, uid from t1 group by day, uid ) tmp group by day</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>多表join引起的倾斜：</p>
+<p>1、调整 spark.sql.autoBroadcastJoinThreshold,  尽量使用broadcastjoin</p>
+<p>2、<code>spark.sql.adaptive.enabled</code>  开启AQE，实现Join倾斜自动优化，可能出现executor粒度的数据倾斜(倾斜分区划分的任务重复分配到一个executor)</p>
+<p>3、使用两阶段shuffle，将倾斜key和非倾斜key分开处理，最后结果union。</p>
+<p>对于非倾斜key，常规处理；</p>
+<p>对于倾斜key，外表对应的key：加盐、添加随机后缀，内表对应的key：添加后缀、数据进行复制，内外表进行一阶段 join 聚合，第二阶段 将第一阶段聚合结果 的joinkey 去除后缀后，进行二次聚合。</p>
+<h2><span id="ddl">DDL</span></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">--Create bucketed table through CTAS and CTE</span><br><span class="line">CREATE TABLE student_bucket</span><br><span class="line">    USING parquet</span><br><span class="line">    CLUSTERED BY (id) INTO 4 buckets (</span><br><span class="line">    WITH tmpTable AS (</span><br><span class="line">        SELECT * FROM student WHERE id &gt; 100</span><br><span class="line">    )</span><br><span class="line">    SELECT * FROM tmpTable</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">CREATE TABLE student_parquet(id INT, name STRING, age INT) USING PARQUET</span><br><span class="line">    OPTIONS (</span><br><span class="line">      &#x27;parquet.bloom.filter.enabled&#x27;=&#x27;true&#x27;,</span><br><span class="line">      &#x27;parquet.bloom.filter.enabled#age&#x27;=&#x27;false&#x27;</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line"># 添加分区    </span><br><span class="line">ALTER TABLE table_identifier ADD [IF NOT EXISTS] </span><br><span class="line">    ( partition_spec [ partition_spec ... ] )</span><br><span class="line"></span><br><span class="line"># 刷新分区</span><br><span class="line">[MSCK] REPAIR TABLE table_identifier [&#123;ADD|DROP|SYNC&#125; PARTITIONS]</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="cte">CTE</span></h3><p><a target="_blank" rel="noopener" href="https://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-cte.html">https://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-cte.html</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CTE</span><br><span class="line"># Common Table Expression (CTE)</span><br><span class="line">A common table expression (CTE) defines a temporary result set that a user can reference possibly multiple times within the scope of a SQL statement. </span><br><span class="line">表示一个临时结果集，用户可以在sql语句中引用多次</span><br><span class="line">-- CTE with multiple column aliases</span><br><span class="line">WITH t(x, y) AS (SELECT 1, 2)</span><br><span class="line">SELECT * FROM t WHERE x = 1 AND y = 2;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="analyze">Analyze</span></h3><p>获取表的统计信息，包括表的大小、行数，也可以针对字段进行统计</p>
+<p>The <code>ANALYZE TABLE</code> statement collects statistics about one specific table or all the tables in one specified database, that are to be used by the query optimizer to find a better query execution plan.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">analyze table emp compute statistics</span><br><span class="line"># noscan 使用noscan仅获取表大小, 不需要扫描整个表</span><br><span class="line"># Collects only the table’s size in bytes (which does not require scanning the entire table).</span><br><span class="line">analyze table emp compute statistics noscan;</span><br><span class="line">desc extended emp;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="cache-table">Cache table</span></h3><p><code>CACHE TABLE</code> statement caches contents of a table or output of a query with the given storage level. If a query is cached, then a temp view will be created for this query. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">CACHE TABLE emp;</span><br><span class="line"></span><br><span class="line">CACHE TABLE emp OPTIONS (&#x27;storageLevel&#x27; &#x27;DISK_ONLY&#x27;) SELECT salary FROM emp</span><br><span class="line"></span><br><span class="line">CLEAR CACHE;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="refresh-table">REFRESH TABLE</span></h3><p>（Invalidates and refreshes all the cached data and metadata of the given table. For performance reasons, Spark SQL or the external data source library it uses might cache certain metadata about a table, such as the location of blocks (数据块的位置信息). When those change outside of Spark SQL, users should call this function to invalidate the cache.）</p>
+<p>更新表的缓存信息，包括元数据等。主要用于表的数据修改、表中元数据未修改的场景。(无法更新分区，msck是更新分区信息)</p>
+<p>Spark为了提高性能会缓存Parquet的元数据信息。当更新了Parquet表数据时，缓存的元数据信息未更新，导致Spark SQL查询不到新插入的数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-- The cached entries of the table will be refreshed  </span><br><span class="line">-- The table is resolved from the current database as the table name is unqualified.</span><br><span class="line"># 这个表的缓存信息 会更新</span><br><span class="line">REFRESH TABLE tbl1;</span><br><span class="line"></span><br><span class="line">##测试的情况，parquet表的数据目录新增数据后(手动增加)，spark sql查询不到新的数据，执行refresh，</span><br><span class="line">spark sql可以查询到新的数据</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>和msck区别：</p>
+<p>msck repair table </p>
+<p>作用是检查HDFS目录下存在（不存在）但表的metastore中不存在（存在）的元数据信息，更新metastore到hive。</p>
+<p>每次执行msck repair这个命令，都会检查所有分区的目录是否在hive元数据中存在，如果是每次新增一个分区的任务（daily的),那么使用这个语句将会越来越耗费时间，建议使用ALTER TABLE ADD PARTITION 命令。MSCK适合一次导入很多分区，需要将这些分区都更新到元数据信息中。</p>
+<h3><span id="msck-repair">msck repair</span></h3><p>只能作用与分区表，否则提示信息(because it is not a partitioned table.)</p>
+<p>更新分区元数据信息到hive ,  （适用于分区数据已更新，但是分区元数据未更新的情况）</p>
+<p><code>REPAIR TABLE</code> recovers all the partitions in the directory of a table and updates the Hive metastore. When creating a table using <code>PARTITIONED BY</code> clause, partitions are generated and registered in the Hive metastore. However, if the partitioned table is created from existing data, partitions are not registered automatically in the Hive metastore. </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">-- create a partitioned table from existing data /tmp/namesAndAges.parquet</span><br><span class="line">CREATE TABLE tt1 (employee_name STRING, salary INT, department string) USING parquet PARTITIONED BY (department) location &#x27;/tmp/test/spark_ext&#x27;;</span><br><span class="line"></span><br><span class="line">-- SELECT * FROM tt1 does not return results</span><br><span class="line">SELECT * FROM tt1;</span><br><span class="line"></span><br><span class="line">refresh table tt1;</span><br><span class="line">-- SELECT * FROM tt1 does not return results</span><br><span class="line">SELECT * FROM tt1;</span><br><span class="line"></span><br><span class="line">-- run REPAIR TABLE to recovers all the partitions</span><br><span class="line">msck REPAIR TABLE tt1;</span><br><span class="line"></span><br><span class="line">-- SELECT * FROM tt1  returns results</span><br><span class="line">SELECT * FROM tt1;</span><br><span class="line">James	3000	Sales</span><br><span class="line">Robert	4100	Sales</span><br><span class="line">James	3000	Sales</span><br><span class="line">Michael	4600	Sales</span><br><span class="line">Maria	3000	Finance</span><br><span class="line">Kumar	2000	Marketing</span><br><span class="line">Scott	3300	Finance</span><br><span class="line">Jen	3900	Finance</span><br><span class="line">Jeff	3000	Marketing</span><br><span class="line">Saif	4100	Sales</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="distribute-by">distribute by</span></h3><p>数据重分区</p>
+<h3><span id="cluster-by">cluster by</span></h3><p>Distribute  by A sort by A</p>
+<p>数据重分区 + 分区内排序</p>
+<h3><span id="explain">explain</span></h3><p>explain  extended  select * from emp</p>
+<h3><span id="inline">Inline</span></h3><p>values 创建临时表</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-- three rows with a table alias</span><br><span class="line">SELECT * FROM VALUES (&quot;one&quot;, 1), (&quot;two&quot;, 2), (&quot;three&quot;, null) AS data(a, b);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="file">File</span></h3><p>sql查询文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM parquet.`examples/src/main/resources/users.parquet`;</span><br><span class="line"></span><br><span class="line">SELECT * FROM orc.`examples/src/main/resources/users.orc`;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="join">Join</span></h3><ul>
+<li><p><strong>join_type</strong></p>
+<p>Specifies the join type.</p>
+<p><strong>Syntax:</strong></p>
+<p><code>[ INNER ] | CROSS | LEFT [ OUTER ] | [ LEFT ] SEMI | RIGHT [ OUTER ] | FULL [ OUTER ] | [ LEFT ] ANTI</code></p>
+</li>
+</ul>
+<h4><span id="semi-join"><strong>Semi Join</strong></span></h4><p>A semi join returns values from the left side of the relation that has a match with the right. It is also referred to as a left semi join.</p>
+<p>只返回左表中的值，这些值在右表存在</p>
+<p><strong>Syntax:</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">relation [ LEFT ] SEMI JOIN relation [ join_criteria ]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="anti-join"><strong>Anti Join</strong></span></h4><p>An anti join returns values from the left relation that has no match with the right. It is also referred to as a left anti join.</p>
+<p>只返回左表中的值，这些值在右表不存在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">relation [ LEFT ] ANTI JOIN relation [ join_criteria ]</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line">-- Use employee and department tables to demonstrate different type of joins.</span><br><span class="line">SELECT * FROM employee;</span><br><span class="line">+---+-----+------+</span><br><span class="line">| id| name|deptno|</span><br><span class="line">+---+-----+------+</span><br><span class="line">|105|Chloe|     5|</span><br><span class="line">|103| Paul|     3|</span><br><span class="line">|101| John|     1|</span><br><span class="line">|102| Lisa|     2|</span><br><span class="line">|104| Evan|     4|</span><br><span class="line">|106|  Amy|     6|</span><br><span class="line">+---+-----+------+</span><br><span class="line"></span><br><span class="line">SELECT * FROM department;</span><br><span class="line">+------+-----------+</span><br><span class="line">|deptno|   deptname|</span><br><span class="line">+------+-----------+</span><br><span class="line">|     3|Engineering|</span><br><span class="line">|     2|      Sales|</span><br><span class="line">|     1|  Marketing|</span><br><span class="line">+------+-----------+</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate inner join.</span><br><span class="line">SELECT id, name, employee.deptno, deptname</span><br><span class="line">    FROM employee INNER JOIN department ON employee.deptno = department.deptno;</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">| id| name|deptno|   deptname|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">|103| Paul|     3|Engineering|</span><br><span class="line">|101| John|     1|  Marketing|</span><br><span class="line">|102| Lisa|     2|      Sales|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate left join.</span><br><span class="line">SELECT id, name, employee.deptno, deptname</span><br><span class="line">    FROM employee LEFT JOIN department ON employee.deptno = department.deptno;</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">| id| name|deptno|   deptname|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">|105|Chloe|     5|       NULL|</span><br><span class="line">|103| Paul|     3|Engineering|</span><br><span class="line">|101| John|     1|  Marketing|</span><br><span class="line">|102| Lisa|     2|      Sales|</span><br><span class="line">|104| Evan|     4|       NULL|</span><br><span class="line">|106|  Amy|     6|       NULL|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate right join.</span><br><span class="line">SELECT id, name, employee.deptno, deptname</span><br><span class="line">    FROM employee RIGHT JOIN department ON employee.deptno = department.deptno;</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">| id| name|deptno|   deptname|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">|103| Paul|     3|Engineering|</span><br><span class="line">|101| John|     1|  Marketing|</span><br><span class="line">|102| Lisa|     2|      Sales|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate full join.</span><br><span class="line">SELECT id, name, employee.deptno, deptname</span><br><span class="line">    FROM employee FULL JOIN department ON employee.deptno = department.deptno;</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">| id| name|deptno|   deptname|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">|101| John|     1|  Marketing|</span><br><span class="line">|106|  Amy|     6|       NULL|</span><br><span class="line">|103| Paul|     3|Engineering|</span><br><span class="line">|105|Chloe|     5|       NULL|</span><br><span class="line">|104| Evan|     4|       NULL|</span><br><span class="line">|102| Lisa|     2|      Sales|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate cross join.</span><br><span class="line">SELECT id, name, employee.deptno, deptname FROM employee CROSS JOIN department;</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">| id| name|deptno|   deptname|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line">|105|Chloe|     5|Engineering|</span><br><span class="line">|105|Chloe|     5|  Marketing|</span><br><span class="line">|105|Chloe|     5|      Sales|</span><br><span class="line">|103| Paul|     3|Engineering|</span><br><span class="line">|103| Paul|     3|  Marketing|</span><br><span class="line">|103| Paul|     3|      Sales|</span><br><span class="line">|101| John|     1|Engineering|</span><br><span class="line">|101| John|     1|  Marketing|</span><br><span class="line">|101| John|     1|      Sales|</span><br><span class="line">|102| Lisa|     2|Engineering|</span><br><span class="line">|102| Lisa|     2|  Marketing|</span><br><span class="line">|102| Lisa|     2|      Sales|</span><br><span class="line">|104| Evan|     4|Engineering|</span><br><span class="line">|104| Evan|     4|  Marketing|</span><br><span class="line">|104| Evan|     4|      Sales|</span><br><span class="line">|106|  Amy|     4|Engineering|</span><br><span class="line">|106|  Amy|     4|  Marketing|</span><br><span class="line">|106|  Amy|     4|      Sales|</span><br><span class="line">+---+-----+------+-----------|</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate semi join.</span><br><span class="line">SELECT * FROM employee SEMI JOIN department ON employee.deptno = department.deptno;</span><br><span class="line">+---+-----+------+</span><br><span class="line">| id| name|deptno|</span><br><span class="line">+---+-----+------+</span><br><span class="line">|103| Paul|     3|</span><br><span class="line">|101| John|     1|</span><br><span class="line">|102| Lisa|     2|</span><br><span class="line">+---+-----+------+</span><br><span class="line"></span><br><span class="line">-- Use employee and department tables to demonstrate anti join.</span><br><span class="line">SELECT * FROM employee ANTI JOIN department ON employee.deptno = department.deptno;</span><br><span class="line">+---+-----+------+</span><br><span class="line">| id| name|deptno|</span><br><span class="line">+---+-----+------+</span><br><span class="line">|105|Chloe|     5|</span><br><span class="line">|104| Evan|     4|</span><br><span class="line">|106|  Amy|     6|</span><br><span class="line">+---+-----+------+</span><br></pre></td></tr></table></figure>
+
+<h3><span id="limit">limit</span></h3><p>The <code>OFFSET</code> clause is used to specify the number of rows to skip before beginning to return rows returned by the <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/3.4.1/sql-ref-syntax-qry-select.html">SELECT</a> statement. In general, this clause is used in conjunction with <a target="_blank" rel="noopener" href="https://spark.apache.org/docs/3.4.1/sql-ref-syntax-qry-select-orderby.html">ORDER BY</a> to ensure that the results are deterministic.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-- Skip the first two rows.</span><br><span class="line">SELECT name, age FROM person ORDER BY name OFFSET 2;</span><br><span class="line">+-------+---+</span><br><span class="line">|   name|age|</span><br><span class="line">+-------+---+</span><br><span class="line">| John A| 18|</span><br><span class="line">| Mike A| 25|</span><br><span class="line">|Shone S| 16|</span><br><span class="line">|Zen Hui| 25|</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="集合操作">集合操作</span></h3><ul>
+<li><code>EXCEPT</code> or <code>MINUS</code></li>
+<li><code>INTERSECT</code></li>
+<li><code>UNION</code></li>
+</ul>
+<p>union  | union all    前者结果集去重，后者不去重</p>
+<h3><span id="tablesample">TABLESAMPLE</span></h3><p>表数据采样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM test;</span><br><span class="line">+--+----+</span><br><span class="line">|id|name|</span><br><span class="line">+--+----+</span><br><span class="line">| 5|Alex|</span><br><span class="line">| 8|Lucy|</span><br><span class="line">| 2|Mary|</span><br><span class="line">| 4|Fred|</span><br><span class="line">| 1|Lisa|</span><br><span class="line">| 9|Eric|</span><br><span class="line">|10|Adam|</span><br><span class="line">| 6|Mark|</span><br><span class="line">| 7|Lily|</span><br><span class="line">| 3|Evan|</span><br><span class="line">+--+----+</span><br><span class="line"></span><br><span class="line">SELECT * FROM test TABLESAMPLE (50 PERCENT);</span><br><span class="line">+--+----+</span><br><span class="line">|id|name|</span><br><span class="line">+--+----+</span><br><span class="line">| 5|Alex|</span><br><span class="line">| 2|Mary|</span><br><span class="line">| 4|Fred|</span><br><span class="line">| 9|Eric|</span><br><span class="line">|10|Adam|</span><br><span class="line">| 3|Evan|</span><br><span class="line">+--+----+</span><br><span class="line"></span><br><span class="line">SELECT * FROM test TABLESAMPLE (5 ROWS);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="tvf">TVF</span></h3><p>表值函数</p>
+<p>返回多行数据</p>
+<p>A table-valued function (TVF) is a function that returns a relation or a set of rows. There are two types of TVFs in Spark SQL:</p>
+<ol>
+<li>a TVF that can be specified in a FROM clause, e.g. range;</li>
+<li>a TVF that can be specified in SELECT&#x2F;LATERAL VIEW clauses, e.g. explode.</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line">-- range call with end</span><br><span class="line">SELECT * FROM range(6 + cos(3));</span><br><span class="line">+---+</span><br><span class="line">| id|</span><br><span class="line">+---+</span><br><span class="line">|  0|</span><br><span class="line">|  1|</span><br><span class="line">|  2|</span><br><span class="line">|  3|</span><br><span class="line">|  4|</span><br><span class="line">+---+</span><br><span class="line"></span><br><span class="line">-- range call with start and end</span><br><span class="line">SELECT * FROM range(5, 10);</span><br><span class="line">+---+</span><br><span class="line">| id|</span><br><span class="line">+---+</span><br><span class="line">|  5|</span><br><span class="line">|  6|</span><br><span class="line">|  7|</span><br><span class="line">|  8|</span><br><span class="line">|  9|</span><br><span class="line">+---+</span><br><span class="line"></span><br><span class="line">-- range call with numPartitions</span><br><span class="line">SELECT * FROM range(0, 10, 2, 200);</span><br><span class="line">+---+</span><br><span class="line">| id|</span><br><span class="line">+---+</span><br><span class="line">|  0|</span><br><span class="line">|  2|</span><br><span class="line">|  4|</span><br><span class="line">|  6|</span><br><span class="line">|  8|</span><br><span class="line">+---+</span><br><span class="line"></span><br><span class="line">-- range call with a table alias</span><br><span class="line">SELECT * FROM range(5, 8) AS test;</span><br><span class="line">+---+</span><br><span class="line">| id|</span><br><span class="line">+---+</span><br><span class="line">|  5|</span><br><span class="line">|  6|</span><br><span class="line">|  7|</span><br><span class="line">+---+</span><br><span class="line"></span><br><span class="line">SELECT explode(array(10, 20));</span><br><span class="line">+---+</span><br><span class="line">|col|</span><br><span class="line">+---+</span><br><span class="line">| 10|</span><br><span class="line">| 20|</span><br><span class="line">+---+</span><br><span class="line"></span><br><span class="line">SELECT inline(array(struct(1, &#x27;a&#x27;), struct(2, &#x27;b&#x27;)));</span><br><span class="line">+----+----+</span><br><span class="line">|col1|col2|</span><br><span class="line">+----+----+</span><br><span class="line">|   1|   a|</span><br><span class="line">|   2|   b|</span><br><span class="line">+----+----+</span><br><span class="line"></span><br><span class="line">SELECT posexplode(array(10,20));</span><br><span class="line">+---+---+</span><br><span class="line">|pos|col|</span><br><span class="line">+---+---+</span><br><span class="line">|  0| 10|</span><br><span class="line">|  1| 20|</span><br><span class="line">+---+---+</span><br><span class="line"></span><br><span class="line">SELECT stack(2, 1, 2, 3);</span><br><span class="line">+----+----+</span><br><span class="line">|col0|col1|</span><br><span class="line">+----+----+</span><br><span class="line">|   1|   2|</span><br><span class="line">|   3|null|</span><br><span class="line">+----+----+</span><br><span class="line"></span><br><span class="line">SELECT json_tuple(&#x27;&#123;&quot;a&quot;:1, &quot;b&quot;:2&#125;&#x27;, &#x27;a&#x27;, &#x27;b&#x27;);</span><br><span class="line">+---+---+</span><br><span class="line">| c0| c1|</span><br><span class="line">+---+---+</span><br><span class="line">|  1|  2|</span><br><span class="line">+---+---+</span><br><span class="line"></span><br><span class="line">SELECT parse_url(&#x27;http://spark.apache.org/path?query=1&#x27;, &#x27;HOST&#x27;);</span><br><span class="line">+-----------------------------------------------------+</span><br><span class="line">|parse_url(http://spark.apache.org/path?query=1, HOST)|</span><br><span class="line">+-----------------------------------------------------+</span><br><span class="line">|                                     spark.apache.org|</span><br><span class="line">+-----------------------------------------------------+</span><br><span class="line"></span><br><span class="line">-- Use explode in a LATERAL VIEW clause</span><br><span class="line">CREATE TABLE test (c1 INT);</span><br><span class="line">INSERT INTO test VALUES (1);</span><br><span class="line">INSERT INTO test VALUES (2);</span><br><span class="line">SELECT * FROM test LATERAL VIEW explode (ARRAY(3,4)) AS c2;</span><br><span class="line">+--+--+</span><br><span class="line">|c1|c2|</span><br><span class="line">+--+--+</span><br><span class="line">| 1| 3|</span><br><span class="line">| 1| 4|</span><br><span class="line">| 2| 3|</span><br><span class="line">| 2| 4|</span><br><span class="line">+--+--+</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="聚合函数">聚合函数</span></h3><h4><span id="ordered-set-aggregate-functions">Ordered-Set Aggregate Functions</span></h4><p>These aggregate Functions use different syntax than the other aggregate functions so that to specify an expression (typically a column name) by which to order the values.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">CREATE OR REPLACE TEMPORARY VIEW basic_pays AS SELECT * FROM VALUES</span><br><span class="line">(&#x27;Diane Murphy&#x27;,&#x27;Accounting&#x27;,8435),</span><br><span class="line">(&#x27;Mary Patterson&#x27;,&#x27;Accounting&#x27;,9998),</span><br><span class="line">(&#x27;Jeff Firrelli&#x27;,&#x27;Accounting&#x27;,8992),</span><br><span class="line">(&#x27;William Patterson&#x27;,&#x27;Accounting&#x27;,8870),</span><br><span class="line">(&#x27;Gerard Bondur&#x27;,&#x27;Accounting&#x27;,11472),</span><br><span class="line">(&#x27;Anthony Bow&#x27;,&#x27;Accounting&#x27;,6627),</span><br><span class="line">(&#x27;Leslie Jennings&#x27;,&#x27;IT&#x27;,8113),</span><br><span class="line">(&#x27;Leslie Thompson&#x27;,&#x27;IT&#x27;,5186),</span><br><span class="line">(&#x27;Julie Firrelli&#x27;,&#x27;Sales&#x27;,9181),</span><br><span class="line">(&#x27;Steve Patterson&#x27;,&#x27;Sales&#x27;,9441),</span><br><span class="line">(&#x27;Foon Yue Tseng&#x27;,&#x27;Sales&#x27;,6660),</span><br><span class="line">(&#x27;George Vanauf&#x27;,&#x27;Sales&#x27;,10563),</span><br><span class="line">(&#x27;Loui Bondur&#x27;,&#x27;SCM&#x27;,10449),</span><br><span class="line">(&#x27;Gerard Hernandez&#x27;,&#x27;SCM&#x27;,6949),</span><br><span class="line">(&#x27;Pamela Castillo&#x27;,&#x27;SCM&#x27;,11303),</span><br><span class="line">(&#x27;Larry Bott&#x27;,&#x27;SCM&#x27;,11798),</span><br><span class="line">(&#x27;Barry Jones&#x27;,&#x27;SCM&#x27;,10586)</span><br><span class="line">AS basic_pays(employee_name, department, salary);</span><br><span class="line"></span><br><span class="line">SELECT * FROM basic_pays;</span><br><span class="line">+-----------------+----------+------+</span><br><span class="line">|    employee_name|department|salary|</span><br><span class="line">+-----------------+----------+------+</span><br><span class="line">|      Anthony Bow|Accounting|	6627|</span><br><span class="line">|      Barry Jones|       SCM| 10586|</span><br><span class="line">|     Diane Murphy|Accounting|	8435|</span><br><span class="line">|   Foon Yue Tseng|     Sales|	6660|</span><br><span class="line">|    George Vanauf|     Sales| 10563|</span><br><span class="line">|    Gerard Bondur|Accounting| 11472|</span><br><span class="line">| Gerard Hernandez|       SCM|	6949|</span><br><span class="line">|    Jeff Firrelli|Accounting|	8992|</span><br><span class="line">|   Julie Firrelli|     Sales|	9181|</span><br><span class="line">|       Larry Bott|       SCM| 11798|</span><br><span class="line">|  Leslie Jennings|        IT|	8113|</span><br><span class="line">|  Leslie Thompson|        IT|	5186|</span><br><span class="line">|      Loui Bondur|       SCM| 10449|</span><br><span class="line">|   Mary Patterson|Accounting|	9998|</span><br><span class="line">|  Pamela Castillo|       SCM| 11303|</span><br><span class="line">|  Steve Patterson|     Sales|	9441|</span><br><span class="line">|William Patterson|Accounting|	8870|</span><br><span class="line">+-----------------+----------+------+</span><br><span class="line"></span><br><span class="line"># percentile_disc是离散值(discrete)，percentile_cont是连续值</span><br><span class="line">SELECT</span><br><span class="line">    department,</span><br><span class="line">    percentile_cont(0.25) WITHIN GROUP (ORDER BY salary) AS pc1,</span><br><span class="line">    percentile_cont(0.25) WITHIN GROUP (ORDER BY salary) FILTER (WHERE employee_name LIKE &#x27;%Bo%&#x27;) AS pc2,</span><br><span class="line">    percentile_cont(0.25) WITHIN GROUP (ORDER BY salary DESC) AS pc3,</span><br><span class="line">    percentile_cont(0.25) WITHIN GROUP (ORDER BY salary DESC) FILTER (WHERE employee_name LIKE &#x27;%Bo%&#x27;) AS pc4,</span><br><span class="line">    percentile_disc(0.25) WITHIN GROUP (ORDER BY salary) AS pd1,</span><br><span class="line">    percentile_disc(0.25) WITHIN GROUP (ORDER BY salary) FILTER (WHERE employee_name LIKE &#x27;%Bo%&#x27;) AS pd2,</span><br><span class="line">    percentile_disc(0.25) WITHIN GROUP (ORDER BY salary DESC) AS pd3,</span><br><span class="line">    percentile_disc(0.25) WITHIN GROUP (ORDER BY salary DESC) FILTER (WHERE employee_name LIKE &#x27;%Bo%&#x27;) AS pd4</span><br><span class="line">FROM basic_pays</span><br><span class="line">GROUP BY department</span><br><span class="line">ORDER BY department;</span><br><span class="line">+----------+-------+--------+-------+--------+-----+-----+-----+-----+</span><br><span class="line">|department|    pc1|     pc2|    pc3|     pc4|  pd1|  pd2|  pd3|  pd4|</span><br><span class="line">+----------+-------+--------+-------+--------+-----+-----+-----+-----+</span><br><span class="line">|Accounting|8543.75| 7838.25| 9746.5|10260.75| 8435| 6627| 9998|11472|</span><br><span class="line">|        IT|5917.75|    NULL|7381.25|    NULL| 5186| NULL| 8113| NULL|</span><br><span class="line">|     Sales|8550.75|    NULL| 9721.5|    NULL| 6660| NULL|10563| NULL|</span><br><span class="line">|       SCM|10449.0|10786.25|11303.0|11460.75|10449|10449|11303|11798|</span><br><span class="line">+----------+-------+--------+-------+--------+-----+-----+-----+-----+</span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="窗口函数">窗口函数</span></h3><p><strong>window_function</strong></p>
+<ul>
+<li><p>Ranking Functions</p>
+<p><strong>Syntax:</strong> <code>RANK | DENSE_RANK | PERCENT_RANK | NTILE | ROW_NUMBER</code></p>
+</li>
+<li><p>Analytic Functions</p>
+<p><strong>Syntax:</strong> <code>CUME_DIST | LAG | LEAD | NTH_VALUE | FIRST_VALUE | LAST_VALUE</code></p>
+</li>
+<li><p>Aggregate Functions</p>
+<p><strong>Syntax:</strong> <code>MAX | MIN | COUNT | SUM | AVG | ...</code></p>
+</li>
+</ul>
+<h3><span id="pivot">PIVOT</span></h3><p>数据透视</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PIVOT ( &#123; aggregate_expression [ AS aggregate_expression_alias ] &#125; [ , ... ]</span><br><span class="line">    FOR column_list IN ( expression_list ) )</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">CREATE table emp111 AS select * from values</span><br><span class="line">(&quot;dev&quot;, &quot;m&quot;, 115),(&quot;sale&quot;, &quot;f&quot;, 95), (&quot;sale&quot;, &quot;m&quot;, 85), (&quot;dev&quot;, &quot;f&quot;, 117), (&quot;dev&quot;, &quot;m&quot;, 117)</span><br><span class="line"></span><br><span class="line">CREATE OR REPLACE TEMPORARY VIEW emp11(dept, sex, salary) AS select * from values</span><br><span class="line">(&quot;dev&quot;, &quot;m&quot;, 115),(&quot;sale&quot;, &quot;f&quot;, 95), (&quot;sale&quot;, &quot;m&quot;, 85), (&quot;dev&quot;, &quot;f&quot;, 117), (&quot;dev&quot;, &quot;m&quot;, 117)</span><br><span class="line"></span><br><span class="line">select * from emp11;</span><br><span class="line">dept	sex	salary</span><br><span class="line">dev	m	115</span><br><span class="line">sale	f	95</span><br><span class="line">sale	m	85</span><br><span class="line">dev	f	117</span><br><span class="line">dev	m	117</span><br><span class="line"></span><br><span class="line">SELECT * FROM emp11</span><br><span class="line">    PIVOT (</span><br><span class="line">        SUM(salary) AS sal_sum</span><br><span class="line">        FOR sex IN (&#x27;m&#x27;, &#x27;f&#x27;)</span><br><span class="line">    );</span><br><span class="line">-------    </span><br><span class="line">dept	m	f</span><br><span class="line">dev	232	117</span><br><span class="line">sale	85	95   </span><br><span class="line"></span><br><span class="line">SELECT * FROM emp11</span><br><span class="line">    PIVOT (</span><br><span class="line">        SUM(salary) AS sal_sum, avg(salary) AS sal_avg</span><br><span class="line">        FOR sex IN (&#x27;m&#x27;, &#x27;f&#x27;)</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line">--------</span><br><span class="line"></span><br><span class="line">dept	m_sal_sum	m_sal_avg	f_sal_sum	f_sal_avg</span><br><span class="line">dev	232	116.0	117	117.0</span><br><span class="line">sale	85	85.0	95	95.0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="unpivot">UNPIVOT</span></h3><p>数据透视的逆向，有点类似把 透视表的一行转成多行输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE sales_quarterly (year INT, q1 INT, q2 INT, q3 INT, q4 INT);</span><br><span class="line">INSERT INTO sales_quarterly VALUES</span><br><span class="line">    (2020, null, 1000, 2000, 2500),</span><br><span class="line">    (2021, 2250, 3200, 4200, 5900),</span><br><span class="line">    (2022, 4200, 3100, null, null);</span><br><span class="line"></span><br><span class="line">-- column names are used as unpivot columns</span><br><span class="line">SELECT * FROM sales_quarterly</span><br><span class="line">    UNPIVOT (</span><br><span class="line">        sales FOR quarter IN (q1, q2, q3, q4)</span><br><span class="line">    );</span><br><span class="line">      </span><br><span class="line">+------+---------+-------+</span><br><span class="line">| year | quarter | sales |</span><br><span class="line">+------+---------+-------+</span><br><span class="line">| 2020 | q2      | 1000  |</span><br><span class="line">| 2020 | q3      | 2000  |</span><br><span class="line">| 2020 | q4      | 2500  |</span><br><span class="line">| 2021 | q1      | 2250  |</span><br><span class="line">| 2021 | q2      | 3200  |</span><br><span class="line">| 2021 | q3      | 4200  |</span><br><span class="line">| 2021 | q4      | 5900  |</span><br><span class="line">| 2022 | q1      | 4200  |</span><br><span class="line">| 2022 | q2      | 3100  |</span><br><span class="line">+------+---------+-------+</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="lateral">Lateral</span></h3><p>LATERAL VIEW 侧边视图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LATERAL VIEW [ OUTER ] generator_function ( expression [ , ... ] ) [ table_alias ] AS column_alias [ , ... ]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>generator_function</strong></p>
+<p>Specifies a generator function (EXPLODE, INLINE, etc.).</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE person (id INT, name STRING, age INT, class INT, address STRING);</span><br><span class="line">INSERT INTO person VALUES</span><br><span class="line">    (100, &#x27;John&#x27;, 30, 1, &#x27;Street 1&#x27;),</span><br><span class="line">    (200, &#x27;Mary&#x27;, NULL, 1, &#x27;Street 2&#x27;),</span><br><span class="line">    (300, &#x27;Mike&#x27;, 80, 3, &#x27;Street 3&#x27;),</span><br><span class="line">    (400, &#x27;Dan&#x27;, 50, 4, &#x27;Street 4&#x27;);</span><br><span class="line"></span><br><span class="line">SELECT * FROM person</span><br><span class="line">    LATERAL VIEW EXPLODE(ARRAY(30, 60)) tableName AS c_age</span><br><span class="line">    LATERAL VIEW EXPLODE(ARRAY(40, 80)) AS d_age;</span><br><span class="line">+------+-------+-------+--------+-----------+--------+--------+</span><br><span class="line">|  id  | name  |  age  | class  |  address  | c_age  | d_age  |</span><br><span class="line">+------+-------+-------+--------+-----------+--------+--------+</span><br><span class="line">| 100  | John  | 30    | 1      | Street 1  | 30     | 40     |</span><br><span class="line">| 100  | John  | 30    | 1      | Street 1  | 30     | 80     |</span><br><span class="line">| 100  | John  | 30    | 1      | Street 1  | 60     | 40     |</span><br><span class="line">| 100  | John  | 30    | 1      | Street 1  | 60     | 80     |</span><br><span class="line">| 200  | Mary  | NULL  | 1      | Street 2  | 30     | 40     |</span><br><span class="line">| 200  | Mary  | NULL  | 1      | Street 2  | 30     | 80     |</span><br><span class="line">| 200  | Mary  | NULL  | 1      | Street 2  | 60     | 40     |</span><br><span class="line">| 200  | Mary  | NULL  | 1      | Street 2  | 60     | 80     |</span><br><span class="line">| 300  | Mike  | 80    | 3      | Street 3  | 30     | 40     |</span><br><span class="line">| 300  | Mike  | 80    | 3      | Street 3  | 30     | 80     |</span><br><span class="line">| 300  | Mike  | 80    | 3      | Street 3  | 60     | 40     |</span><br><span class="line">| 300  | Mike  | 80    | 3      | Street 3  | 60     | 80     |</span><br><span class="line">| 400  | Dan   | 50    | 4      | Street 4  | 30     | 40     |</span><br><span class="line">| 400  | Dan   | 50    | 4      | Street 4  | 30     | 80     |</span><br><span class="line">| 400  | Dan   | 50    | 4      | Street 4  | 60     | 40     |</span><br><span class="line">| 400  | Dan   | 50    | 4      | Street 4  | 60     | 80     |</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="dml">DML</span></h2><h3><span id="insert-into">Insert into</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE students (name STRING, address  STRING) PARTITIONED BY (birthday DATE);</span><br><span class="line"></span><br><span class="line">INSERT INTO students PARTITION (birthday = date&#x27;2019-01-02&#x27;)</span><br><span class="line">    VALUES (&#x27;Amy Smith&#x27;, &#x27;123 Park Ave, San Jose&#x27;);</span><br><span class="line"></span><br><span class="line">SELECT * FROM students;</span><br><span class="line">+-------------+-------------------------+-----------+</span><br><span class="line">|         name|                  address|   birthday|</span><br><span class="line">+-------------+-------------------------+-----------+</span><br><span class="line">|    Amy Smith|   123 Park Ave, San Jose| 2019-01-02|</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">INSERT OVERWRITE students PARTITION (student_id = 11215016) (address, name) VALUES</span><br><span class="line">    (&#x27;Hangzhou, China&#x27;, &#x27;Kent Yao Jr.&#x27;);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3><span id="insert-overwrite-directory">Insert overwrite directory</span></h3><h4><span id="spark-format">Spark format</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">INSERT OVERWRITE DIRECTORY &#x27;/tmp/destination&#x27;</span><br><span class="line">    USING parquet</span><br><span class="line">    OPTIONS (col1 1, col2 2, col3 &#x27;test&#x27;)</span><br><span class="line">    SELECT * FROM test_table;</span><br><span class="line"></span><br><span class="line">INSERT OVERWRITE DIRECTORY</span><br><span class="line">    USING parquet</span><br><span class="line">    OPTIONS (&#x27;path&#x27; &#x27;/tmp/destination&#x27;, col1 1, col2 2, col3 &#x27;test&#x27;)</span><br><span class="line">    SELECT * FROM test_table;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="hive-format">Hive format</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">INSERT OVERWRITE LOCAL DIRECTORY &#x27;/tmp/destination&#x27;</span><br><span class="line">    STORED AS orc</span><br><span class="line">    SELECT * FROM test_table;</span><br><span class="line"></span><br><span class="line">INSERT OVERWRITE LOCAL DIRECTORY &#x27;/tmp/destination&#x27;</span><br><span class="line">    ROW FORMAT DELIMITED FIELDS TERMINATED BY &#x27;,&#x27;</span><br><span class="line">    SELECT * FROM test_table;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/07/09/bigdata/spark/spark3/20230707_sparksql/" data-id="cljvl2jh80000619a7e0a2rjw" data-title="20230707_sparksql" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spark/" rel="tag">spark</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-bigdata/spark/spark3/20230707_spark_data_format" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/07/07/bigdata/spark/spark3/20230707_spark_data_format/" class="article-date">
@@ -1950,305 +2495,11 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
 
 
   
-    <article id="post-tools/java/maven/maven远程仓库配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" class="article-date">
-  <time class="dt-published" datetime="2023-07-03T14:01:21.000Z" itemprop="datePublished">2023-07-03</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/tools-java-maven/">tools/java/maven</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/">maven远程仓库配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <!-- toc -->
-
-
-
-<!-- tocstop -->
-
-<p>修改 MAVEN_HOME&#x2F;conf&#x2F;settings.xml文件，</p>
-<p>1、本地仓库位置 修改</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;localRepository&gt;$&#123;user.home&#125;/.m2/repository&lt;/localRepository&gt;</span><br><span class="line">默认位置 ~/.m2/repository </span><br></pre></td></tr></table></figure>
-
-
-
-<p>2、远程仓库地址 配置</p>
-<p>当本地仓库找不到对应依赖包时，从配置的远程仓库中拉取依赖包、下载到本地。</p>
-<p>如下示例在profiles  配置了两个远程仓库，id分别为repo、alimaven，id必须是唯一的，不能重复。</p>
-<p>activeProfiles 指明两个仓库都是激活状态，都可用于项目构建</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">&lt;profiles&gt;</span><br><span class="line">    &lt;!--</span><br><span class="line">     | Specifies a set of introductions to the build process, to be activated using one or more of the</span><br><span class="line">     | mechanisms described above. For inheritance purposes, and to activate profiles via &lt;activatedProfiles/&gt;</span><br><span class="line">     | or the command line, profiles have to have an ID that is unique.</span><br><span class="line">     |</span><br><span class="line">     | An encouraged best practice for profile identification is to use a consistent naming convention</span><br><span class="line">     | for profiles, such as &#x27;env-dev&#x27;, &#x27;env-test&#x27;, &#x27;env-production&#x27;, &#x27;user-jdcasey&#x27;, &#x27;user-brett&#x27;, etc.</span><br><span class="line">     | This will make it more intuitive to understand what the set of introduced profiles is attempting</span><br><span class="line">     | to accomplish, particularly when you only have a list of profile id&#x27;s for debug.</span><br><span class="line">   --&gt;</span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">              &lt;id&gt;repo&lt;/id&gt;</span><br><span class="line">              &lt;name&gt;Central Repository&lt;/name&gt;</span><br><span class="line">              &lt;url&gt;https://repo.maven.apache.org/maven2&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">    &lt;profile&gt;</span><br><span class="line">      &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">      &lt;repositories&gt;</span><br><span class="line">          &lt;repository&gt;</span><br><span class="line">           &lt;id&gt;alimaven&lt;/id&gt;</span><br><span class="line">           &lt;name&gt;alimaven&lt;/name&gt;</span><br><span class="line">           &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public/&lt;/url&gt;</span><br><span class="line">      &lt;!--         &lt;layout&gt;default&lt;/layout&gt;</span><br><span class="line">              &lt;snapshots&gt;</span><br><span class="line">                  &lt;enabled&gt;false&lt;/enabled&gt;</span><br><span class="line">              &lt;/snapshots&gt; --&gt;</span><br><span class="line">          &lt;/repository&gt;</span><br><span class="line">      &lt;/repositories&gt;</span><br><span class="line">    &lt;/profile&gt;</span><br><span class="line"></span><br><span class="line">&lt;/profiles&gt;</span><br><span class="line"></span><br><span class="line">  &lt;!-- activeProfiles</span><br><span class="line">   | List of profiles that are active for all builds.</span><br><span class="line">  &lt;/activeProfiles&gt;</span><br><span class="line">  --&gt;</span><br><span class="line"></span><br><span class="line">&lt;activeProfiles&gt;</span><br><span class="line">    &lt;activeProfile&gt;repo&lt;/activeProfile&gt;</span><br><span class="line">    &lt;activeProfile&gt;alimaven&lt;/activeProfile&gt;</span><br><span class="line">&lt;/activeProfiles&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/03/tools/java/maven/maven%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/" data-id="cljmy0mmf0000v29a26p20mk6" data-title="maven远程仓库配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-system/linux/command/linux常用命令" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="article-date">
-  <time class="dt-published" datetime="2023-07-03T13:55:00.000Z" itemprop="datePublished">2023-07-03</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/system-linux-command/">system/linux/command</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">linux常用命令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <!-- toc -->
-
-<ul>
-<li><a href="#%E7%8E%AF%E5%A2%83">环境：</a></li>
-<li><a href="#%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C">文件操作</a><ul>
-<li><a href="#find">Find</a></li>
-</ul>
-</li>
-<li><a href="#%E5%8E%8B%E7%BC%A9%E5%92%8C%E8%A7%A3%E5%8E%8B%E7%BC%A9">压缩和解压缩</a></li>
-<li><a href="#vim">VIM</a></li>
-<li><a href="#%E7%AE%A1%E7%90%86%E7%94%A8%E6%88%B7%E7%BB%84">管理用户组</a></li>
-<li><a href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE">网络配置</a></li>
-<li><a href="#%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86">软件包管理</a></li>
-<li><a href="#%E5%86%85%E6%A0%B8">内核</a><ul>
-<li><a href="#grub">GRUB</a></li>
-</ul>
-</li>
-<li><a href="#%E8%BF%9B%E7%A8%8B">进程</a></li>
-<li><a href="#%E5%88%86%E5%8C%BA">分区</a></li>
-<li><a href="#%E8%B5%84%E6%96%99">资料</a></li>
-</ul>
-<!-- tocstop -->
-
-<h3><span id="环境">环境：</span></h3><p>linux版本：</p>
-<p>内核：<a target="_blank" rel="noopener" href="https://kernel.org/">https://kernel.org/</a></p>
-<p>发行版：Redhat\centos\federa\  ubuntu\debian  后两种有界面</p>
-<p>init 3  进入登录</p>
-<p>Init 0 关机</p>
-<p>虚拟机安装：<a target="_blank" rel="noopener" href="https://www.virtualbox.org/wiki/Downloads">virtualbox</a></p>
-<p>os:  <a target="_blank" rel="noopener" href="http://isoredirect.centos.org/centos/7/isos/x86_64/">centos</a></p>
-<h3><span id="文件操作">文件操作</span></h3><p>Mv  :  重命名 或移动 文件（目录）</p>
-<p>Ctrl + l  &#x3D;  clear</p>
-<p>cd - 返回上一级目录</p>
-<h4><span id="find">Find</span></h4><p>find &#x2F;etc  -name init</p>
-<p>find &#x2F; -size +204800  # 在根目录查找&gt;100m的文件，100MB &#x3D;&#x3D; 102400KB&#x3D;&#x3D;204800数据快</p>
-<h3><span id="压缩和解压缩">压缩和解压缩</span></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">c 打tar包 打包</span><br><span class="line">x解tar包 解包</span><br><span class="line">f 文件</span><br><span class="line">j bzip2解压缩</span><br><span class="line">z gzip压缩</span><br></pre></td></tr></table></figure>
-
-<p>tar jxf  &#x2F;tmp&#x2F;etc-backup.tar.bz2  -C &#x2F;tmp&#x2F;test1</p>
-<p>tar jcf  &#x2F;tmp&#x2F;etc-backup.tar.bz2  &#x2F;etc</p>
-<p>tar zxf  &#x2F;tmp&#x2F;etc-backup.tar.gz  -C  &#x2F;tmp&#x2F;test2</p>
-<p>tar zcf  &#x2F;tmp&#x2F;etc-backup.tar.gz  &#x2F;etc</p>
-<p>tar cf   &#x2F;tmp&#x2F;etc.tar  &#x2F;etc     &#x2F;&#x2F;打tar包</p>
-<p>gzip  etc.tar         &#x2F;&#x2F;.tar.gz</p>
-<p>gzip -d  etc.tar.gz   &#x2F;&#x2F;.tar.gz -&gt; .tar</p>
-<p>zip -r etc.zip &#x2F;etc   zip压缩</p>
-<p>unzip  etc.zip  -d    &#x2F;tmp&#x2F;test1</p>
-<h3><span id="vim">VIM</span></h3><p>配置文件 vi &#x2F;etc&#x2F;virc</p>
-<p>正常编辑模式： -i -I -a -A -o -O   hjkl （上下左右） </p>
-<p>yy 3yy  y$(光标到行的末尾) 复制</p>
-<p>dd 3dd d$ 剪切</p>
-<p>u（撤销） ctrl+r 恢复动作</p>
-<p>输入set nu 显示行号</p>
-<p>x   3x 删除多个字符</p>
-<p>r + 新字符 替换</p>
-<p>11 + G  移动到指定第11行  g + g移动到首行  G移动到最后一行</p>
-<p>shift+^ 行首  shift + $ 行尾</p>
-<p>命令模式： </p>
-<p>输入set nu 显示行号</p>
-<p>输入set nonu 不显示行号</p>
-<p>wq 保存 退出</p>
-<p>!command 执行linux命令</p>
-<p>&#x2F;x  查找字符串 x, n向下查找，shift + n 向上查找</p>
-<p>%s&#x2F;old&#x2F;new  所有行第一个替换    s&#x2F;old&#x2F;new 当前行第一个替换</p>
-<p>%s&#x2F;old&#x2F;new&#x2F;g  所有行替换 (&#x2F;g全局所有行)</p>
-<p>3,5s&#x2F;old&#x2F;new&#x2F;g (第三到第五行替换)</p>
-<p>可视模式：</p>
-<p>v</p>
-<p>shift +v</p>
-<p>ctrl + v</p>
-<h3><span id="管理用户组">管理用户组</span></h3><p>&#x2F;etc&#x2F;passwd  用户</p>
-<p>&#x2F;etc&#x2F;shadow  密码</p>
-<p> &#x2F;etc&#x2F;group 用户组</p>
-<p>useradd  useradd -g group1 user1</p>
-<p>userdel</p>
-<p>passwd user1 修改密码</p>
-<p>usermod 修改用户属性   usermod -g group1 user1</p>
-<p>chage</p>
-<p>groupadd</p>
-<p>groupdel</p>
-<p>su - tom 切换到用户tom</p>
-<p>sudo   以普通用户身份登录的状态下，执行某些只有root才能执行的命令，比如sudo shutdown</p>
-<p>实现方式，直接执行visudo命令 对文件&#x2F;etc&#x2F;sudoers修改、授权</p>
-<p>visudo    为用户添加执行某些root命令的权限，实质是修改 &#x2F;etc&#x2F;sudoers文件 </p>
-<p>chown</p>
-<p>chgrp</p>
-<p>chmod  u g o a  u+x u-x</p>
-<p>目录权限：x 进入目录</p>
-<p>  rx 进入目录，查看文件</p>
-<p> wx 进入目录，删除文件，修改文件名</p>
-<h3><span id="网络配置">网络配置</span></h3><p>修改网卡显示名字</p>
-<p>vi  &#x2F;etc&#x2F;default&#x2F;grub, 在GRUB_CMDLINE_LINUX 增加 biosdevname&#x3D;0 net.ifnames&#x3D;1</p>
-<p>grub2-mkconfig  -o  &#x2F;boot&#x2F;grub2&#x2F;grub.cfg    &#x2F;&#x2F;重新生成grub配置文件</p>
-<p>reboot</p>
-<p>mii-tool etho  查看网卡物理网络连接情况</p>
-<p>route  -n 查看路由 网关</p>
-<p>修改ip:  ifconfig  eth0  10.0.2.4  netmask 255.255.255.0</p>
-<p>ifup  启动网卡</p>
-<p>route add  增加路由</p>
-<p>route del   减少一条路由</p>
-<p>ping </p>
-<p>traceroute -w 1  <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>   </p>
-<p>mtr</p>
-<p>nslookup  域名查看  nslookup   <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a></p>
-<p>telnet   telnet  ww.baidu.com   80</p>
-<p>tcpdump     查看网络数据包  tcpdump  -i any  -n port   80</p>
-<p>​                     tcpdump -i any  -n host 10.0.0.1</p>
-<p>​                     tcpdump -i any  -n host 10.0.0.1 and port  80</p>
-<p>​                     tcpdump -i any  -n host 10.0.0.1 and port  80  -w  &#x2F;tmp&#x2F;file1</p>
-<p>netstat  netstat   -tlunp</p>
-<p>ss</p>
-<p> service network restart  (systemctl   restart  NetworkManager.service)</p>
-<p>&#x2F;etc&#x2F;sysconfig&#x2F;netwok-scripts&#x2F;ifcfg-eth0   </p>
-<p>​     BOOTPROTO(dhcp|none)  IPADDR  GATEWAY   NETMASK  DNS1  DNS2  DNS3</p>
-<p>​	</p>
-<p>hostnamectl  set-hostname c7.test11</p>
-<p>vi  &#x2F;etc&#x2F;hosts</p>
-<p>Selinux  强制访问控制 </p>
-<p>​     getenforce</p>
-<p>​     setenforce  0</p>
-<p>​     &#x2F;etc&#x2F;selinux&#x2F;sysconfig</p>
-<p>​    </p>
-<h3><span id="软件包管理">软件包管理</span></h3><p>rpm  -qa  查看</p>
-<p>rpm  -i   安装</p>
-<p>rpm  -e 卸载</p>
-<p>yum 简化rpm包的下载、安装、依赖</p>
-<p>配置yum 源  &#x2F;etc&#x2F;yum.repos.d&#x2F;CentOS-Base.repo,   <a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/centos?spm=a2c6h.13651102.0.0.39491b11mLBS4h">国内aliyun yum源</a></p>
-<p>yum -y install</p>
-<p>yum remove</p>
-<p>yum list</p>
-<p>yum update  ***   更新软件包</p>
-<p>源代码编译安装</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">wget  https://openresty.org/download/openresty-1.21.4.1.tar.gz</span><br><span class="line">tar -zxvf openresty-1.21.4.1.tar.gz</span><br><span class="line">cd openresty-1.21.4.1</span><br><span class="line">./configure  --prefix=/usr/local/openresty  (prefix 指定安装目录)</span><br><span class="line">make -j2  (-j2 使用2个核进行编译)</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">perl: https://www.cpan.org/src/5.0/perl-5.36.1.tar.gz</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<p>epel    扩展包  yum install  epel-release  -y</p>
-<h3><span id="内核">内核</span></h3><p>uname -r 查看内核版本</p>
-<p>lscpu  查看cpu</p>
-<h4><span id="grub">GRUB</span></h4><p>（GRand Unified Bootloader，大一统启动加载器），是一个<a target="_blank" rel="noopener" href="https://wiki.archlinuxcn.org/wiki/Arch_%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B#%E5%BC%95%E5%AF%BC%E5%8A%A0%E8%BD%BD%E7%A8%8B%E5%BA%8F">引导加载程序</a></p>
-<p>vi  &#x2F;etc&#x2F;default&#x2F;grub</p>
-<p>ls &#x2F;etc&#x2F;grub.d&#x2F;</p>
-<p>vi  &#x2F;boot&#x2F;grub2&#x2F;grub.cfg</p>
-<p>grub2-mkconfig  -o  &#x2F;boot&#x2F;grub2&#x2F;grub.cfg    &#x2F;&#x2F;重新生成grub配置文件</p>
-<h3><span id="进程">进程</span></h3><p>ps</p>
-<p>ps -eLf</p>
-<p>pstree 进程树</p>
-<p>top</p>
-<p>top -p pid    只查某一个进程</p>
-<p>nice  启动时指定进程优先级</p>
-<p>renice  运行中指定进程优先级</p>
-<p>.&#x2F;a.sh &amp;    加&amp;表示后端运行，进程放入后端</p>
-<p>jobs  查看正在运行的后端进程</p>
-<p>fg+ 数字(jobs显示的)  进程调回前端</p>
-<p>bg+ 数字(jobs显示的)  进程调入后端</p>
-<p>ctrl + z 正在前端运行的进程调入后端，并进行stop状态，通过jobs  fg后续继续执行</p>
-<p>kill -l</p>
-<p>ctrl+c</p>
-<p>kill -9  pid</p>
-<p>nohup  + cmd + &amp; </p>
-<p>守护进程 daemon</p>
-<p>screen   </p>
-<p>​         screen 进入screen环境</p>
-<p>​         screen  -ls    查看后端有哪些screen环境下的进程</p>
-<p>​         ctrl + a  d   进程调入后端</p>
-<p>​          screen -r id  进程调回前端</p>
-<p>进程日志   </p>
-<p>​     &#x2F;var&#x2F;log&#x2F;messages  </p>
-<p>​     &#x2F;var&#x2F;log&#x2F;dmesg   内核</p>
-<p>​     &#x2F;var&#x2F;log&#x2F;secure</p>
-<p>​     &#x2F;var&#x2F;log&#x2F;cron</p>
-<p>systemctl   start&#x2F;stop&#x2F;enable&#x2F;disable  </p>
-<p>Systemctl    </p>
-<p>top</p>
-<p>free</p>
-<p>fdisk -l  磁盘分区</p>
-<p>parted -l</p>
-<p>df -h</p>
-<p>du -sh 实际占用空间</p>
-<p>ls -lh</p>
-<p>dd  if&#x3D;&#x2F;dev&#x2F;zero  bs&#x3D;4M  count&#x3D;10 of&#x3D;bfile    复制产生一个文件</p>
-<p>文件系统  ext4  xfs ntfs</p>
-<p>ls -i  查看i节点</p>
-<p>ln   硬链接   i节点相同，不能跨分区</p>
-<p>ln -s  软链接  i节点不同，</p>
-<p>getfacl   文件访问权限控制</p>
-<p>setfacl  -m u:user1:r  afile   赋读权</p>
-<h3><span id="分区">分区</span></h3><p>fdisk  分区, 大于2T 要使用parted 进行分区</p>
-<p>mkfs.ext4   文件系统格式化</p>
-<p>mkdir  &#x2F;mnt&#x2F;sdc1  mount  &#x2F;dev&#x2F;sdc1  &#x2F;mnt&#x2F;sdc1    挂载文件系统</p>
-<p>vi  &#x2F;etc&#x2F;fstab   文件里修改，对挂载固化，重启自动挂载</p>
-<p>磁盘配额 quota  限制用户对磁盘的使用</p>
-<h3><span id="资料">资料</span></h3><p><a target="_blank" rel="noopener" href="https://time.geekbang.org/course/detail/100029601-101469">极客时间 linux实战技能 100讲</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://qingfengzhou.github.io/2023/07/03/system/linux/command/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" data-id="cljmxdm1q00001h9a94fi72lf" data-title="linux常用命令" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -2259,7 +2510,7 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-langchain/">ai/llm/langchain</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-prompt/">ai/llm/prompt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-kafka/">bigdata/kafka</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-fun/">life/fun</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-langchain/">ai/llm/langchain</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-prompt/">ai/llm/prompt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-kafka/">bigdata/kafka</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-fun/">life/fun</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-vmware/">system/linux/vmware</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
     </div>
   </div>
 
@@ -2288,7 +2539,7 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">August 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/11/">November 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">September 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">August 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
     </div>
   </div>
 
@@ -2301,6 +2552,14 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
       <ul>
         
           <li>
+            <a href="/2023/11/17/system/linux/vmware/vmware%E6%89%A9%E5%AE%B9/">vmware扩容</a>
+          </li>
+        
+          <li>
+            <a href="/2023/09/03/bigdata/flink/flink_doc/flink_shangguigu/">(no title)</a>
+          </li>
+        
+          <li>
             <a href="/2023/08/21/life/english/">english</a>
           </li>
         
@@ -2310,14 +2569,6 @@ spark.table(&quot;test_zhou.emp&quot;).withColumn(&quot;hash&quot;, hash(col(&qu
         
           <li>
             <a href="/2023/08/21/life/culture/">culture</a>
-          </li>
-        
-          <li>
-            <a href="/2023/08/21/life/fun/movie/">movie</a>
-          </li>
-        
-          <li>
-            <a href="/2023/07/27/ai/llm/prompt/wu_en_da_prompt/">wu_en_da_prompt</a>
           </li>
         
       </ul>

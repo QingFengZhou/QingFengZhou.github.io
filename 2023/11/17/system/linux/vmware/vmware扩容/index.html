@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>vmware扩容 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="virtualbox centos7.9扩容 虚拟系统磁盘文件扩充 修改分区 重启 格式化分区 LVM更新 扩容文件系统 References:      virtualbox centos7.9扩容虚拟系统磁盘文件扩充命令操作 命令行运行VBoxManage，modifyhd扩容需要文件格式为.vdi，如为.vmdk，需要使用clonehd指定格式进行格式转换，详细可参考【1】。 1VBo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vmware扩容">
+<meta property="og:url" content="https://qingfengzhou.github.io/2023/11/17/system/linux/vmware/vmware%E6%89%A9%E5%AE%B9/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="virtualbox centos7.9扩容 虚拟系统磁盘文件扩充 修改分区 重启 格式化分区 LVM更新 扩容文件系统 References:      virtualbox centos7.9扩容虚拟系统磁盘文件扩充命令操作 命令行运行VBoxManage，modifyhd扩容需要文件格式为.vdi，如为.vmdk，需要使用clonehd指定格式进行格式转换，详细可参考【1】。 1VBo">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-11-17T15:30:48.000Z">
+<meta property="article:modified_time" content="2023-11-17T15:40:49.197Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://qingfengzhou.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-system/linux/vmware/vmware扩容" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/11/17/system/linux/vmware/vmware%E6%89%A9%E5%AE%B9/" class="article-date">
+  <time class="dt-published" datetime="2023-11-17T15:30:48.000Z" itemprop="datePublished">2023-11-17</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/system-linux-vmware/">system/linux/vmware</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      vmware扩容
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <!-- toc -->
+
+<ul>
+<li><a href="#virtualbox-centos79%E6%89%A9%E5%AE%B9">virtualbox centos7.9扩容</a><ul>
+<li><a href="#%E8%99%9A%E6%8B%9F%E7%B3%BB%E7%BB%9F%E7%A3%81%E7%9B%98%E6%96%87%E4%BB%B6%E6%89%A9%E5%85%85">虚拟系统磁盘文件扩充</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E5%88%86%E5%8C%BA">修改分区</a></li>
+<li><a href="#%E9%87%8D%E5%90%AF">重启</a></li>
+<li><a href="#%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%88%86%E5%8C%BA">格式化分区</a></li>
+<li><a href="#lvm%E6%9B%B4%E6%96%B0">LVM更新</a></li>
+<li><a href="#%E6%89%A9%E5%AE%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">扩容文件系统</a></li>
+<li><a href="#references">References:</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="virtualbox-centos79扩容">virtualbox centos7.9扩容</span></h2><h3><span id="虚拟系统磁盘文件扩充">虚拟系统磁盘文件扩充</span></h3><p><strong>命令操作</strong></p>
+<p>命令行运行<code>VBoxManage</code>，<code>modifyhd</code>扩容需要文件格式为<code>.vdi</code>，如为<code>.vmdk</code>，需要使用<code>clonehd</code>指定格式进行格式转换，详细可参考【1】。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VBoxManage modifyhd <span class="string">&quot;centos-01.vdi&quot;</span> --resize 20480</span><br></pre></td></tr></table></figure>
+
+<p><strong>GUI操作</strong></p>
+<p>关闭操作的虚拟机，在<code>Oracle VM VirtualBox</code>管理器主界面，<strong>管理-&gt;虚拟介质管理-&gt;属性-&gt;大小-&gt;应用</strong>。</p>
+<h3><span id="修改分区">修改分区</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ sudo fdisk /dev/sda　　　　 </span><br><span class="line">p　　　　　　　<span class="comment">#查看已分区数量</span></span><br><span class="line">n　　　　　　　<span class="comment">#新增加一个分区</span></span><br><span class="line">p　　　　　　　<span class="comment">#分区类型选择为主分区 </span></span><br><span class="line">回车　　　　   <span class="comment">#选择分区号，使用默认，即为新增分区</span></span><br><span class="line">回车　　　　　 <span class="comment">#默认（起始扇区） </span></span><br><span class="line">回车　　　　　 <span class="comment">#默认（结束扇区） </span></span><br><span class="line">t　　　　　　　<span class="comment">#修改分区类型 </span></span><br><span class="line">回车　　　　   <span class="comment">#选分区3 </span></span><br><span class="line">8e　　　　　 　<span class="comment">#修改为LVM（8e就是LVM）</span></span><br><span class="line">w　　　　　  　<span class="comment">#写分区表并退出 </span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="重启">重启</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo reboot                <span class="comment">#重启</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="格式化分区">格式化分区</span></h3><p>（非必要，可用于转换文件系统类型）</p>
+<p>这里名称“&#x2F;dev&#x2F;sda3”与新增分区一致。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看</span></span><br><span class="line">$ sudo fdisk -l </span><br><span class="line"><span class="comment"># 格式化，还有各种 mkfs.ext4，mkfs.xfs..，与需要扩容的文件系统应该一致</span></span><br><span class="line">$ sudo mkfs.ext3 /dev/sda3</span><br></pre></td></tr></table></figure>
+
+<h3><span id="lvm更新">LVM更新</span></h3><p>这里名称“&#x2F;dev&#x2F;sda3”与新增分区一致。</p>
+<p>此虚拟机环境中需要扩容的文件系统为<code>/dev/mapper/centos-root</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ lvm　　　　　　　　　　　　              <span class="comment">#进入lvm管理</span></span><br><span class="line">$ lvm&gt;pvcreate /dev/sda3　　           <span class="comment">#这是初始化刚才的分区3</span></span><br><span class="line">$ lvm&gt;vgdisplay						  <span class="comment">#查看卷组(VG Name)</span></span><br><span class="line">$ lvm&gt;vgextend centos /dev/sda3       <span class="comment">#将初始化过的分区加入到虚拟卷组centos</span></span><br><span class="line">$ lvm&gt;lvdisplay 					  <span class="comment">#查看逻辑分区，发现/dev/centos/root是根分区</span></span><br><span class="line">$ lvm&gt;lvextend /dev/mapper/centos-root /dev/sda3   <span class="comment">#此处将整个分区扩展到根分区上</span></span><br><span class="line">$ lvm&gt;pvdisplay 						<span class="comment">#查看卷容量，这时你会看到一个很大的卷了</span></span><br><span class="line">$ lvm&gt;quit 　							<span class="comment">#退出</span></span><br></pre></td></tr></table></figure>
+
+<p>这一过程中因不合适操作初始化了一个<code>[unknown]</code>物理卷，导致无法继续正确拓展逻辑分区，参考【3】使用以下命令后恢复，注意不应该使用<code>vgremove</code>（其功能为删除卷组）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vgreduce --removemissing <span class="comment"># 删除卷组中丢失的物理卷，使卷组恢复正常状态。</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="扩容文件系统">扩容文件系统</span></h3><p>可以通过<code>df -T</code>查看文件系统类型，之前已格式化为<code>ext3</code>，执行以下命令完成扩容。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo resize2fs /dev/mapper/centos-root 		<span class="comment">#扩容文件系统，对应自己的根分区</span></span><br><span class="line"><span class="comment"># 如果报错或许因为扩容的是xfs文件系统，执行以下命令扩容文件系统</span></span><br><span class="line"><span class="comment"># $ sudo xfs_growfs /dev/centos/root </span></span><br><span class="line">$ sudo <span class="built_in">df</span> -h 		<span class="comment">#查看根分区容量已经更改</span></span><br><span class="line">$ sudo reboot		<span class="comment">#重启完成最后的操作</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3><span id="references">References:</span></h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/climbsnail/p/12803025.html">博客园：virtualbox-centos扩容</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.0xzhang.com/posts/VirtualBox%E8%99%9A%E6%8B%9F%E6%9C%BACentOS7%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9.html">个人博客</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://qingfengzhou.github.io/2023/11/17/system/linux/vmware/vmware%E6%89%A9%E5%AE%B9/" data-id="clp2sf5wq0000h19ahlfc8zbi" data-title="vmware扩容" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/09/03/bigdata/flink/flink_doc/flink_shangguigu/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-langchain/">ai/llm/langchain</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ai-llm-prompt/">ai/llm/prompt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-flink-flink-doc/">bigdata/flink/flink_doc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-hadoop-hadoop-env/">bigdata/hadoop/hadoop_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-kafka/">bigdata/kafka</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-nosql-hbase/">bigdata/nosql/hbase</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark/">bigdata/spark</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark3/">bigdata/spark/spark3</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-env/">bigdata/spark/spark_env</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-spark-tune/">bigdata/spark/spark_tune</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-spark-sparksql-kyuubi/">bigdata/spark/sparksql/kyuubi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/bigdata-sql/">bigdata/sql</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-concurrent/">java/concurrent</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-designpattern/">java/designpattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java-jvm/">java/jvm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life/">life</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-daily/">life/daily</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-fun/">life/fun</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/life-thought/">life/thought</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-ansible/">system/linux/ansible</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-command/">system/linux/command</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-host-monitor/">system/linux/host/monitor</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-prometheus/">system/linux/prometheus</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/system-linux-vmware/">system/linux/vmware</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-draw-%E5%9C%A8%E7%BA%BF%E7%94%BB%E5%9B%BE/">tools/draw/在线画图</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-github-hexo/">tools/github/hexo</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools-java-maven/">tools/java/maven</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/flink/" rel="tag">flink</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hadoop/" rel="tag">hadoop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/health/" rel="tag">health</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/" rel="tag">kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/llm/" rel="tag">llm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/movie/" rel="tag">movie</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spark/" rel="tag">spark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql/" rel="tag">sql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/flink/" style="font-size: 10px;">flink</a> <a href="/tags/hadoop/" style="font-size: 10px;">hadoop</a> <a href="/tags/health/" style="font-size: 10px;">health</a> <a href="/tags/java/" style="font-size: 16.67px;">java</a> <a href="/tags/kafka/" style="font-size: 10px;">kafka</a> <a href="/tags/llm/" style="font-size: 13.33px;">llm</a> <a href="/tags/movie/" style="font-size: 10px;">movie</a> <a href="/tags/spark/" style="font-size: 20px;">spark</a> <a href="/tags/sql/" style="font-size: 10px;">sql</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/11/">November 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">September 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/08/">August 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">July 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/11/17/system/linux/vmware/vmware%E6%89%A9%E5%AE%B9/">vmware扩容</a>
+          </li>
+        
+          <li>
+            <a href="/2023/09/03/bigdata/flink/flink_doc/flink_shangguigu/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/08/21/life/english/">english</a>
+          </li>
+        
+          <li>
+            <a href="/2023/08/21/life/health/">health</a>
+          </li>
+        
+          <li>
+            <a href="/2023/08/21/life/culture/">culture</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
